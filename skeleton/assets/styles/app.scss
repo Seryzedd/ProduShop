@@ -1,0 +1,187 @@
+// 2. Personnaliser les variables (optionnel)
+$primary: #ff6600;
+$enable-rounded: true;
+
+// 3. Importer le reste des variables par défaut
+@import '../../node_modules/bootstrap/scss/bootstrap';
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+body {
+    height: 100vh;
+}
+
+input[type="radio"] {
+    display:none;
+}
+
+.form-check {
+    position: relative;
+}
+
+input + span.error::before {
+    content: 'error_outline';
+    font-family: 'Material Icons';
+    font-size: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+input + span.pending::before {
+    content: 'more_horiz';
+    font-family: 'Material Icons';
+    font-size: 20px;
+    margin-right: 5px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+input + span.valid::before {
+    content: 'check';
+    font-family: 'Material Icons';
+    font-size: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+input[type="radio"]:not(.btn-radio) + label {
+    padding-left: 30px;
+}
+
+input[type="radio"]:not(:checked):not(.btn-radio) + label:hover::before {
+    border: $gray-900 solid 2px;
+    border-radius: 1em;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 50px;
+    height: 25px;
+    position:absolute;
+}
+
+input[type="radio"]:not(.btn-radio) + label::before {
+    border: $gray-700 solid 2px;
+    border-radius: 1em;
+    display: block;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 50px;
+    height: 25px;
+    position:absolute;
+}
+
+input[type="radio"]:not(.btn-radio):checked + label:hover::before {
+    border: darken($success, 10%) solid 2px;
+    border-radius: 1em;
+    display: block;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 50px;
+    height: 25px;
+    position:absolute;
+}
+
+input[type="radio"]:not(.btn-radio):checked + label::before {
+    border: $success solid 2px;
+    border-radius: 1em;
+    display: block;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 50px;
+    height: 25px;
+    position:absolute;
+}
+
+input[type="radio"]:not(.btn-radio):checked + label::after {
+    background-color: $success;
+    border-radius: 1em;
+    display: block;
+    position:absolute;
+    content: '';
+    top: 3px;
+    left: 27px;
+    width: 19px;
+    height: 19px;
+    transition: 0.3s;
+}
+
+input[type="radio"]:not(.btn-radio):not(:checked) + label:hover::after {
+    background-color: $gray-900;
+}
+
+input[type="radio"]:not(.btn-radio):not(:checked) + label::after {
+    background-color: $gray-700;
+    content: '';
+    border-radius: 1em;
+    position:absolute;
+    display: block;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    transition: 0.3s;
+}
+
+input[type="radio"]:not(.btn-radio):checked + label:hover::after {
+    background-color: darken($success, 10%);
+}
+
+.validate-btn::after {
+    content: "done";
+    font-family: 'Material Icons';
+    font-size: 24px;
+    margin-right: 5px;
+    vertical-align: middle; 
+}
+
+.prev::before {
+    content: "arrow_back";
+    font-family: 'Material Icons';
+    font-size: 24px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.next::after {
+    content: "arrow_forward";
+    font-family: 'Material Icons';
+    font-size: 24px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.btn.reset::before {
+    content: "cached";
+    font-family: 'Material Icons';
+    font-size: 24px;
+    margin-left: 5px;
+    vertical-align: middle; 
+}
+
+#suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.suggestion {
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.suggestion:hover {
+  background-color: #f0f0f0;
+}

@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
+        <div class="col-lg-8 card p-3">
+
+            <h1 class="text-center text-primary">{% trans %}Register{% endtrans %}</h1>
+
+            {% for flash_error in app.flashes('verify_email_error') %}
+                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+            {% endfor %}
+
+            {{ form_start(registrationForm) }}
+                <div class="row align-items-center py-3">
+                    <div class="steps col-lg-6">
+                        {% for step in registrationForm.vars.steps %}
+                            <h3 class="py-2 {% if step.name == registrationForm.vars.cursor.currentStep %}text-dark{% else %}text-muted{% endif %}">
+                                {% if step.name == registrationForm.vars.cursor.currentStep %}
+                                    {{ ux_icon('material-symbols:radio-button-checked') }}
+                                {% else %}
+                                    {% if step.is_skipped %}
+                                        {{ ux_icon('ic:outline-motion-photos-off') }}
+                                    {% else %}
+                                        {{ ux_icon('material-symbols:radio-button-unchecked') }}
+                                    {% endif %}
+                                    
+                                {% endif %}
+                                
+                                {{ step.name|capitalize }}
+                            </h3>
+                        {% endfor %}
+                    </div>
+                    <div class="steps col-lg-6">
+                        {% if registrationForm.basics is defined %}
+                            {{ form_row(registrationForm.basics) }}
+                        {% endif %}
+
+                        {% if registrationForm.general is defined %}
+                            {{ form_row(registrationForm.general) }}
+                        {% endif %}
+
+                        {% if registrationForm.professional is defined %}
+                            {{ block('professional') }}
+                        {% endif %}
+
+                        {% if registrationForm.adress is defined %}
+                            {% set adressForm = registrationForm.adress %}
+                            {{ block('address') }}
+                        {% endif %}
+
+                        {% if registrationForm.security is defined %}
+                            {{ form_row(registrationForm.security) }}
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 mt-2">
+                        <div class="d-flex justify-content-between direction-end">
+                            {% if registrationForm.navigator.previous is defined %}
+                                {{ form_row(registrationForm.navigator.previous) }}
+                            {% endif %}
+
+                            {{ form_row(registrationForm.navigator.reset) }}
+
+                            {% if registrationForm.navigator.next is defined %}
+                                {{ form_row(registrationForm.navigator.next) }}
+                            {% endif %}
+
+                            {% if registrationForm.navigator.finish is defined %}
+                                {{ form_row(registrationForm.navigator.finish) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block professional %}
+    {{ form_row(registrationForm.professional.name) }}
+
+    {{ form_label(registrationForm.professional.siret) }}
+    <div class='input-group'>
+        {{ form_widget(registrationForm.professional.siret) }}
+    </div>
+    {{ form_help(registrationForm.professional.siret) }}
+    {{ form_errors(registrationForm.professional.siret) }}
+{% endblock %}
+
+{% block address %}
+    <div class="row">
+        <div class="col-12 mb-3">
+            {{ form_label(adressForm.street) }}
+            {{ form_widget(adressForm.street) }}
+            <div class="px-2 w-100" style="position: relative;">
+                <div id="suggestions" style="display: none;"></div>
+            </div>
+            {{ form_errors(adressForm.street) }}
+        </div>
+
+        <div class="col-12">
+            {{ form_row(adressForm.complement) }}
+        </div>
+
+        <div class="col-lg-6">
+            {{ form_row(adressForm.zipCode) }}
+        </div>
+
+        <div class="col-lg-6">
+            {{ form_row(adressForm.country) }}
+        </div>
+    </div>
+{% endblock %}
