@@ -21,6 +21,11 @@ return [
         'type' => 'css',
         'entrypoint' => true,
     ],
+    'password-validation' => [
+        'path' => './assets/script/password.js',
+        'type' => 'js',
+        'entrypoint' => true,
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],

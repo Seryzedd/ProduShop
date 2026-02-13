@@ -13,9 +13,14 @@
     </style>
 {% endblock %}
 
+{% block header %}{% endblock %}
+
 {% block body %}
     <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
         <div class="col-lg-8 card p-3">
+            <p class="text-end text-muted">
+                <a href="{{ path('app_home_index') }}" class="btn btn-light">{% trans %}Homepage{% endtrans %}</a>
+            </p>
 
             <h1 class="text-center text-primary">{% trans %}Register{% endtrans %}</h1>
 
@@ -24,7 +29,7 @@
             {% endfor %}
 
             {{ form_start(registrationForm) }}
-                <div class="row align-items-center py-3">
+                <div class="row align-items-center p-3">
                     <div class="steps col-lg-6">
                         {% for step in registrationForm.vars.steps %}
                             <h3 class="py-2 {% if step.name == registrationForm.vars.cursor.currentStep %}text-dark{% else %}text-muted{% endif %}">
@@ -62,17 +67,25 @@
                         {% endif %}
 
                         {% if registrationForm.security is defined %}
-                            {{ form_row(registrationForm.security) }}
+                            {{ block('password') }}
                         {% endif %}
+
+                        <p class="text-end py-3">
+                            <a class="btn btn-link" href="{{ path('app_login') }}">
+                                {% trans %}already have an account{% endtrans %}
+                            </a>
+                        </p>
                     </div>
 
                     <div class="col-12 mt-2">
                         <div class="d-flex justify-content-between direction-end">
-                            {% if registrationForm.navigator.previous is defined %}
-                                {{ form_row(registrationForm.navigator.previous) }}
-                            {% endif %}
+                            <div class="d-flex align-items-center justify-content-around">
+                                {% if registrationForm.navigator.previous is defined %}
+                                    {{ form_widget(registrationForm.navigator.previous) }}
+                                {% endif %}
 
-                            {{ form_row(registrationForm.navigator.reset) }}
+                                {{ form_widget(registrationForm.navigator.reset) }}
+                            </div>
 
                             {% if registrationForm.navigator.next is defined %}
                                 {{ form_row(registrationForm.navigator.next) }}
@@ -123,4 +136,38 @@
             {{ form_row(adressForm.country) }}
         </div>
     </div>
+{% endblock %}
+
+{% block password %}
+    {{ form_row(registrationForm.security.password) }}
+
+    {{ block('password_validation') }}
+{% endblock %}
+
+{% block password_validation %}
+    <div class="form-group bg-light p-2">
+        <div class="validation-rules">
+            <div class="rule" id="length-rule">
+                <span class="rule-icon is-question"></span>
+                <span>{% trans %}10 characters minimum{% endtrans %}</span>
+            </div>
+            <div class="rule" id="uppercase-rule">
+                <span class="rule-icon is-question"></span>
+                <span>{% trans %}1 uppercase{% endtrans %}</span>
+            </div>
+            <div class="rule" id="lowercase-rule">
+                <span class="rule-icon is-question"></span>
+                <span>{% trans %}1 lowercase{% endtrans %}</span>
+            </div>
+            <div class="rule" id="special-rule">
+                <span class="rule-icon is-question"></span>
+                <span>{% trans %}1 special character{% endtrans %} <small class="fw-lighter">(!;?,:%*$@&éàç)</small></span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('password-validation') }}
 {% endblock %}

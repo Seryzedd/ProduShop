@@ -1,0 +1,76 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar w/ text</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+            </ul>
+        
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    {% if is_granted('ROLE_USER') %}
+                        <li class="nav-item">
+                            <button class="nav-link" type="button" title="{% trans %}My cart{% endtrans %}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                                {{ ux_icon('ic:twotone-shopping-basket', {height: '24px', width: '24px'}) }}
+                                {% trans %}My cart{% endtrans %}
+                            </button>
+                        </li>
+                    {% endif %}
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ ux_icon('ic:twotone-account-circle', {height: '20px', width: '20px'}) }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-lg-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ path('app_account_informations') }}" title="{% trans %}My account{% endtrans %}">
+                                    {{ ux_icon('ic:outline-person', {height: '20px', width: '20px'}) }}
+                                    {% trans %}My account{% endtrans %}
+                                </a>
+                            </li>
+
+                            {% if is_granted('ROLE_SELLER') %}
+                                <li>
+                                    <a class="dropdown-item" href="" title="{% trans %}My products{% endtrans %}">
+                                        {{ ux_icon('ic:outline-inventory-2', {height: '20px', width: '20px'}) }}
+                                        {% trans %}My products{% endtrans %}
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ path('app_logout') }}" title="{% trans %}Logout{% endtrans %}">
+                                    {{ ux_icon('ic:twotone-logout', {height: '20px', width: '20px'}) }}
+                                    {% trans %}Logout{% endtrans %}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_login') }}" title="{% trans %}Connexion{% endtrans %}">
+                            {{ ux_icon('ic:outline-login', {height: '24px', width: '24px'}) }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_register') }}" title="{% trans %}Create account{% endtrans %}">
+                            {{ ux_icon('ic:outline-person-outline', {height: '24px', width: '24px'}) }}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

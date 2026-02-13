@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block body %}
+    <div class="row w-100 h-100 p-3 bg-light align-items-center justify-content-center">
+        <div class="col-lg-8 card p-4 text-center">
+            <form method="post" class="p-4">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                {% endif %}
+
+                {% if app.user %}
+                    <div class="mb-3">
+                        <p>{% trans with {'%name%': app.user.userIdentifier} %}You are logged in as %name%{% endtrans %}, <a href="{{ logout_path() }}">Logout</a></p>
+                    </div>
+                {% endif %}
+
+                <h1 class="h3 mb-3 font-weight-normal">{% trans %}Please sign in{% endtrans %}</h1>
+                <label for="username">{% trans %}Email{% endtrans %}</label>
+                <input type="email" value="{{ last_username }}" name="_username" id="username" placeholder="{% trans %}exemple@contact.com{% endtrans %}" class="form-control text-center mb-4" autocomplete="email" required autofocus>
+                
+                <label for="password">{% trans %}Password{% endtrans %}</label>
+                <input type="password" name="_password" id="password" placeholder="{% trans %}My password{% endtrans %}" class="form-control text-center" autocomplete="current-password" required>
+                
+                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="checkbox my-3" style="position: relative; width:fit-content;">
+                            <input type="checkbox" name="_remember_me" id="_remember_me">
+                            <label for="_remember_me">{% trans %}Remember me{% endtrans %}</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 text-end">
+                        <a href="{{ path('app_register') }}" class="">{% trans %}Create an account{% endtrans %}</a><br>
+                        <a href="" class="">{% trans %}Password forgotten{% endtrans %}</a>
+                    </div>
+                </div>
+                
+
+
+
+                <button class="btn btn-lg btn-primary" type="submit">
+                    {% trans %}Sign in{% endtrans %}
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
