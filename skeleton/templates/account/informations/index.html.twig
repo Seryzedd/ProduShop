@@ -4,18 +4,6 @@
     {% trans %}My account{% endtrans %}
 {% endblock %}
 
-{% block body %}
-    <main class="container">
-        <div class='row'>
-            <div class="col-lg-4">
-                {{ block('base_details') }}
-            </div>
-
-            <div class="col-lg-8"></div>
-        </div>
-    </main>
-{% endblock %}
-
 {% block breadcrumb %}
     {% set breadcrumb = [
         {
@@ -26,6 +14,20 @@
     ] %}
 
     {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class='row'>
+            <div class="col-lg-4">
+                {{ block('base_details') }}
+            </div>
+
+            <div class="col-lg-8">
+                <h1 class="text-end text-secondary">{% trans %}My account{% endtrans %}</h1>
+            </div>
+        </div>
+    </main>
 {% endblock %}
 
 {% block base_details %}
@@ -45,8 +47,16 @@
             <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ app.user.siret }}</p>
         {% endif %}
         
-        <p class="">{% trans %}Postale adress{% endtrans %}</p>
+        <p class="mb-0 mt-2"><strong>{% trans %}Postale adress{% endtrans %}</strong></p>
+        <p class="ms-2">
+            {{ app.user.adress.street }}<br>
+            {{ app.user.adress.zipCode }} {{ app.user.adress.country }}
+        </p>
 
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
+            </li>
+        </ul>
     </div>
-    {{ dump(app.user) }}
 {% endblock %}

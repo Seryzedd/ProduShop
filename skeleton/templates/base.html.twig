@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <link rel="icon" href="{{ asset('icons/logo.png') }}" />
         {% block stylesheets %}
             {{ importmap('app.scss') }}
         {% endblock %}
@@ -26,28 +26,34 @@
         {% endblock %}
 
         {% block flash_messages %}
-            {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} row">
-                    <div class="col-md-2">
-                        {% if label == 'danger' %}
-                            {{ ux_icon('ic:outline-report-problem') }}
-                        {% elseif label == 'success' %}
-                            {{ ux_icon('ic:outline-done-outline') }}
-                        {% elseif label == 'warning' %}
-                            {{ ux_icon('ic:outline-warning') }}
-                        {% elseif label == 'info' %}
-                            {{ ux_icon('ic:outline-tips-and-updates') }}
-                        {% endif %}
-                    </div>
+            <div id="flash-messages" class="container">
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }} row align-items-center">
+                            <div class="col-md-1">
+                                {% set size = {width: '30px', height: '30px'} %}
+                                {% if label == 'danger' %}
+                                    {{ ux_icon('ic:outline-report-problem', size) }}
+                                {% elseif label == 'success' %}
+                                    {{ ux_icon('ic:outline-done-outline', size) }}
+                                {% elseif label == 'warning' %}
+                                    {{ ux_icon('ic:outline-warning', size) }}
+                                {% elseif label == 'info' %}
+                                    {{ ux_icon('ic:outline-tips-and-updates', size) }}
+                                {% endif %}
+                            </div>
 
-                    <p class="col-md-10 mb-0">
-                        {{ message }}
-                    </p>
-                </div>
-            {% endfor %}
-        {% endfor %}
+                            <p class="col-md-10 mb-0">
+                                {{ message }}
+                            </p>
 
+                            <p class="mb-0 col-md-1 text-end">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
         {% endblock %}
 
         {% block body %}{% endblock %}

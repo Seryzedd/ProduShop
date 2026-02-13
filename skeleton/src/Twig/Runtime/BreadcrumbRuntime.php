@@ -34,7 +34,6 @@ class BreadcrumbRuntime implements RuntimeExtensionInterface
                 routeParameters: $route['parameters'] ?? []
             );
         }
-        dump($routes);
 
         return $routes;
     }

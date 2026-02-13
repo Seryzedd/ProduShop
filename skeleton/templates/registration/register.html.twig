@@ -15,6 +15,8 @@
 
 {% block header %}{% endblock %}
 
+{% block breadcrumb %}{% endblock %}
+
 {% block body %}
     <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
         <div class="col-lg-8 card p-3">
@@ -145,26 +147,7 @@
 {% endblock %}
 
 {% block password_validation %}
-    <div class="form-group bg-light p-2">
-        <div class="validation-rules">
-            <div class="rule" id="length-rule">
-                <span class="rule-icon is-question"></span>
-                <span>{% trans %}10 characters minimum{% endtrans %}</span>
-            </div>
-            <div class="rule" id="uppercase-rule">
-                <span class="rule-icon is-question"></span>
-                <span>{% trans %}1 uppercase{% endtrans %}</span>
-            </div>
-            <div class="rule" id="lowercase-rule">
-                <span class="rule-icon is-question"></span>
-                <span>{% trans %}1 lowercase{% endtrans %}</span>
-            </div>
-            <div class="rule" id="special-rule">
-                <span class="rule-icon is-question"></span>
-                <span>{% trans %}1 special character{% endtrans %} <small class="fw-lighter">(!;?,:%*$@&éàç)</small></span>
-            </div>
-        </div>
-    </div>
+    {% include 'components/password_validation.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}

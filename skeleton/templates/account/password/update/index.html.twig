@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Update your password{% endtrans %}{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        },
+        {
+            label: 'Update my password',
+            route: 'app_account_password_update',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1 class="text-center">{% trans %}Update my password{% endtrans %}</h1>
+        <p class="text-muted text-center">{% trans %}Change My current password to new one{% endtrans %}.</p>
+        {{ form_start(form) }}
+            <div class="row align-items-start justify-content-center">
+                <div class="col-lg-6">
+                    {{ form_row(form.currentPassword) }}
+                </div>
+                <div class="col-lg-6">
+                    {{ form_row(form.newPassword.plainPassword) }}
+
+                    {% include 'components/password_validation.html.twig' %}
+                </div>
+
+                <div class="col-12 text-center py-4">
+                    <button class="btn btn-primary">{% trans %}Update my password{% endtrans %}</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('password-validation') }}
+{% endblock %}

@@ -49,7 +49,7 @@ class RegistrationController extends AbstractController
 
             $this->addFlash('success', 'Account created. An email has been sent to your email adress');
 
-            return $this->redirectToRoute('app_home_index');
+            return $this->redirectToRoute('app_login');
         }
 
         return $this->render('registration/register.html.twig', [

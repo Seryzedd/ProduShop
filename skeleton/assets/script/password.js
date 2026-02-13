@@ -1,4 +1,4 @@
-const passwordInputFirst = document.getElementById('registration_step_security_password_first');
+const passwordInputFirst = document.querySelector('.passwordValidator');
 const passwordInputsecond = document.getElementById('registration_step_security_password_second');
 
 // Règles de validation

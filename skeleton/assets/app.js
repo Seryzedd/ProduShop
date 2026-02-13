@@ -1,6 +1,3 @@
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
 /*
  * Welcome to your app's main JavaScript file!
  *
@@ -106,3 +103,10 @@ if(inputStreet) {
   }));
 }
 
+$('.alert .btn-close').on('click', function() {
+    $(this).closest('.alert').slideUp();
+
+    setTimeout(function () {
+      $(this).closest('.alert').remove();
+    }, 1000);
+});
