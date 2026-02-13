@@ -17,6 +17,10 @@
             {% include 'components/header.html.twig' %}
         {% endblock %}
 
+        {% block breadcrumb %}
+            {% include 'components/breadcrumb.html.twig' %}
+        {% endblock %}
+
         {% block cart_content %}
             {% include 'components/cart/canvas.html.twig' %}
         {% endblock %}
