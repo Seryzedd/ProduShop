@@ -16,6 +16,18 @@
     </main>
 {% endblock %}
 
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
 {% block base_details %}
     <div class="border sticky-top p-4">
         <h2 class="text-center">
