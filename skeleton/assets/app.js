@@ -6,6 +6,8 @@
  */
 import $ from 'jquery';
 
+import 'bootstrap';
+
 import './styles/app.css';
 import './styles/app.scss';
 

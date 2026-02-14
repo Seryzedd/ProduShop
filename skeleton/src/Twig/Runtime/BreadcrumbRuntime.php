@@ -29,7 +29,7 @@ class BreadcrumbRuntime implements RuntimeExtensionInterface
         foreach ($configured as $route) {
             $routes[] = new Link(
                 label: $route['label'],
-                route: $route['route'],
+                route: $this->urlGenerator->generate($route['route'], $route['parameters'] ?? []),
                 isCurrent: $routeName === $route['route'],
                 routeParameters: $route['parameters'] ?? []
             );
