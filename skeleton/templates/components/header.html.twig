@@ -44,7 +44,7 @@
 
                             {% if is_granted('ROLE_SELLER') %}
                                 <li>
-                                    <a class="dropdown-item" href="" title="{% trans %}My products{% endtrans %}">
+                                    <a class="dropdown-item" href="{{ path('app_merchant_products') }}" title="{% trans %}My products{% endtrans %}">
                                         {{ ux_icon('ic:outline-inventory-2', {height: '20px', width: '20px'}) }}
                                         {% trans %}My products{% endtrans %}
                                     </a>

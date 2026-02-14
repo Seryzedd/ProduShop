@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Create new product{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if app.request.attributes.get('_route') == 'app_merchant_product_create' %}
+        {% set currentroute = {
+            label: 'Create new product',
+            route: 'app_merchant_product_create',
+        } %}
+    {% elseif app.request.attributes.get('_route') == 'app_merchant_product_edit' %}
+        {% set currentroute = {
+            label: 'Edit "%name%" product'|trans({'%name%': form.vars.data.name}),
+            route: 'app_merchant_product_edit',
+            parameters: {product: form.vars.data.id}
+        } %}
+    {% endif %}
+
+    {% set breadcrumb = [
+        {
+            label: 'My products',
+            route: 'app_merchant_products',
+        },
+        currentroute
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        {% if app.request.attributes.get('_route') == 'app_merchant_product_create' %}
+            <h1 class="text-secondary">{% trans %}Create new product{% endtrans %}</h1>
+        {% elseif app.request.attributes.get('_route') == 'app_merchant_product_edit' %}
+            <h1 class="text-secondary">{% trans with {'%name%': form.vars.data.name} %}Edit product "%name%"{% endtrans %}</h1>
+        {% endif %}
+        
+        
+        {% set product = form.vars.data %}
+
+        {{ form_start(form) }}
+        <div class="row align-items-center">
+            
+            <div class="col-lg-8">
+                {{ form_row(form.name) }}
+                {{ form_row(form.description) }}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="text-center position-relative">
+                    {% if product.image == null %}
+                        <label class="text-end mx-auto px-2 text-muted" for="{{ form.image.file.vars.id }}">
+                            {{ ux_icon('ic:twotone-insert-photo', {height: '48px', width: '48px'}) }}
+                        </label>
+                    {% elseif product.image|instanceOf('App\\Entity\\Picture') %}
+                        <label class="text-end mx-auto px-4 text-muted" for="{{ form.image.file.vars.id }}">
+                            <img src="{{ product.image.src }}" alt="{{ product.image.name }}" class="img-fluid">
+                        </label>
+                        <a class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0" href="" title="{% trans %}Delete image{% endtrans %}">
+                            {{ ux_icon('ic:outline-delete', {height: '20px', width: '20px'}) }}
+                        </a>
+                    {% endif %}
+                </div>
+                {{ form_widget(form.image.file) }}
+                {{ form_help(form.image.file) }}
+
+                <div class="mt-2">
+                
+                </div>
+                {{ form_label(form.slider) }}
+                <div class="d-flex align-items-baseline">
+                    <div class="w-100">
+                        {{ form_widget(form.slider) }}
+                    </div>
+                    <a href="" class="btn btn-outline-secondary ms-2" title="{% trans %}Create new slider{% endtrans %}">
+                        {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+                    </a>
+                </div>
+                {{ form_help(form.slider) }}
+                {{ form_errors(form.slider) }}
+                
+            </div>
+
+            <div class="col-lg-12 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    {% trans %}Save product{% endtrans %}
+                </button>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+    

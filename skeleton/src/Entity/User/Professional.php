@@ -2,8 +2,11 @@
 
 namespace App\Entity\User;
 
+use App\Entity\Product\Product;
 use App\Entity\User\PostalAdress\Adress;
 use App\Repository\User\ProfessionalRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User\AbstractUser;
 
@@ -20,10 +23,17 @@ class Professional extends AbstractUser
     #[ORM\JoinColumn(nullable: false)]
     private Adress $adress;
 
+    /**
+     * @var Collection<int, Product>
+     */
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'company', orphanRemoval: true)]
+    private Collection $products;
+
     public function __construct()
     {
         $this->addRole('ROLE_SELLER');
         $this->adress = new Adress();
+        $this->products = new ArrayCollection();
     }
 
     public function getSiret(): ?string
@@ -60,6 +70,36 @@ class Professional extends AbstractUser
         $this->adress = $adress;
 
         
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setCompany($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getCompany() === $this) {
+                $product->setCompany(null);
+            }
+        }
 
         return $this;
     }

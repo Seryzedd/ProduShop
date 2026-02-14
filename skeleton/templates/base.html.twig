@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="{{ asset('icons/logo.png') }}" />
+        <link rel="icon" href="{{ asset('icons/favicon.png') }}" />
         {% block stylesheets %}
             {{ importmap('app.scss') }}
         {% endblock %}
@@ -27,7 +27,7 @@
 
         {% block flash_messages %}
             <div id="flash-messages" class="container">
-                {% for label, messages in app.flashes %}
+                {% for label, messages in app.session.flashbag.all() %}
                     {% for message in messages %}
                         <div class="alert alert-{{ label }} row align-items-center">
                             <div class="col-md-1">
@@ -44,7 +44,7 @@
                             </div>
 
                             <p class="col-md-10 mb-0">
-                                {{ message }}
+                                {{ message|trans }}
                             </p>
 
                             <p class="mb-0 col-md-1 text-end">

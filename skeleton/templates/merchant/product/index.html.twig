@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}My products{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My products',
+            route: 'app_merchant_products',
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-baseline mb-4">
+            <h1 class="text-secondary">{% trans %}My products{% endtrans %}</h1>
+            <a href="{{ path('app_merchant_product_create') }}" class="btn btn-outline-primary" title="{% trans %}Create new product{% endtrans %}">
+                {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+                {% trans %}Create new product{% endtrans %}
+            </a>
+        </div>
+        
+
+        {{ block('product_list') }}
+    </main>
+{% endblock %}
+
+{% block product_list %}
+    <div class="row">
+        {% if app.user.products is empty %}
+            <div class="col-lg-12">
+                <p class="text-center text-muted">{% trans %}You have no products yet.{% endtrans %}</p>
+            </div>
+        {% endif %}
+        {% for product in app.user.products %}
+            <div class="col-lg-12">
+
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

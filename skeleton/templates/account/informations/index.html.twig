@@ -60,3 +60,19 @@
         </ul>
     </div>
 {% endblock %}
+
+{% block main_informations %}
+    {% if is_granted('ROLE_SELLER') %}
+        {{ block("professional_details") }}
+    {% elseif is_granted('ROLE_USER') %}
+        {{ block("user_details") }}
+    {% endif %}
+{% endblock %}
+
+{% block user_details %}
+    
+{% endblock %}
+
+{% block professional_details %}
+    
+{% endblock %}
