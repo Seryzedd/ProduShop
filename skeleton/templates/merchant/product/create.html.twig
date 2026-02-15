@@ -41,11 +41,14 @@
         {% set product = form.vars.data %}
 
         {{ form_start(form) }}
-        <div class="row align-items-center">
+        <div class="row align-items-start">
             
             <div class="col-lg-8">
+                <h4 class="mb-3 text-muted">{% trans %}General informations{% endtrans %}</h4>
                 {{ form_row(form.name) }}
                 {{ form_row(form.description) }}
+
+                {% include 'form/collectionType.html.twig' with {collection: form.packages} %}
             </div>
 
             <div class="col-lg-4">
@@ -91,5 +94,10 @@
         </div>
         {{ form_end(form) }}
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
 {% endblock %}
     

@@ -7,6 +7,8 @@ use App\Entity\Product\Product;
 use App\Entity\Product\Slider;
 use App\Entity\User\Professional;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Form\Product\PackageType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -32,6 +34,13 @@ class ProductType extends AbstractType
             ])
             ->add('image', ImageType::class, [
                 'label' => false,
+            ])
+            ->add('packages', CollectionType::class, [
+                'entry_type' => PackageType::class,
+                'label' => false,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
             ])
         ;
     }

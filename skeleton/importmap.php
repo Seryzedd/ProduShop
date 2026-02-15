@@ -26,6 +26,11 @@ return [
         'type' => 'js',
         'entrypoint' => true,
     ],
+    'collection-form' => [
+        'path' => './assets/script/collectionForm.js',
+        'type' => 'js',
+        'entrypoint' => true,
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],

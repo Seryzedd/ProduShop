@@ -5,6 +5,8 @@ namespace App\Entity\Product;
 use App\Entity\Picture;
 use App\Entity\User\Professional;
 use App\Repository\Product\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,9 +34,16 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Professional $company = null;
 
+    /**
+     * @var Collection<int, Package>
+     */
+    #[ORM\OneToMany(targetEntity: Package::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $packages;
+
     public function __construct(Professional $company)
     {
         $this->company = $company;
+        $this->packages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -108,6 +117,36 @@ class Product
     public function setCompany(?Professional $company): static
     {
         $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Package>
+     */
+    public function getPackages(): Collection
+    {
+        return $this->packages;
+    }
+
+    public function addPackage(Package $package): static
+    {
+        if (!$this->packages->contains($package)) {
+            $this->packages->add($package);
+            $package->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removePackage(Package $package): static
+    {
+        if ($this->packages->removeElement($package)) {
+            // set the owning side to null (unless already changed)
+            if ($package->getProduct() === $this) {
+                $package->setProduct(null);
+            }
+        }
 
         return $this;
     }
