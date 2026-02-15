@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Sliders{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Sliders',
+            route: 'app_merchant_slider',
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-end">
+            <h1>{% trans %}Sliders{% endtrans %}</h1>
+            <a href="{{ path('app_merchant_slider_create') }}" class="btn btn-primary" title="{% trans %}Create new slider{% endtrans %}">
+                {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+            </a>
+        </div>
+        {{ block('slider_list') }}
+        
+    </main>
+{% endblock %}
+
+{% block slider_list %}
+    <ul class="list-group">
+        {% for slider in sliders %}
+            <li class="list-group-item">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <a href="{{ path('app_merchant_slider_edit', {slider: slider.id}) }}" >{{ slider.name }}</a>
+                    </div>
+                    <div class="col-md-3">
+                        {% if slider.product %}
+                            <a href="{{ path('app_merchant_product_edit', {product: slider.product.id}) }}">
+                                <small class="text-muted">{% trans %}Product{% endtrans %} : </small>{{ slider.product.name }}</a>
+                        {% else %}
+                            <span class="text-muted">{% trans %}No product{% endtrans %}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="d-flex align-items-center justify-content-center flex-wrap">
+                            {% for item in slider.items %}
+                                <img src="{{ item.image.src }}" alt="{{ item.image.name }}" class="img-thumbnail me-2 mb-2" style="max-width: 80px; max-height: 80px;">
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-1 text-end">
+                        <a href="{{ path('app_merchant_slider_delete', {slider: slider.id}) }}" class="btn btn-sm btn-outline-danger" title="{% trans %}Delete{% endtrans %}">
+                            {{ ux_icon('ic:outline-delete', {height: '20px', width: '20px'}) }}
+                        </a>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

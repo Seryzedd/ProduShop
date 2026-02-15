@@ -26,7 +26,7 @@ class Professional extends AbstractUser
     /**
      * @var Collection<int, Product>
      */
-    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'company', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'company', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $products;
 
     public function __construct()

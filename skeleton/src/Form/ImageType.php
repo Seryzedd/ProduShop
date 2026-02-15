@@ -8,6 +8,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use App\Service\ImgTransformerService;
@@ -24,10 +26,50 @@ class ImageType extends AbstractType
         $builder
             ->add('file', FileType::class, [
                 'label' => 'Image file',
+                'attr' => [
+                    'accept' => 'image/*',
+                    'class' => 'd-none'
+                ],
+                'constraints' => [
+                    new File(
+                        mimeTypes: ['image/*'],
+                        mimeTypesMessage: 'Please upload a valid image file.'
+                    ),
+                ],
                 'mapped' => false,
                 'required' => false,
             ])
         ;
+
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function (FormEvent $event) {
+                $form = $event->getForm();
+                $picture = $event->getData();
+
+                $form->add('file', FileType::class, [
+                    'label' => $picture ? $picture->getName() : 'New image',
+                    'label_attr' => [
+                        'data-current-image' => $picture ? $picture->getSrc() : '',
+                    ],
+                    'attr' => [
+                        'accept' => 'image/*',
+                        'class' => 'd-none'
+                    ],
+                    'row_attr' => [
+                        'class' => 'mb-0',
+                    ],
+                    'constraints' => [
+                        new File(
+                            mimeTypes: ['image/*'],
+                            mimeTypesMessage: 'Please upload a valid image file.'
+                        ),
+                    ],
+                    'mapped' => false,
+                    'required' => false,
+                ]);
+            }
+        );
 
         $builder->addEventListener(
             FormEvents::SUBMIT,

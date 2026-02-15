@@ -16,6 +16,16 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
+    public function findByMerchant($merchant)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.company = :merchant')
+            ->setParameter('merchant', $merchant)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */

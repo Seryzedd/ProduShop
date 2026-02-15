@@ -21,7 +21,7 @@ class Slider
     /**
      * @var Collection<int, SlideItem>
      */
-    #[ORM\OneToMany(targetEntity: SlideItem::class, mappedBy: 'slider', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: SlideItem::class, mappedBy: 'slider', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $items;
 
     #[ORM\OneToOne(inversedBy: 'slider', cascade: ['persist', 'remove'])]

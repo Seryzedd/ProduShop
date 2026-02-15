@@ -30,7 +30,7 @@
 {% endblock %}
 
 {% block body %}
-    <main class="container">
+    <main class="container py-4">
         {% if app.request.attributes.get('_route') == 'app_merchant_product_create' %}
             <h1 class="text-secondary">{% trans %}Create new product{% endtrans %}</h1>
         {% elseif app.request.attributes.get('_route') == 'app_merchant_product_edit' %}
@@ -61,7 +61,7 @@
                         <label class="text-end mx-auto px-4 text-muted" for="{{ form.image.file.vars.id }}">
                             <img src="{{ product.image.src }}" alt="{{ product.image.name }}" class="img-fluid">
                         </label>
-                        <a class="btn btn-sm btn-light rounded-circle position-absolute top-0 end-0" href="" title="{% trans %}Delete image{% endtrans %}">
+                        <a class="btn btn-sm btn-light position-absolute top-0 end-0" href="{{ path('app_merchant_product_remove_main_image', {product: product.id}) }}" title="{% trans %}Delete image{% endtrans %}">
                             {{ ux_icon('ic:outline-delete', {height: '20px', width: '20px'}) }}
                         </a>
                     {% endif %}
@@ -69,15 +69,24 @@
                 {{ form_widget(form.image.file) }}
                 {{ form_help(form.image.file) }}
 
-                <div class="mt-2">
-                
+                <div class="mt-2 d-flex align-items-center justify-content-center position-relative">
+                    {% if form.slider.vars.data %}
+                        {% for item in form.slider.vars.data.items %}
+                            <img class="img-thumbnail img-fluid" style="max-width: 80px; max-height: 80px;" src="{{ item.image.src }}" alt="{{ item.image.name }}">
+                        {% endfor %}
+
+                        <a class="position-absolute btn btn-light btn-sm top-0 end-0" href="{{ path('app_merchant_slider_edit', {slider: form.slider.vars.data.id}) }}">
+                            {{ ux_icon('ic:outline-edit', {height: '20px', width: '20px'}) }}
+                        </a>
+                    {% endif %}
                 </div>
+
                 {{ form_label(form.slider) }}
                 <div class="d-flex align-items-baseline">
                     <div class="w-100">
                         {{ form_widget(form.slider) }}
                     </div>
-                    <a href="" class="btn btn-outline-secondary ms-2" title="{% trans %}Create new slider{% endtrans %}">
+                    <a href="{{ path('app_merchant_slider_create') }}" class="btn btn-outline-secondary ms-2" title="{% trans %}Create new slider{% endtrans %}">
                         {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
                     </a>
                 </div>

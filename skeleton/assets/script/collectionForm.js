@@ -1,3 +1,5 @@
+import { addImgEvent,  addimgEvents, addImgLabel} from './imageEvent.js';
+
 function addFormToCollection(e) {
     const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
 
@@ -12,13 +14,35 @@ function addFormToCollection(e) {
             collectionHolder.dataset.index
         );
 
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.classList.add('btn', 'nav-link', 'remove_collection_item_btn', 'btn-trash', 'position-absolute', 'top-0', 'end-0', 'p-2');
+
+    btn.addEventListener("click", removeFormFromCollection);
+
+    item.appendChild(btn);
+
     collectionHolder.appendChild(item);
+
+    addimgEvents();
 
     collectionHolder.dataset.index++;
 };
+
+addImgLabel();
 
 document
   .querySelectorAll('.add_collection_item_btn')
   .forEach(btn => {
       btn.addEventListener("click", addFormToCollection)
+  });
+
+function removeFormFromCollection(e) {
+    e.currentTarget.closest('li').remove();
+}
+
+document
+  .querySelectorAll('.remove_collection_item_btn')
+  .forEach(btn => {
+      btn.addEventListener("click", removeFormFromCollection)
   });

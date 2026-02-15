@@ -22,7 +22,7 @@ class Product
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\OneToOne(mappedBy: 'product', cascade: ['persist', 'remove'])]
     private ?Slider $slider = null;
@@ -30,7 +30,7 @@ class Product
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Picture $image = null;
 
-    #[ORM\ManyToOne(inversedBy: 'products')]
+    #[ORM\ManyToOne(inversedBy: 'products', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Professional $company = null;
 
@@ -42,7 +42,7 @@ class Product
 
     public function __construct(Professional $company)
     {
-        $this->company = $company;
+        $this->setCompany($company);
         $this->packages = new ArrayCollection();
     }
 
@@ -117,6 +117,7 @@ class Product
     public function setCompany(?Professional $company): static
     {
         $this->company = $company;
+        $company->addProduct($this);
 
         return $this;
     }

@@ -27,6 +27,13 @@ body {
     height: 100vh;
 }
 
+.btn.btn-trash::before {
+    content: '\e872';
+    font-family: 'Material Icons';
+    font-size: 20px;
+    color: $danger;
+}
+
 #main-header .logo {
     width: 90px;
 }
@@ -251,7 +258,7 @@ input[type="checkbox"]:checked + label:hover::after {
 }
 
 #flash-messages .alert {
-    background-color: $light;
+    background-color: $white;
 
 }
 

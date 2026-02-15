@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Sliders{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if app.request.attributes.get('_route') == 'app_merchant_slider_create' %}
+        {% set currentroute = {
+            label: 'Create new slider',
+            route: 'app_merchant_slider_create',
+        } %}
+    {% elseif app.request.attributes.get('_route') == 'app_merchant_slider_edit' %}
+        {% set currentroute = {
+            label: 'Edit "%name%" slider'|trans({'%name%': form.vars.data.name}),
+            route: 'app_merchant_slider_edit',
+            parameters: {slider: form.vars.data.id}
+        } %}
+    {% endif %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Sliders',
+            route: 'app_merchant_slider',
+        },
+        currentroute
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        {% if app.request.attributes.get('_route') == 'app_merchant_slider_create' %}
+            <h1 class="text-secondary">{% trans %}Create new slider{% endtrans %}</h1>
+        {% elseif app.request.attributes.get('_route') == 'app_merchant_slider_edit' %}
+            <h1 class="text-secondary">{% trans with {'%name%': form.vars.data.name} %}Edit slider "%name%"{% endtrans %}</h1>
+        {% endif %}
+
+        {{ form_start(form) }}
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="mb-3 text-muted">{% trans %}General informations{% endtrans %}</h4>
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.product) }}
+                    {{ form_row(form.active) }}
+                </div>
+                <div class="col-lg-6">
+                    {% include 'form/collectionType.html.twig' with {collection: form.items} %}
+                </div>
+
+                <div class="col-12 text-start">
+                    <button type="submit" class="btn btn-primary">{% trans %}Save{% endtrans %}</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+{% endblock %}

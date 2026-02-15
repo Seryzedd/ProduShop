@@ -23,11 +23,10 @@ class BreadcrumbRuntime implements RuntimeExtensionInterface
         $routeName = $request->attributes->get('_route');
 
         $routes = [
-            new Link(label: 'Home', route: 'app_home', isCurrent: $routeName === 'app_home'),
+            new Link(label: 'Home', route: $this->urlGenerator->generate('app_home_index'), isCurrent: $routeName === 'app_home'),
         ];
 
         foreach ($configured as $route) {
-            dump($route);
             $routes[] = new Link(
                 label: $route['label'],
                 route: $this->urlGenerator->generate($route['route'], $route['parameters'] ?? []),

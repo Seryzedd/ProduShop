@@ -27,10 +27,13 @@ class ProductType extends AbstractType
             ->add('description', FormTypes\TextareaType::class, [
                 'attr' => ['rows' => 5],
                 'required' => false,
+                'empty_data' => '',
             ])
             ->add('slider', EntityType::class, [
                 'class' => Slider::class,
                 'choice_label' => 'name',
+                'required' => false,
+                'placeholder' => 'No slider',
             ])
             ->add('image', ImageType::class, [
                 'label' => false,
