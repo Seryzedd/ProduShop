@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Translations',
+            route: 'app_admin_translations_manager',
+            parameters: []
+        },
+        {
+            label: 'Translations in "%lang%"'|trans({'%lang%': locale|language}),
+            route: 'app_admin_translations_manager_edit',
+            parameters: {'locale': locale}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="row">
+            <h1>{% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}</h1>
+        </div>
+        {{ form_start(form) }}
+            <div class="d-flex align-items-start">
+                <div class="nav flex-column nav-pills sticky-top" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    {% for data in form.languages.vars.data %}
+                        <button class="btn btn-light rounded-start rounded-end-0{% if loop.first %} active{% endif %}" id="v-pills-{{ data.provider }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ data.provider }}" type="button" role="tab" aria-controls="v-pills-{{ data.provider }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ data.provider }}</button>
+                    {% endfor %}
+                </div>
+                <div class="tab-content w-100 card rounded-end rounded-start-0 p-3" id="v-pills-tabContent">
+                    {% for file in form.languages.children %}
+                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="v-pills-{{ file.vars.data.provider }}" role="tabpanel" aria-labelledby="v-pills-{{ file.vars.data.provider }}-tab" tabindex="{{ loop.index }}">
+                            
+                            {{ block('provider_translations') }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="text-end py-4">
+                <button class="btn btn-primary" type="submit">
+                    {% trans %}Validate{% endtrans %}
+                </button>
+            </div>
+
+        {{ form_end(form) }}
+    <main>
+{% endblock %}
+
+{% block provider_translations %}
+    {% include 'form/collectionType.html.twig' with {'collection': file.translations} %}
+{% endblock %}

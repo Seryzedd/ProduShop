@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin Dashboard{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        
+    <main>
+{% endblock %}

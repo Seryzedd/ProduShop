@@ -51,6 +51,22 @@
                                 </li>
                             {% endif %}
 
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li>
+                                    <a class="dropdown-item text-secondary" href="{{ path('app_admin_index') }}" title="{% trans %}Admin dashboard{% endtrans %}">
+                                        {{ ux_icon('ic:outline-dashboard', {height: '20px', width: '20px'}) }}
+                                        {% trans %}Admin dashboard{% endtrans %}
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_admin_translations_manager') }}" title="{% trans %}Translations manager{% endtrans %}">
+                                        {{ ux_icon('ic:outline-g-translate', {height: '20px', width: '20px'}) }}
+                                        {% trans %}Translations manager{% endtrans %}
+                                    </a>
+                                </li>
+                            {% endif %}
+
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item text-danger" href="{{ path('app_logout') }}" title="{% trans %}Logout{% endtrans %}">

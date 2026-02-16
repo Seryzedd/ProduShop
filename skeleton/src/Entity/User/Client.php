@@ -21,10 +21,10 @@ class Client extends AbstractUser
     private string $gender = "";
 
     #[ORM\Column(length: 255)]
-    private ?string $firstname = null;
+    private string $firstname = '';
 
     #[ORM\Column(length: 255)]
-    private ?string $lastname = null;
+    private string $lastname = '';
 
     /**
      * @var Collection<int, Adress>
@@ -50,7 +50,7 @@ class Client extends AbstractUser
         return $this;
     }
 
-    public function getFirstname(): ?string
+    public function getFirstname(): string
     {
         return $this->firstname;
     }
@@ -62,7 +62,7 @@ class Client extends AbstractUser
         return $this;
     }
 
-    public function getLastname(): ?string
+    public function getLastname(): string
     {
         return $this->lastname;
     }

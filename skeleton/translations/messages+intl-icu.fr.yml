@@ -1,0 +1,61 @@
+'Translation "%locale%" extracted successfully.': '__Translation "%locale%" extracted successfully.'
+'Product "%name%" successfully updated.': '__Product "%name%" successfully updated.'
+'Main image in product "%name%" removed successfully.': '__Main image in product "%name%" removed successfully.'
+'Product "%name%" removed successfully.': '__Product "%name%" removed successfully.'
+'Slider "%name%" created successfully.': '__Slider "%name%" created successfully.'
+'Slider "%name%" updated successfully.': '__Slider "%name%" updated successfully.'
+'Slider "%name%" deleted successfully.': '__Slider "%name%" deleted successfully.'
+Homepage: __Homepage
+'Add new': '__Add new'
+'My cart': '__My cart'
+'Cart empty': '__Cart empty'
+'10 characters minimum': '__10 characters minimum'
+'1 uppercase': '__1 uppercase'
+'1 lowercase': '__1 lowercase'
+'1 special character': '__1 special character'
+'My account': '__My account'
+'My products': '__My products'
+'Admin dashboard': '__Admin dashboard'
+'Translations manager': '__Translations manager'
+Logout: __Logout
+Connexion: __Connexion
+'Create account': '__Create account'
+Register: __Register
+'already have an account': '__already have an account'
+Email: __Email
+Siret: __Siret
+'Postale adress': '__Postale adress'
+'Update my password': '__Update my password'
+'Update your password': '__Update your password'
+'Change My current password to new one': '__Change My current password to new one'
+'You are logged in as %name%': '__You are logged in as %name%'
+'Please sign in': '__Please sign in'
+exemple@contact.com: __exemple@contact.com
+Password: __Password
+'My password': '__My password'
+'Remember me': '__Remember me'
+'Create an account': '__Create an account'
+'Password forgotten': '__Password forgotten'
+'Sign in': '__Sign in'
+'Reset your password': '__Reset your password'
+'Enter your email address, and we will send you a link to reset your password': '__Enter your email address, and we will send you a link to reset your password'
+'Send password reset email': '__Send password reset email'
+Sliders: __Sliders
+'Edit "%name%" slider': '__Edit "%name%" slider'
+'Create new slider': '__Create new slider'
+'Edit slider "%name%"': '__Edit slider "%name%"'
+'General informations': '__General informations'
+Save: __Save
+Product: __Product
+'No product': '__No product'
+Delete: __Delete
+'Create new product': '__Create new product'
+'Edit "%name%" product': '__Edit "%name%" product'
+'Edit product "%name%"': '__Edit product "%name%"'
+'Delete image': '__Delete image'
+'Save product': '__Save product'
+'You have no products yet.': '__You have no products yet.'
+'Delete product': '__Delete product'
+'Translation Manager': '__Translation Manager'
+'No translation available': '__No translation available'
+'Admin Dashboard': '__Admin Dashboard'

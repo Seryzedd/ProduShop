@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans  %}Translation Manager{% endtrans %}{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Translations',
+            route: 'app_admin_translations_manager',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="">{% trans  %}Translation Manager{% endtrans %}</h1>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+                </button>
+                <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                    {% for language in languages %}
+                        <li><a class="dropdown-item py-2" href="{{ path('app_admin_translations_manager_extract', {locale: language}) }}">{{ language|name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        {% if translationFiles is empty %}
+            <h4 class="text-center text-muted py-4">{% trans %}No translation available{% endtrans %}</h4>
+        {% else %}
+            <ul class="list-group">
+                {% for key in translationFiles|keys %}
+                    <a href="{{ path('app_admin_translations_manager_edit', {'locale': key}) }}" class="list-group-item list-group-item-action">{{ key|name }}</a>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    <main>
+{% endblock %}
