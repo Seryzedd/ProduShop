@@ -1,0 +1,7 @@
+<div class="input-group mb-1">
+    <label class="input-group-text" for="filter-by-input-val">{% trans with {'%name%': value is defined ? value} %}Filter %name%{% endtrans %}</label>
+    <input type="email" class="form-control form-control-sm filter-input" id="filter-by-input-val" data-container="{{ container is defined ? container : "" }}" filter-by="input-values" container-target="li" placeholder="{% trans %}Example{% endtrans %}">
+    <button class="btn btn-outline-dark btn-remove-val" type="button">
+        {{ ux_icon('ic:twotone-close') }}
+    </button>
+</div>

@@ -7,10 +7,6 @@
         {% block stylesheets %}
             {{ importmap('app.scss') }}
         {% endblock %}
-
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
     </head>
     <body>
         {% block header %}
@@ -43,7 +39,7 @@
                                 {% endif %}
                             </div>
 
-                            <p class="col-md-10 mb-0">
+                            <p class="col-md-10 mb-0 px-4">
                                 {{ message|trans }}
                             </p>
 
@@ -57,5 +53,9 @@
         {% endblock %}
 
         {% block body %}{% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
     </body>
 </html>

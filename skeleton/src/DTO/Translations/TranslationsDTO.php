@@ -10,4 +10,11 @@ class TranslationsDTO
     {
         return $this->languages;
     }
+
+    public function setLanguages(array $languages): static
+    {
+        $this->languages = $languages;
+
+        return $this;
+    }
 }

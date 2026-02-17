@@ -48,6 +48,16 @@ class TranslationFileDTO
         return $this->translations;
     }
 
+    public function getTranslationsToArray(): array
+    {
+        $translations = [];
+        foreach($this->translations as $translation) {
+            $translations[$translation->getTranslationKey()] = $translation->getTranslationValue();
+        }
+
+        return $translations;
+    }
+
     public function removeTranslation(TranslationDTO $translation): void
     {
         $this->translations = array_filter($this->translations, function ($t) use ($translation) {

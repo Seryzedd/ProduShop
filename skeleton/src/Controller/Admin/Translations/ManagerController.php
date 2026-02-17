@@ -12,13 +12,22 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Form\Translation\AllTranslationsType;
 use App\Service\CommandRunner;
 use App\Service\Translation\Languages;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/admin/translations')]
 final class ManagerController extends AbstractController
 {
-    public function __construct(Languages $languages)
+    private Languages $languages;
+
+    private CommandRunner $commandRunner;
+
+    private TranslatorInterface $translator;
+
+    public function __construct(Languages $languages, CommandRunner $commandRunner, TranslatorInterface $translator)
     {
         $this->languages = $languages;
+        $this->commandRunner = $commandRunner;
+        $this->translator = $translator;
     }
     
     #[Route('/', name: 'app_admin_translations_manager')]
@@ -31,13 +40,23 @@ final class ManagerController extends AbstractController
     }
 
     #[Route('/extract/{locale}', name: 'app_admin_translations_manager_extract')]
-    public function updateTranslations(CommandRunner $commandRunner, string $locale): Response
+    public function updateTranslations(string $locale): Response
     {
-        $commandRunner->run('translation:extract', ['--force' => true, 'locale' => $locale, '--format' => 'yml']);
+        $this->extractTranslations($locale);
 
         $this->addFlash('success', new TranslatableMessage('Translation "%locale%" extracted successfully.', ['%locale%' => $locale]));
 
-        return $this->redirectToRoute('app_admin_translations_manager');
+        return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
+    }
+
+    #[Route('/reload/{locale}', name: 'app_admin_translations_manager_reload')]
+    public function reloadTranslations(string $locale, TranslationFileReader $translationFileReader)
+    {
+        $this->extractTranslations($locale);
+
+        $this->addFlash('success', new TranslatableMessage('Translation %locale% reloaded.', ['%locale%' => \Locale::getDisplayName($locale)]));
+
+        return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
     }
 
     #[Route('/edit/{locale}', name: 'app_admin_translations_manager_edit')]
@@ -51,6 +70,17 @@ final class ManagerController extends AbstractController
         
         if ($form->isSubmitted() && $form->isValid()) { 
             
+            $files = $form->getData();
+
+            foreach($files->getLanguages() as $file) {
+                $filename = $file->getFilename();
+
+                $translations = $file->getTranslationsToArray();
+
+                $translationFileReader->updateFile($filename, $translations);
+                
+                $this->addFlash('success', new TranslatableMessage('Translation file "%filename%" updated successfully.', ['%filename%' => $filename]));
+            }
         }
 
         return $this->render('admin/translations/manager/edit.html.twig', [
@@ -59,4 +89,10 @@ final class ManagerController extends AbstractController
             'form' => $form
         ]);
     }
+
+    private function extractTranslations(string $locale)
+    {
+        $this->commandRunner->run('app:translation:update', ['locale' => $locale]);
+    }
+
 }

@@ -26,17 +26,25 @@
 
 {% block body %}
     <main class="container">
-        <div class="row">
-            <h1>{% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}</h1>
+        <div class="row align-items-center">
+            <h1 class="col-sm-10">{% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}</h1>
+            <div class="col-sm-2 text-end">
+                <a class="btn btn-primary btn-sm spin-hover" href="{{ path('app_admin_translations_manager_reload', {'locale': locale}) }}">
+                    {{ ux_icon('ic:twotone-autorenew', {height: '26px', width: '26px'}) }}
+                </a>
+            </div>
         </div>
+
+        {% include 'components/filters/filter_by_input_val.html.twig' with {'value': 'translations'|trans, 'container': 'form[name="all_translations"]'} %}
+
         {{ form_start(form) }}
             <div class="d-flex align-items-start">
                 <div class="nav flex-column nav-pills sticky-top" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                     {% for data in form.languages.vars.data %}
-                        <button class="btn btn-light rounded-start rounded-end-0{% if loop.first %} active{% endif %}" id="v-pills-{{ data.provider }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ data.provider }}" type="button" role="tab" aria-controls="v-pills-{{ data.provider }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ data.provider }}</button>
+                        <a href="#{{ data.provider }}" class="btn btn-light rounded-start rounded-end-0{% if loop.first %} active{% endif %}" id="v-pills-{{ data.provider }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ data.provider }}" aria-controls="v-pills-{{ data.provider }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ data.provider }}</a>
                     {% endfor %}
                 </div>
-                <div class="tab-content w-100 card rounded-end rounded-start-0 p-3" id="v-pills-tabContent">
+                <div class="tab-content bg-light w-100 card rounded-end rounded-start-0 p-3" id="v-pills-tabContent">
                     {% for file in form.languages.children %}
                         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="v-pills-{{ file.vars.data.provider }}" role="tabpanel" aria-labelledby="v-pills-{{ file.vars.data.provider }}-tab" tabindex="{{ loop.index }}">
                             
@@ -58,4 +66,11 @@
 
 {% block provider_translations %}
     {% include 'form/collectionType.html.twig' with {'collection': file.translations} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+    <script src="{{ asset('script/deleteInputValue.js') }}"></script>
+    <script src="{{ asset('script/filters.js') }}"></script>
 {% endblock %}

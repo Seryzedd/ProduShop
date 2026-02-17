@@ -69,4 +69,24 @@ class TranslationFileReader
 
         return $allTranslations;
     }
+
+    public function updateFile(string $filename, array $content)
+    {
+        $path = $this->translationPath . '/' . $filename;
+        if(!file_exists($path)) {
+            throw new \Exception("Error file does not exist.");
+            
+        }
+
+        $yaml = Yaml::dump($content);
+
+        $valid = file_put_contents($path, $yaml);
+
+        return $valid;
+    }
+
+    public function removeFilesByLocale(string $locale)
+    {
+        $this->getFilesByLocale($locale);
+    }
 }

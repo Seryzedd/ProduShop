@@ -18,6 +18,16 @@ class TranslationDTO
         ];
     }
 
+    public function getTranslationKey(): string
+    {
+        return $this->translationKey;
+    }
+
+    public function getTranslationValue(): string
+    {
+        return $this->translationValue;
+    }
+
     public function toObject(): object
     {
         return (object) json_encode($this->toArray());

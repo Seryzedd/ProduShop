@@ -1,3 +1,12 @@
+'Please enter your email': 'Please enter your email'
+'Please upload a valid image file.': 'Please upload a valid image file.'
+'Please enter your current password': 'Please enter your current password'
+'The typed password is incorrect.': 'The typed password is incorrect.'
+'You should agree to our terms.': 'You should agree to our terms.'
+'Please enter a password': 'Please enter a password'
+'Your password should be at least {{ limit }} characters': 'Your password should be at least {{ limit }} characters'
+'There is already an account with this email': 'There is already an account with this email'
+Error: Error
 'This value should be false.': 'Cette valeur doit être fausse.'
 'This value should be true.': 'Cette valeur doit être vraie.'
 'This value should be of type {{ type }}.': 'Cette valeur doit être de type {{ type }}.'
@@ -76,7 +85,6 @@
 'The host could not be resolved.': "Le nom de domaine n'a pas pu être résolu."
 'This value does not match the expected {{ charset }} charset.': 'Cette valeur ne correspond pas au jeu de caractères {{ charset }} attendu.'
 'This is not a valid Business Identifier Code (BIC).': "Cette valeur n'est pas un Code Identifiant de Business (BIC) valide."
-Error: Erreur
 'This is not a valid UUID.': "Cette valeur n'est pas un UUID valide."
 'This value should be a multiple of {{ compared_value }}.': 'Cette valeur doit être un multiple de {{ compared_value }}.'
 'This Business Identifier Code (BIC) is not associated with IBAN {{ iban }}.': "Ce code d'identification d'entreprise (BIC) n'est pas associé à l'IBAN {{ iban }}."
@@ -169,11 +177,3 @@ Error: Erreur
 'Please select a valid option.': 'Veuillez sélectionner une option valide.'
 'Please select a valid range.': 'Veuillez sélectionner une plage valide.'
 'Please enter a valid week.': 'Veuillez entrer une semaine valide.'
-'Please enter your email': '__Please enter your email'
-'Please upload a valid image file.': '__Please upload a valid image file.'
-'Please enter your current password': '__Please enter your current password'
-'The typed password is incorrect.': '__The typed password is incorrect.'
-'You should agree to our terms.': '__You should agree to our terms.'
-'Please enter a password': '__Please enter a password'
-'Your password should be at least {{ limit }} characters': '__Your password should be at least {{ limit }} characters'
-'There is already an account with this email': '__There is already an account with this email'
