@@ -33,6 +33,7 @@ final class ManagerController extends AbstractController
     #[Route('/', name: 'app_admin_translations_manager')]
     public function index(TranslationFileReader $translationFileReader): Response
     {
+
         return $this->render('admin/translations/manager/index.html.twig', [
             'translationFiles' => $translationFileReader->readAllTranslationFiles(),
             'languages' => $this->languages->getLanguagesKeys()

@@ -89,6 +89,28 @@ class TranslationFileReader
         return $allTranslations;
     }
 
+    public static function getLanguagesByFiles(): array
+    {
+        $dir = '/var/www/html/translations/';
+        if(!is_dir($dir)) {
+            return null;
+        }
+
+        $files = scandir($dir);
+
+        $pattern = '/^.+\.([a-z]{2}(?:_[A-Z]{2})?)\.ya?ml$/';
+
+        $response = [];
+        foreach ($files as $file) {
+
+            if (preg_match($pattern, $file, $matches)) {
+                $response[$matches[1]] = $matches[1];
+            }
+        }
+
+        return $response;
+    }
+
     public function updateFile(string $filename, array $content)
     {
         $path = $this->translationPath . '/' . $filename;

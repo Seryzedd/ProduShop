@@ -18,14 +18,43 @@
                     <a class="nav-link" href="#">Pricing</a>
                 </li>
             </ul>
-        
+            
             <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item">
+                    {% if app.enabled_locales|length <= 1 %}
+                        <button class="nav-link disabled" type="button">
+                            {{ app.locale|language }}
+                            <small>{{ app.locale|region }}</small>
+                        </button>
+                    {% else %}
+                        <div class="btn-group">
+                            <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ app.locale|language }}
+                                <small class="fw-lighter">{{ app.locale|region }}</small>
+                            </button>
+                            
+                            <form method="post" action="{{ app.request.uri }}" name="locale-switcher" class="dropdown-menu">
+                                {% for locale in app.enabled_locales %}
+                                    {% if locale != app.locale %}
+                                        <button type="submit" class="dropdown-item" value="{{ locale }}" name="locale_language">
+                                            {{ locale|language }}
+                                                
+                                            {% if locale|region != '' %}
+                                                <small class="fw-lighter">{{ locale|region }}</small>
+                                            {% endif %}
+                                        </button>
+                                    {% endif %}
+                                {% endfor %}
+                            </form>
+                        </div>
+                    {% endif %}
+                </li>
+
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                     {% if is_granted('ROLE_USER') %}
                         <li class="nav-item">
                             <button class="nav-link" type="button" title="{% trans %}My cart{% endtrans %}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                 {{ ux_icon('ic:twotone-shopping-basket', {height: '24px', width: '24px'}) }}
-                                {% trans %}My cart{% endtrans %}
                             </button>
                         </li>
                     {% endif %}

@@ -1,5 +1,5 @@
 framework:
     default_locale: fr
+    enabled_locales: "%app.languages.all%"
     translator:
         default_path: '%kernel.project_dir%/translations'
-        providers:
