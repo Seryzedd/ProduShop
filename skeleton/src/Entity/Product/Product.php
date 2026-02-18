@@ -40,6 +40,10 @@ class Product
     #[ORM\OneToMany(targetEntity: Package::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $packages;
 
+    #[ORM\ManyToOne(inversedBy: 'product', cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Shelf $shelf = null;
+
     public function __construct(Professional $company)
     {
         $this->setCompany($company);
@@ -148,6 +152,18 @@ class Product
                 $package->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getShelf(): ?Shelf
+    {
+        return $this->shelf;
+    }
+
+    public function setShelf(?Shelf $shelf): static
+    {
+        $this->shelf = $shelf;
 
         return $this;
     }
