@@ -59,10 +59,15 @@ final class ManagerController extends AbstractController
         return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
     }
 
+    #[Route('/edit/file/{filename}/language/{locale}', name: 'app_admin_translations_file_manager_edit')]
     #[Route('/edit/{locale}', name: 'app_admin_translations_manager_edit')]
-    public function editLanguage(string $locale, TranslationFileReader $translationFileReader, Request $request)
+    public function editLanguage(string $locale, TranslationFileReader $translationFileReader, Request $request, ?string $filename = null)
     {
-        $languages = $translationFileReader->getFilesByLocale($locale);
+        if ($filename) {
+            $languages = $translationFileReader->getFileByFilename($filename);
+        } else {
+            $languages = $translationFileReader->getFilesByLocale($locale);
+        }
         
         $form = $this->createForm(AllTranslationsType::class, $languages);
 
@@ -73,11 +78,15 @@ final class ManagerController extends AbstractController
             $files = $form->getData();
 
             foreach($files->getLanguages() as $file) {
-                $filename = $file->getFilename();
+                try {
+                    $filename = $file->getFilename();
 
-                $translations = $file->getTranslationsToArray();
+                    $translations = $file->getTranslationsToArray();
 
-                $translationFileReader->updateFile($filename, $translations);
+                    $translationFileReader->updateFile($filename, $translations);
+                } catch (\Exception $e) {
+                    $this->addFlash('danger', $e->getMessage());
+                }
                 
                 $this->addFlash('success', new TranslatableMessage('Translation file "%filename%" updated successfully.', ['%filename%' => $filename]));
             }
@@ -86,13 +95,19 @@ final class ManagerController extends AbstractController
         return $this->render('admin/translations/manager/edit.html.twig', [
             'languages' => $languages,
             'locale' => $locale,
-            'form' => $form
+            'form' => $form,
+            'filename' => $filename,
         ]);
     }
 
     private function extractTranslations(string $locale)
     {
-        $this->commandRunner->run('app:translation:update', ['locale' => $locale]);
+        try {
+            $this->commandRunner->run('app:translation:update', ['locale' => $locale]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+        }
+        
     }
 
 }

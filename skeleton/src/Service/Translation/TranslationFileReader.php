@@ -32,7 +32,7 @@ class TranslationFileReader
 
     public function getFilesByLocale(string $locale): TranslationsDTO
     {
-        $translationFiles = glob($this->translationPath . '/*.' . $locale . '.*');
+        $translationFiles = glob($this->translationPath . '/*.' . $locale . '.yml');
         $filesByLocale = [];
 
         foreach ($translationFiles as $file) {
@@ -42,6 +42,25 @@ class TranslationFileReader
         $dto = new TranslationsDTO($filesByLocale);
 
         return $dto;
+    }
+
+    public function getFileByFilename(string $filename): TranslationsDTO
+    {
+        $translationFiles = glob($this->translationPath . '/' . $filename);
+        $filesByLocale = [];
+
+        foreach ($translationFiles as $file) {
+            $filesByLocale[] = $this->readTranslationFileAsDTO(basename($file));
+        }
+
+        $dto = new TranslationsDTO($filesByLocale);
+
+        return $dto;
+    }
+
+    public function getFullPathFile(string $filename): string
+    {
+        return $this->translationPath . '/' . $filename;
     }
 
     public function readTranslationFileAsDTO(string $fileName): TranslationFileDTO
