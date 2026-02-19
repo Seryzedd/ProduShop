@@ -40,7 +40,7 @@ class Product
     #[ORM\OneToMany(targetEntity: Package::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $packages;
 
-    #[ORM\ManyToOne(inversedBy: 'product', cascade: ['persist'])]
+    #[ORM\ManyToOne(inversedBy: 'products', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?Shelf $shelf = null;
 

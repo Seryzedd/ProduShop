@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%count%': products|length} %}Product|%count% Products{% endtrans %}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        {% include 'components/map.html.twig' %}
+        {{ dump() }}
+    </main>
+{% endblock %}

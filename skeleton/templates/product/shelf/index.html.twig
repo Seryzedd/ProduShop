@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%name%': shelf ? shelf.name : 'All'} %}Shelf %name%{% endtrans %}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        {{ dump() }}
+    </main>
+{% endblock %}

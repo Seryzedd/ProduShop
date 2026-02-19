@@ -49,7 +49,7 @@ class Shelf
     /**
      * @return Collection<int, Product>
      */
-    public function getProduct(): Collection
+    public function getProducts(): Collection
     {
         return $this->products;
     }

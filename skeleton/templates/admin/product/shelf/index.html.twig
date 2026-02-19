@@ -23,6 +23,98 @@
 
 {% block body %}
     <main class="container">
-        {{ dump() }}
+        <div class="d-flex align-items-end justify-content-between">
+            <h1 class="mb-0">
+                {% trans %}Shelves Manager{% endtrans %}
+            </h1>
+
+            <button type="button"  class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#newShelf">
+                {{ ux_icon('line-md:plus', {width: '26px', height: '26px'}) }}
+            </button>
+        </div>
+
+        {% if shelves|length > 0 %}
+            <div class="row align-items-stretch mt-3">
+                <div class='col-md-3'>
+                    <ul class="nav flex-column">
+                        {% for shelf in shelves %}
+                            <li class="nav-item">
+                                <button class="nav-link{% if loop.first %} active{% endif %}" id="v-pills-{{ shelf.name }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ shelf.name }}" type="button" role="tab" aria-controls="v-pills-{{ shelf.name }}" aria-selected="true">{{ shelf.name }}</button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-9 border-start border-dark">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        {% for shelf in shelves %}
+                            <div class="tab-pane{% if loop.first %} show active{% endif %} fade" id="v-pills-{{ shelf.name }}" role="tabpanel" aria-labelledby="v-pills-{{ shelf.name }}-tab" tabindex="{{ loop.index }}">
+                                {% if shelf.products|length == 0 %}
+                                    <h2 class="text-muted text-center">{% trans %}No product in this shelf{% endtrans %}</h2>
+                                {% else %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for product in shelf.products %}
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-2 text-center text-muted">
+                                                        {% if product.image.src|length == 0 %}
+                                                            {{ ux_icon('ic:round-broken-image', {width: '30px', height: '30px'}) }}
+                                                        {% else %}
+                                                            <img src="{{ product.image.src }}" class="img-fluid">
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <h5 class="card-title text-primary mb-0">{{ product.name }}</h5>
+                                                        <p class="text-muted mb-0">
+                                                            {{ product.description}}
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <p class="mb-0">{{ product.company.companyName }}</p>
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <a class="nav-link text-center" href="">
+                                                            {{ ux_icon('line-md:pencil-alt-twotone') }}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+
+
+                                
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+            </div>
+        {% endif %}
+        
     </main>
+
+    <div class="modal fade" id="newShelf" tabindex="-1" aria-labelledby="newLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="newLabel">{% trans %}Create new Shelf{% endtrans %}</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                {{ form_start(form) }}
+                    <div class="modal-body">
+                        
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
 {% endblock %}

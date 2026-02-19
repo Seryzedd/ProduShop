@@ -46,15 +46,15 @@
         {% if is_granted('ROLE_SELLER') %}
             <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ app.user.siret }}</p>
         {% endif %}
-        
-        <p class="mb-0 mt-2"><strong>{% trans %}Postale adress{% endtrans %}</strong></p>
-        <p class="ms-2">
-            {{ app.user.adress.street }}<br>
-            {{ app.user.adress.zipCode }} {{ app.user.adress.country }}
-        </p>
+
+        {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
+            {{ block('user_details') }}
+        {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
+            {{ block('professional_details') }}
+        {% endif %}
 
         <ul class="nav flex-column">
-            <li class="nav-item">
+            <li class="nav-item text-end">
                 <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
             </li>
         </ul>
@@ -70,9 +70,41 @@
 {% endblock %}
 
 {% block user_details %}
-    
+    <div class="position-relative">
+        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
+            <strong>{% trans %}Postale adress{% endtrans %}</strong>
+            <a href="{{ path('app_account_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+        </p>
+        {% if app.user.shippingAdress|length == 0 %}
+            <p class="ms-2 text-muted">
+                {% trans %}No postal adress{% endtrans %}
+            </p>
+        {% endif %}
+
+        {% for adress in app.user.shippingAdress %}
+            <p class="ms-2">
+                {{ adress.street }}<br>
+                {{ adress.zipCode }} {{ adress.country }}
+            </p>
+        {% endfor %}
+    </div>
 {% endblock %}
 
 {% block professional_details %}
-    
+    <div class="position-relative">
+        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
+            <strong>{% trans %}Postale adress{% endtrans %}</strong>
+            <a href="{{ path('app_account_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+        </p>
+        {% if app.user.adress %}
+            <p class="ms-2">
+                {{ app.user.adress.street }}<br>
+                {{ app.user.adress.zipCode }} {{ app.user.adress.country }}
+            </p>
+        {% else %}
+            <p class="ms-2 text-muted">
+                {% trans %}No postal adress{% endtrans %}
+            </p>
+        {% endif %}
+    </div>
 {% endblock %}

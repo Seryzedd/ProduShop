@@ -9,7 +9,7 @@
     {% for item in breadcrumbItem %}
         {% if not item.current %}
             <li class="breadcrumb-item d-flex align-items-center p-2">
-                <a href="{{ item.route }}" class="nav-link d-flex align-items-center text-primary" title="{{ item.label|trans }}">
+                <a href="{{ item.route }}" class="link-offset-3 link-underline-opacity-100-hover link-primary link-underline link-underline-opacity-10 d-flex align-items-center" title="{{ item.label|trans }}">
                     {% if loop.first %}
                         {{ ux_icon('ic:twotone-home', {height: '26px', width: '26px'}) }}
                     {% endif %}

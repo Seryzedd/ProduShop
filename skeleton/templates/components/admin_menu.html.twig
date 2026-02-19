@@ -1,0 +1,47 @@
+{% if is_granted('ROLE_ADMIN') %}
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="adminMenu" style="width: fit-content;" aria-labelledby="staticBackdropLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="staticBackdropLabel">
+                {% trans %}Admin menu{% endtrans %}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-start {% if app.request.attributes.get('_route') == 'app_admin_index' %} active disabled{% endif %}" aria-current="page" href="{{ path('app_admin_index') }}">
+                        {{ ux_icon('line-md:home-alt-twotone') }}
+                        {% trans %}Admin Homepage{% endtrans %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link text-start" type="button" data-bs-toggle="collapse" data-bs-target="#lang_sub" aria-expanded="false" aria-controls="lang_sub">
+                        {{ ux_icon('mdi:google-translate' )}}
+                        {% trans %}Languages{% endtrans %}
+                    </button>
+                    <div class="collapse" id="lang_sub">
+                        <ul class="nav flex-column ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_manager' %} active disabled{% endif %}" href="{{ path('app_admin_translations_manager') }}">
+                                    {% trans %}Manager{% endtrans %}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_files' %} active disabled{% endif %}" href="{{ path('app_admin_translations_files') }}">
+                                    {% trans %}Files{% endtrans %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_product_shelf' %} active disabled{% endif %}" href="{{ path('app_admin_product_shelf') }}">
+                        {{ ux_icon('mdi:store') }}
+                        {% trans %}Products{% endtrans %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+{% endif %}

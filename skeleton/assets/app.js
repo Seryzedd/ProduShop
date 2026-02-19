@@ -72,9 +72,9 @@ function debounce(func, wait) {
   };
 }
 
-const inputStreet = document.getElementById('registration_step_adress_street');
-const inputZip = document.getElementById('registration_step_adress_zipCode');
-const inputCountry = document.getElementById('registration_step_adress_country');
+const inputStreet = document.querySelector('#registration_step_adress_street, [name="adress[street]"]');
+const inputZip = document.querySelector('#registration_step_adress_zipCode, [name="adress[zipCode]"]');
+const inputCountry = document.querySelector('#registration_step_adress_country, [name="adress[country]"]');
 
 const suggestionsContainer = document.getElementById('suggestions');
 

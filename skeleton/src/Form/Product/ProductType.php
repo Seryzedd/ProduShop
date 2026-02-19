@@ -14,6 +14,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type as FormTypes;
+use App\Entity\Product\Shelf;
 use App\Form\ImageType;
 
 class ProductType extends AbstractType
@@ -44,6 +45,10 @@ class ProductType extends AbstractType
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
+            ])
+            ->add('shelf', EntityType::class, [
+                'class' => Shelf::class,
+                'choice_label' => 'name',
             ])
         ;
     }

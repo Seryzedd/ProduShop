@@ -5,6 +5,10 @@ namespace App\Controller\Account;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Form\User\AdressType;
+use App\Entity\User\PostalAdress\Adress;
 
 #[Route('/account')]
 final class InformationsController extends AbstractController
@@ -13,5 +17,30 @@ final class InformationsController extends AbstractController
     public function index(): Response
     {
         return $this->render('account/informations/index.html.twig', []);
+    }
+
+    #[Route('/adress', name: 'app_account_adress')]
+    public function updateAdress(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $adress = new Adress();
+        if($this->getUser()->getAdress()) {
+            $adress = $this->getUser()->getAdress();
+        }
+
+        $form = $this->createForm(AdressType::class, $adress);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $adress = $form->getData();
+
+            $entityManager->persist($adress);
+            $entityManager->flush();
+
+            $this->addFlash('info', 'Postal adress updated.');
+        }
+        return $this->render('account/informations/adress.html.twig', [
+            'form' => $form
+        ]);
     }
 }

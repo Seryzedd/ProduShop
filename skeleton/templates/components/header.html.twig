@@ -10,14 +10,23 @@
             <div class="me-auto">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <button class="nav-link text-dark px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMenu" aria-controls="adminMenu">
+                            {{ ux_icon('ic:twotone-admin-panel-settings', {width: '24px', height: '24px'}) }}
+                        </button>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Features</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Pricing</a>
-                    </li>
+                    {% if shelvesEntities|length > 0 %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% trans %}Shelves products{% endtrans %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ path('app_shelf_product') }}">{% trans %}All{% endtrans %}</a></li>
+                                {% for shelf in shelvesEntities %}
+                                    <li><a class="dropdown-item" href="{{ path('app_shelf_product', {'shelf': shelf.name}) }}">{{ shelf.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
             

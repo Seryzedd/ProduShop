@@ -26,6 +26,16 @@ class ProductRepository extends ServiceEntityRepository
         ;
     }
 
+    public function findByShelf(string $shelf)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.shelf = :shelf')
+            ->setParameter('shelf', $shelf)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */
