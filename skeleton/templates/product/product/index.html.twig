@@ -4,9 +4,26 @@
     {% trans with {'%count%': products|length} %}Product|%count% Products{% endtrans %}
 {% endblock %}
 
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Shelf "%shelf%" products'|trans({'%shelf%': shelf}),
+            route: 'app_shelf_product',
+            parameters: {'shelf': shelf}
+        },
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
     <main class="container">
-        {% include 'components/map.html.twig' %}
-        {{ dump() }}
+        <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
+        <div class="card-group row-cols-1 row-cols-lg-6">
+            {% for product in products %}
+                {% include 'product/product/card.html.twig' %}
+            {% endfor %}
+        </div>
     </main>
 {% endblock %}

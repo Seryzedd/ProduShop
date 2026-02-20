@@ -11,7 +11,7 @@ use App\Entity\Product;
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
-    #[Route('/{shelf}', name: 'app_shelf_product', defaults: ['shelf' => 'All'])]
+    #[Route('/shelf/{shelf}', name: 'app_shelf_product', defaults: ['shelf' => 'All'])]
     public function index(string $shelf, ProductRepository $productRepository): Response
     {
         if($shelf === "All") {
@@ -20,7 +20,16 @@ final class ProductController extends AbstractController
             $products = $productRepository->findByShelf($shelf);
         }
         return $this->render('product/product/index.html.twig', [
-            'products' => $products
+            'products' => $products,
+            'shelf' => $shelf
+        ]);
+    }
+
+    #[Route('/package/{id}', name: 'app_view_product')]
+    public function view(Product\Package $package): Response
+    {
+        return $this->render('product/product/view.html.twig', [
+            'package' => $package
         ]);
     }
 }

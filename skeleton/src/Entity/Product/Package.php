@@ -136,4 +136,9 @@ class Package
 
         return $this;
     }
+
+    public function getFinalPrice()
+    {
+        return $this->price + ($this->price * $this->taxe /100);
+    }
 }

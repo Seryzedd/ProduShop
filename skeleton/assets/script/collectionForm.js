@@ -16,7 +16,7 @@ function addFormToCollection(e) {
 
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.classList.add('btn', 'nav-link', 'remove_collection_item_btn', 'btn-trash', 'position-absolute', 'top-0', 'end-0', 'p-2');
+    btn.classList.add('btn', 'btn-ouline-danger', 'remove_collection_item_btn', 'btn-trash', 'position-absolute', 'top-0', 'end-0', 'p-2', 'rounded-start-0');
 
     btn.addEventListener("click", removeFormFromCollection);
 

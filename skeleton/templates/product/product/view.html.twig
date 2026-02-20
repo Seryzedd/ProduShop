@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%name%': package.product.name} %}Product "%name%" view{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Shelf "%shelf%" products'|trans({'%shelf%': package.product.shelf.name}),
+            route: 'app_shelf_product',
+            parameters: {'shelf': package.product.shelf.name}
+        },
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    {% set product = package.product %}
+    <main class="container">
+        <div class="row">
+            <div class="col-12"><h1>{{ product.name }}</h1></div>
+            <div class="col-lg-8">
+                {% if product.image.src|length > 0 %}
+                    <img class="img-fluid" src="{{ product.image.src }}">
+                {% endif %}
+
+                <div class="row">
+                    {% if product.slider and product.slider.items|length > 0 %}
+                        {% for item in product.slider.items %}
+                            <div class="col-4 col-lg-3">
+                                <img class="img-thumbnail" src="{{ item.image.src }}">
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <p class="text-muted">{{ product.description }}</p>
+                <div class="border-top"></div>
+                <div class="d-flex justify-content-between">
+                    <p class="mb-0 {% if package.stock == 0 %}text-danger{% else %}text-info{% endif %}">{% trans with {'%stock%': package.stock} %}%stock% left{% endtrans %}</p>
+                    <p class="mb-0 fw-semibold">x{{ package.quantity }}</p>
+                </div>
+                <h3 class="text-center">
+                    {{ package.finalPrice }}
+                    {{ ux_icon('ic:outline-euro') }}
+                </h3>
+
+                {% if product.packages|length > 1 %}
+                    <p class="text-end text-primary">{% trans %}Other packages{% endtrans %}</p>
+                    <div class="row">
+                        {% for otherPack in product.packages %}
+                            {% if otherPack !== package %}
+                                {% include 'product/product/package_link.html.twig' with {'package': otherPack} %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </main>
+{% endblock %}

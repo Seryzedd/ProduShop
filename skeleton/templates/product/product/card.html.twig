@@ -1,0 +1,33 @@
+<div class="card" style="width: 18rem;">
+    {% if product.image.src|length > 0 %}
+        <img src="{{ product.image.src }}" class="card-img-top" alt="{{ product.image.name }}">
+    {% else %}
+        <div class="d-flex align-items-center bg-light p-4 justify-content-center">
+            {{ ux_icon('line-md:image', {width: '30px', height: '30px'}) }}
+        </div>
+    {% endif %}
+
+    {% if product.slider and product.slider.items|length > 0 %}
+        <div class="row no-gutters">
+            {% for item in product.slider.items %}
+                <div class="col-4 col-lg-3">
+                    <img class="img-thumbnail" src="{{ item.image.src}}">
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p class="card-text text-muted">{{ product.description }}</p>
+    </div>
+
+    <div class="card-footer">
+        <div class="row no-gutters">
+            {% for package in product.packages %}
+                {% include 'product/product/package_link.html.twig' with {'package': package} %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
