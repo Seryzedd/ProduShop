@@ -7,11 +7,12 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Twig\Extension\GlobalsInterface;
+use App\Service\Cart\CartService;
 use App\Repository;
 
 class GlobalEntitiesExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private Repository\Product\ShelfRepository $shelfRepo)
+    public function __construct(private Repository\Product\ShelfRepository $shelfRepo, private CartService $cartService)
     {
 
     }
@@ -36,7 +37,8 @@ class GlobalEntitiesExtension extends AbstractExtension implements GlobalsInterf
     public function getGlobals(): array
     {
         return [
-            'shelvesEntities' => $this->shelfRepo->findAll()
+            'shelvesEntities' => $this->shelfRepo->findAll(),
+            'cart' => $this->cartService,
         ];
     }
 }

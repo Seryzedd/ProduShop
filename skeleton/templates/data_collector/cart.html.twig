@@ -1,0 +1,73 @@
+{# templates/data_collector/cart.html.twig #}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set color = collector.hasAvailabilityIssues ? 'red' : 'default' %}
+    {% set icon %}
+        {{ ux_icon('ic:baseline-shopping-cart', {width: '24px', height: '24px'}) }} <span class="sf-toolbar-value">{{ collector.itemCount }}</span>
+    {% endset %}
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>{% trans %}Lines{% endtrans %}</b><span>{{ collector.itemCount }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>{% trans %}Total TTC{% endtrans %}</b><span>{{ collector.totalPrice|number_format(2, ',', ' ') }} €</span>
+        </div>
+        {% if collector.hasAvailabilityIssues %}
+        <div class="sf-toolbar-info-piece">
+            <b style="color:red">{% trans %}Not enough stock{% endtrans %}</b>
+        </div>
+        {% endif %}
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url, status: color }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label {{ collector.hasAvailabilityIssues ? 'label-status-error' }}">
+        <span class="icon">{{ ux_icon('ic:baseline-shopping-cart', {width: '24px', height: '24px'}) }}</span>
+        <strong>{% trans %}Cart{% endtrans %}</strong>
+        {% if collector.itemCount > 0 %}
+            <span class="count">{{ collector.itemCount }}</span>
+        {% endif %}
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>{% trans with {'%count%': collector.itemCount, '%price%': collector.totalPrice|number_format(2, ',', ' ')} %}Cart (%count% line(s) — %price% € TTC){% endtrans %}</h2>
+
+    {% if collector.items is empty %}
+        <div class="empty">{% trans %}Cart empty{% endtrans %}</div>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans %}id{% endtrans %}</th>
+                    <th>{% trans %}Product{% endtrans %}</th>
+                    <th>{% trans %}Quantity{% endtrans %}</th>
+                    <th>{% trans %}Unit price{% endtrans %}</th>
+                    <th>{% trans %}Total{% endtrans %}</th>
+                    <th>{% trans %}Stock{% endtrans %}</th>
+                    <th>{% trans %}available{% endtrans %}</th>
+                    <th>{% trans %}Status{% endtrans %}</th>
+                    <th>{% trans %}Added at{% endtrans %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in collector.items %}
+                    <tr class="{{ not item.available ? 'status-error' }}">
+                        <td>{{ item.package_id }}</td>
+                        <td>{{ item.product_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price|number_format(2, ',', ' ') }} €</td>
+                        <td>{{ item.line_total|number_format(2, ',', ' ') }} €</td>
+                        <td>{{ item.stock }}</td>
+                        <td>{{ item.available ? '✅' : '❌' }}</td>
+                        <td><span class="badge status-{{ item.status }}">{{ item.status }}</span></td>
+                        <td>{{ item.added_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

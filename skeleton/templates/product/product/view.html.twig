@@ -50,6 +50,10 @@
                     {{ ux_icon('ic:outline-euro') }}
                 </h3>
 
+                <a class="btn btn-light mx-auto" href="{{ path('app_cart_add', {'id': package.id}) }}">
+                    {% trans %}Add to cart{% endtrans %}
+                </a>
+
                 {% if product.packages|length > 1 %}
                     <p class="text-end text-primary">{% trans %}Other packages{% endtrans %}</p>
                     <div class="row">
