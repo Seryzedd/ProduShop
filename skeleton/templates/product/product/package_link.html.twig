@@ -1,5 +1,5 @@
 {% block package_link %}
-    <div class="col position-relative text-center">
+    <div class="col position-relative text-center{% if not loop.last %} border-end border-dark{% endif %}">
         <div class="d-flex justify-content-between">
             {% if package.stock == 0 %}
                 <p class="text-danger"><small>{% trans %}Out of stock{% endtrans %}</small></p>
@@ -10,8 +10,14 @@
             <p class="mb-0 text-end fw-semibold">x{{ package.quantity }}</p>
         </div>
         <h4 class="text-center text-muted">
-            {{ package.finalPrice }}
-            {{ ux_icon('ic:round-euro') }}
+            {{ package.finalPrice|number_format(2, ',', ' ') }}
+            {{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}
         </h4>
+        {% if package.stock > 0 %}
+            <a class="btn btn-primary stretched-link" href="{{ path('app_cart_add', {id: package.id}) }}">
+                {{ ux_icon('ic:round-shopping-cart') }}
+                {% trans %}Add to cart{% endtrans %}
+            </a>
+        {% endif %}
     </div>
 {% endblock %}

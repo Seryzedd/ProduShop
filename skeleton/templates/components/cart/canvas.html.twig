@@ -17,6 +17,9 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <h4 class="text-primary fw-bolder mb-0">{{ item.package.product.name }}</h4>
+                                    <p class="mb-0">
+                                        {% trans with {'%count%': item.package.quantity} %}%count% product|]1,Inf[%count% products{% endtrans %}
+                                    </p>
                                 </div>
                                 <div class="col-lg-2">
                                     <p class="mb-0 text-end">

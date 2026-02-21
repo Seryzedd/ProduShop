@@ -114,9 +114,11 @@
                         <li class="nav-item">
                             <button class="nav-link position-relative" type="button" title="{% trans %}My cart{% endtrans %}" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
                                 {{ ux_icon('ic:twotone-shopping-basket', {height: '24px', width: '24px'}) }}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
-                                    {{ cart.itemCount }}
-                                </span>
+                                {% if not cart.empty %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+                                        {{ cart.itemCount }}
+                                    </span>
+                                {% endif %}
                             </button>
                         </li>
                     {% endif %}

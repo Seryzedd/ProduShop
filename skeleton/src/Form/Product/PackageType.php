@@ -39,6 +39,10 @@ class PackageType extends AbstractType
             ])
             ->add('taxe', FormTypes\PercentType::class, [
                 'attr' => ['min' => 0],
+                'rounding_mode' => 2,
+                'attr' => [
+                    'step' => 0.5
+                ],
                 'help' => 'Tax rate',
                 'data' => 0,
                 'html5' => true,

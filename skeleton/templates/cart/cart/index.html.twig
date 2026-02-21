@@ -17,14 +17,82 @@
 {% endblock %}
 
 {% block body %}
+    {% set products = [] %}
     <main class="container">
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-                <h3 class="">{{ cart.total|number_format('2', ',', ' ') }}</h3>
-            </li>
-            {% for item in cart.items %}
-                <li class="list-group-item">An item</li>
-            {% endfor %}
-        </ul>
+        {% if cart.empty %}
+            <h3 class="text-center text-muted">
+                {% trans %}Cart is empty{% endtrans %}
+            </h3>
+        {% else %}
+            <p class="mb-0 text-end">
+                <a class="btn btn-light" href="{{ path('app_cart_clear') }}">
+                    {% trans %}Clear cart{% endtrans %}
+                    {{ ux_icon('line-md:trash', {height: '24px', height: '24px'}) }}
+                </a>
+            </p>
+
+            {{ form_start(form) }}
+                <ul class="list-group list-group-flush">
+                    
+                    {% for quantity in form.items %}
+                        {% set item = quantity.vars.data %}
+                        
+                        {% set products = products|merge([item.package.product]) %}
+                        <li class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 col-sm-4">
+                                    {% if item.package.product.image and item.package.product.image.src|length > 0 %}
+                                        <img src="{{ item.package.product.image.src }}" class="img-fluid">
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 col-sm-4">
+                                    <p class="mb-0 text-muted">{{ item.package.product.company.companyName }}</p>
+                                    <h3>{{ item.package.product.name }}<h3>
+                                </div>
+
+                                <div class="col-md-2 col-sm-2">
+                                    <div class="d-flex">
+                                        {{ form_widget(quantity) }}
+                                        <a class="btn btn-light", href="{{ path('app_cart_remove', {'itemId': item.package.id}) }}">
+                                            {{ ux_icon('line-md:trash', {height: '24px', height: '24px'}) }}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-2">
+                                    <h5 class="mb-0 text-muted text-end">
+                                        {{ (item.package.finalPrice * item.quantity)|number_format(2, ',', ' ') }}
+                                        {{ ux_icon('ic:round-euro-symbol', {width: '14px', height: '14px'}) }}
+                                        {% trans %}ttc{% endtrans %}
+                                    </h5>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <li class="list-group-item">
+                        {{ block('cart_total') }}
+                    </li>
+                </ul>
+                <p class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        {% trans %}Save{% endtrans %}
+                    </button>
+                </p>
+            {{ form_end(form) }}
+        {% endif %}
     </main>
+{% endblock %}
+
+{% block cart_total %}
+    <div class="d-flex justify-content-between align-items-end">
+        <p class="mb-0 text-muted">
+            {% trans %}Total{% endtrans %} :
+        </p>
+        <h3 class="mb-0">
+            {{ cart.total|number_format('2', ',', ' ') }}
+            {{ ux_icon('ic:round-euro-symbol', {width: '20px', height: '20px'}) }}
+            <small>{% trans %}ttc{% endtrans %}</small>
+        </h3>
+    </div>
 {% endblock %}

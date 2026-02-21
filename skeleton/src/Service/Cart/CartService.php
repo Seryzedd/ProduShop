@@ -25,6 +25,8 @@ class CartService
     {
         $id = $package->getId();
 
+        $this->loadFromSession();
+
         if (isset($this->items[$id])) {
             $newQty = $this->items[$id]->getQuantity() + $quantity;
             $this->items[$id]->setQuantity($newQty);
@@ -35,8 +37,22 @@ class CartService
         $this->save();
     }
 
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
     public function remove(int $packageId): void
     {
+        if ($this->items === null) {
+            $this->loadFromSession();
+        }
+
+        if(!array_key_exists($packageId, $this->items)) {
+            throw new \Exception("No item with id '$packageId' in cart");
+            
+        }
+
         unset($this->items[$packageId]);
         $this->save();
     }
@@ -112,6 +128,8 @@ class CartService
     private function loadFromSession(): void
     {
         $data = $this->requestStack->getSession()->get('cart', []);
+
+        $this->items = [];
 
         foreach ($data as $row) {
             $package = $this->packageRepository->find($row['package_id']);
