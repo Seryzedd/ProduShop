@@ -76,6 +76,8 @@ class CartService
 
     public function getItemCount(): int
     {
+        $this->loadFromSession();
+
         return count($this->items);
     }
 

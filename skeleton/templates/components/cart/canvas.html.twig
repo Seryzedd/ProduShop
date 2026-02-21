@@ -1,12 +1,53 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasRightLabel">{% trans %}My cart{% endtrans %}</h5>
+            <h5 class="offcanvas-title text-muted" id="offcanvasRightLabel">{% trans %}My cart{% endtrans %}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             {% if cart.items|length > 0 %}
-                {{ dump(cart.items) }}
+                <ul class="list-group list-group-flush">
+                    {% for item in cart.items %}
+                        <li class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-lg-4">
+                                    {% if item.package.product.image and item.package.product.image.src|length > 0 %}
+                                        <img src="{{ item.package.product.image.src }}" class="img-fluid img-thumbnail">
+                                    {% endif %}
+                                </div>
+                                <div class="col-lg-6">
+                                    <h4 class="text-primary fw-bolder mb-0">{{ item.package.product.name }}</h4>
+                                </div>
+                                <div class="col-lg-2">
+                                    <p class="mb-0 text-end">
+                                        <a class="btn btn-light btn-sm">
+                                            {{ ux_icon('ic:round-delete') }}
+                                        </a>
+                                    </p>
+                                    <p class="text-end fw-bolder mb-0">x{{ item.quantity }}</p>
+                                </div>
+                                <div class="col-lg-12">
+                                    <p class="text-end text-muted mb-0">{{ (item.package.finalPrice * item.quantity)|number_format(2, ',', ' ') }}{{ ux_icon('ic:round-euro-symbol', {width: '16px', height: '16px'}) }} <small>{% trans %}TTC{% endtrans %}</small></p>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-end">
+                            <p class="text-muted mb-0">{% trans %}Total{% endtrans %} :</p>
+
+                            <div class='d-inline-flex align-items-end'>
+                                <h3 class="text-end mb-0">{{ cart.total|number_format(2, ',', ' ') }}{{ ux_icon('ic:round-euro-symbol', {width: '22px', height: '22px'}) }}</h3>
+                                <p class="mb-0">{% trans %}TTC{% endtrans %}</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <p class="text-center mt-4 mb-0">
+                    <a class="btn btn-primary mx-auto" href="{{ path('app_cart') }}">
+                        {% trans %}Validate my cart{% endtrans %}
+                    </a>
+                <p>
             {% else %}
                 <h2 class="text-muted text-center">
                     {{ ux_icon('ic:outline-shopping-cart', {height: '48px', width: '48px'}) }}

@@ -4,8 +4,27 @@
     {% trans %}My cart{% endtrans %}
 {% endblock %}
 
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'My cart',
+            route: 'app_cart',
+            parameters: []
+        },
+    ] %}
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
     <main class="container">
-        {{ dump() }}
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <h3 class="">{{ cart.total|number_format('2', ',', ' ') }}</h3>
+            </li>
+            {% for item in cart.items %}
+                <li class="list-group-item">An item</li>
+            {% endfor %}
+        </ul>
     </main>
 {% endblock %}
