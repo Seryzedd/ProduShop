@@ -114,13 +114,12 @@
     <div class="flex-grow-1">
         <div id="map"></div>
     </div>
-
 </div>
-
 {# ── Données JSON injectées depuis PHP (coordonnées déjà en base) ── #}
 <script>
-
+    
     window._mapData = {
+        radiusKm: {{ radius is defined and radius is not null ? radius|json_encode|raw : 'null' }},
         client: {
             {% if adress and adress.hasCoordinates() %}
             lat: {{ adress.latitude }},
@@ -150,117 +149,125 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    (function () {
-        const data    = window._mapData;
-        const markers = [];
+(function () {
+    const data    = window._mapData;
+    const markers = [];
 
-        // ── Icône produit (SVG inline) ────────────────────────────────
-        const productIcon = L.divIcon({
-            className: '',
-            html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-                    <path d="M14 0C6.27 0 0 6.27 0 14c0 9.625 14 22 14 22S28 23.625 28 14C28 6.27 21.73 0 14 0z"
-                        fill="#212529" stroke="#0d6efd" stroke-width="2"/>
-                    <circle cx="14" cy="14" r="5" fill="#0d6efd"/>
-                </svg>`,
-            iconSize:   [28, 36],
-            iconAnchor: [14, 36],
-            popupAnchor:[0, -38],
-        });
+    // ── Product icon (inline SVG) ─────────────────────────────
+    const productIcon = L.divIcon({
+        className: '',
+        html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+                 <path d="M14 0C6.27 0 0 6.27 0 14c0 9.625 14 22 14 22S28 23.625 28 14C28 6.27 21.73 0 14 0z"
+                       fill="#212529" stroke="#0d6efd" stroke-width="2"/>
+                 <circle cx="14" cy="14" r="5" fill="#0d6efd"/>
+               </svg>`,
+        iconSize:   [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor:[0, -38],
+    });
 
-        // ── Icône client (point pulsant) ─────────────────────────────
-        const clientIcon = L.divIcon({
-            className: '',
-            html: `<div class="user-marker-dot"></div>`,
-            iconSize:   [16, 16],
-            iconAnchor: [8, 8],
-            popupAnchor:[0, -12],
-        });
+    // ── Client icon (pulsing dot) ─────────────────────────────
+    const clientIcon = L.divIcon({
+        className: '',
+        html: `<div class="user-marker-dot"></div>`,
+        iconSize:   [16, 16],
+        iconAnchor: [8, 8],
+        popupAnchor:[0, -12],
+    });
 
-        // ── Initialisation — synchrone, pas d'appel réseau ────────────
-        const map = L.map('map');
+    // ── Map initialisation — synchronous, no network call ────────
+    const map = L.map('map').setView([data.client.lat, data.client.lng], 12);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom:     19,
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom:     19,
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
 
-        const bounds = L.latLngBounds();
+    // ── Client marker ─────────────────────────────────────────
+    if (data.client.lat !== null) {
+        const clientLatLng = [data.client.lat, data.client.lng];
 
-        // Marqueur client
-        if (data.client.lat !== null) {
-            const latlng = [data.client.lat, data.client.lng];
-            L.marker(latlng, { icon: clientIcon })
-                .addTo(map)
-                .bindPopup('<strong>Votre adresse</strong>');
-            bounds.extend(latlng);
-        }
+        L.marker(clientLatLng, { icon: clientIcon })
+            .addTo(map)
+            .bindPopup('<strong>Your address</strong>');
 
-        // Marqueurs produits
-        data.products.forEach((p, i) => {
-            const latlng = [p.lat, p.lng];
-            bounds.extend(latlng);
+        // ── Radius circle centered on the client ──────────────
+        if (data.radiusKm !== null) {
+            const circle = L.circle(clientLatLng, {
+                radius:      data.radiusKm * 1000, // Leaflet expects metres
+                color:       '#a3c8ff',
+                fillColor:   '#84b5ff',
+                fillOpacity: 0.05,
+                weight:      2            // dashed border
+            }).addTo(map);
 
-            const marker = L.marker(latlng, { icon: productIcon })
-                .addTo(map)
-                .bindPopup(buildPopup(p));
-
-            marker.on('click', () => setActive(i));
-            markers.push(marker);
-        });
-
-        // Centrage sur le client, fallback sur l'ensemble des marqueurs, puis sur la France
-        if (data.client.lat !== null) {
-            map.setView([data.client.lat, data.client.lng], 12);
-        } else if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [40, 40] });
+            // Auto-zoom: fit the map to the circle's bounds
+            map.fitBounds(circle.getBounds(), { padding: [20, 20] });
         } else {
-            map.setView([46.603354, 1.888334], 6);
+            // No radius — just center on the client at a neighbourhood zoom
+            map.setView(clientLatLng, 12);
         }
+    } else {
+        // No client coordinates — fallback to France
+        map.setView([46.603354, 1.888334], 6);
+    }
 
-        // ── Popup ─────────────────────────────────────────────────────
-        function buildPopup(p) {
-            return `
-                <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
-                    <p class="mb-0 text-primary small fw-semibold">${esc(p.company)}</p>
-                    <p class="mb-1 fw-bold">${esc(p.name)}</p>
-                    ${p.desc  ? `<p class="mb-1 text-muted small">${esc(p.desc)}</p>` : ''}
-                    ${p.shelf ? `<span class="badge text-bg-secondary">${esc(p.shelf)}</span>` : ''}
-                    <hr class="my-2">
-                    <p class="mb-0 text-muted small">
-                        <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
-                    </p>
-                </div>`;
-        }
+    // ── Product markers ───────────────────────────────────────
+    data.products.forEach((p, i) => {
+        const latlng = [p.lat, p.lng];
 
-        // ── Focus sidebar → carte ─────────────────────────────────────
-        window.mapFocusMarker = function (index) {
-            const marker = markers[index];
-            if (!marker) return;
-            map.setView(marker.getLatLng(), 15, { animate: true });
-            marker.openPopup();
-            setActive(index);
-        };
+        const marker = L.marker(latlng, { icon: productIcon })
+            .addTo(map)
+            .bindPopup(buildPopup(p));
 
-        function setActive(index) {
-            document.querySelectorAll('.map-product-card')
-                .forEach(c => c.classList.remove('bg-primary-subtle'));
-            document.querySelector(`.map-product-card[data-index="${index}"]`)
-                ?.classList.add('bg-primary-subtle');
-        }
+        marker.on('click', () => setActive(i));
+        markers.push(marker);
+    });
 
-        // ── Recherche ─────────────────────────────────────────────────
-        document.getElementById('mapSearchInput').addEventListener('input', function () {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('.map-product-card').forEach(card => {
-                card.style.display =
-                    card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
-            });
+    // ── Popup content ─────────────────────────────────────────
+    function buildPopup(p) {
+        return `
+            <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
+                <p class="mb-0 text-primary small fw-semibold">${esc(p.company)}</p>
+                <p class="mb-1 fw-bold">${esc(p.name)}</p>
+                ${p.desc  ? `<p class="mb-1 text-muted small">${esc(p.desc)}</p>` : ''}
+                ${p.shelf ? `<span class="badge text-bg-secondary">${esc(p.shelf)}</span>` : ''}
+                <hr class="my-2">
+                <p class="mb-0 text-muted small">
+                    <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
+                </p>
+            </div>`;
+    }
+
+    // ── Focus from sidebar → map ──────────────────────────────
+    window.mapFocusMarker = function (index) {
+        const marker = markers[index];
+        if (!marker) return;
+        map.setView(marker.getLatLng(), 15, { animate: true });
+        marker.openPopup();
+        setActive(index);
+    };
+
+    function setActive(index) {
+        document.querySelectorAll('.map-product-card')
+            .forEach(c => c.classList.remove('bg-primary-subtle'));
+        document.querySelector(`.map-product-card[data-index="${index}"]`)
+            ?.classList.add('bg-primary-subtle');
+    }
+
+    // ── Search filter ─────────────────────────────────────────
+    document.getElementById('mapSearchInput').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.map-product-card').forEach(card => {
+            card.style.display =
+                card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
         });
+    });
 
-        function esc(s) {
-            return String(s ?? '')
-                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-        }
-    })();
+    function esc(s) {
+        return String(s ?? '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+})();
 </script>

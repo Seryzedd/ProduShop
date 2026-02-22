@@ -18,6 +18,7 @@
 {% endblock %}
 
 {% block body %}
+    {% set radius = app.request.query.get('radius') ?: 20 %}
     <main class="container">
         <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
         {{ block("radius_form") }}
@@ -38,7 +39,7 @@
             <label for="radius" class="form-label">
                 {% trans %}Distance{% endtrans %}
             </label>
-            <input type="range" name="radius" value="{{ app.request.query.get('radius') ?: 20 }}" class="form-range" min="5" max="100" step="1" id="radius" unit="km">
+            <input type="range" name="radius" value="{{ radius }}" class="form-range" min="5" max="100" step="1" id="radius" unit="km">
             <p class="position-relative"></p>
         </div>
         <button type="submit" class="btn btn-secondary">
@@ -49,6 +50,6 @@
 
 {% block map %}
     <div class="">
-        {% include 'components/map.html.twig' %}
+        {% include 'components/map.html.twig' with {'radius': radius} %}
     </div>
 {% endblock %}
