@@ -22,6 +22,14 @@ doctrine:
                 alias: App
         controller_resolver:
             auto_mapping: false
+        dql:
+            numeric_functions:
+                ASIN:    App\Doctrine\AsinFunction
+                SQRT:    App\Doctrine\SqrtFunction
+                SIN:     App\Doctrine\SinFunction
+                COS:     App\Doctrine\CosFunction
+                RADIANS: App\Doctrine\RadiansFunction
+                POWER:   App\Doctrine\PowerFunction
 
 when@test:
     doctrine:

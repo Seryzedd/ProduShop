@@ -26,50 +26,84 @@
     }
 </style>
 
-<div class="d-flex border rounded overflow-hidden" style="height: 520px;">
+{% set adress = null %}
+
+<div class="d-flex border rounded overflow-hidden" style="max-height: 520px;">
 
     {# ── Sidebar ── #}
-    <div class="d-flex flex-column border-end bg-white" style="width: 280px; flex-shrink: 0;">
+    <div class="d-flex flex-column border-end bg-white" style="width: 50%; flex-shrink: 0;">
 
         <div class="p-2 border-bottom">
+            <div class="d-flex align-items-start my-2">
+
+                {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
+                    <form>
+                        {% for shippingAdress in app.user.shippingAdress %}
+                            <select class="form-select" aria-label="Default select example">
+                                <option value="{{ adress.id }}">
+                                    {{ adress.street }}<br>
+                                    {{ adress.zipCode }} {{ adress.country }}
+                                </option>
+                            </select>
+
+                            {% set adress = shippingAdress %}
+                        {% endfor %}
+                    </form>
+                {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
+                    {% set adress = app.user.adress %}
+                    <p class="me-2">
+                        {% trans %}My adress{% endtrans %} :
+                    </p>
+                    <p class="text-muted">
+                        {{ adress.street }}<br>
+                        {{ adress.zipCode }} {{ adress.country }}
+                    </p>
+                {% endif %}
+            </div>
+
             <input type="search" id="mapSearchInput" class="form-control form-control-sm"
                    placeholder="Rechercher…">
         </div>
-
+        {% set companies = [] %}
         <div class="map-sidebar-list flex-grow-1">
             {% if products is empty %}
-                <p class="text-muted text-center small py-4">Aucun produit disponible</p>
+                <p class="text-muted text-center small py-4">
+                    {% trans %}No product available{% endtrans %}
+                </p>
             {% else %}
                 {% for product in products %}
-                <div class="p-2 border-bottom map-product-card"
-                     role="button"
-                     data-index="{{ loop.index0 }}"
-                     data-name="{{ product.name|lower }}"
-                     data-company="{{ product.company.companyName|lower }}"
-                     onclick="mapFocusMarker({{ loop.index0 }})"
-                     onmouseover="this.classList.add('bg-light')"
-                     onmouseout="this.classList.remove('bg-light')"
-                     style="cursor:pointer;"
-                >
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1 me-1 overflow-hidden">
-                            <p class="text-primary mb-1">{{ product.company.companyName }}</p>
-                        </div>
-                        {% if product.shelf is defined and product.shelf %}
-                            <span class="badge text-bg-light flex-shrink-0" style="font-size:.65rem;">
-                                {{ product.shelf.name ?? 'Rayon' }}
-                            </span>
-                        {% endif %}
-                    </div>
-                    {% if product.company.adress is defined and product.company.adress %}
-                        <p class="mb-0 text-muted" style="font-size:.68rem;">
-                            {{ ux_icon('ic:baseline-location-on') }}
+                    {% if product.company not in companies %}
+                        {% set companies = companies|merge([product.company]) %}
+                        <div class="p-2 border-bottom map-product-card"
+                            role="button"
+                            data-index="{{ loop.index0 }}"
+                            data-name="{{ product.name|lower }}"
+                            data-company="{{ product.company.companyName|lower }}"
+                            onclick="mapFocusMarker({{ loop.index0 }})"
+                            onmouseover="this.classList.add('bg-light')"
+                            onmouseout="this.classList.remove('bg-light')"
+                            style="cursor:pointer;"
+                        >
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1 me-1 overflow-hidden">
+                                    <p class="text-primary mb-1">{{ product.company.companyName }}</p>
+                                </div>
+                                {% if product.shelf is defined and product.shelf %}
+                                    <span class="badge text-bg-light flex-shrink-0" style="font-size:.65rem;">
+                                        {{ product.shelf.name ?? 'Rayon' }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            {% if product.company.adress is defined and product.company.adress %}
+                                <p class="mb-0 text-muted" style="font-size:.68rem;">
+                                    {{ ux_icon('ic:baseline-location-on') }}
 
-                            {{ product.company.adress.street }}
-                            {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
-                        </p>
+                                    {{ product.company.adress.street }}
+                                    {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
+                                </p>
+                            {% endif %}
+                        </div>
                     {% endif %}
-                </div>
                 {% endfor %}
             {% endif %}
         </div>
@@ -85,19 +119,12 @@
 
 {# ── Données JSON injectées depuis PHP (coordonnées déjà en base) ── #}
 <script>
-    {% set adress = null %}
-    {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
-        {% set adress = app.user.shippingAdress %}
-    {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
-        {% set adress = app.user.adress %}
-    {% endif %}
 
     window._mapData = {
         client: {
-            {% set clientAddr = adress %}
-            {% if clientAddr and clientAddr.hasCoordinates() %}
-            lat: {{ clientAddr.latitude }},
-            lng: {{ clientAddr.longitude }}
+            {% if adress and adress.hasCoordinates() %}
+            lat: {{ adress.latitude }},
+            lng: {{ adress.longitude }}
             {% else %}
             lat: null,
             lng: null
@@ -105,15 +132,11 @@
         },
 
         products: [
-            {% for product in products %}
-            {% set addr = product.company.adress %}
+            {% for company in companies %}
+                {% set addr = company.adress %}
             {% if addr and addr.hasCoordinates() %}
             {
-                id:      {{ product.id }},
-                name:    {{ product.name|json_encode|raw }},
-                desc:    {{ (product.description ?? '')|json_encode|raw }},
-                company: {{ (product.company.companyName ?? '')|json_encode|raw }},
-                shelf:   {{ (product.shelf.name ?? '')|json_encode|raw }},
+                company: {{ (company.companyName ?? '')|json_encode|raw }},
                 lat:     {{ addr.latitude }},
                 lng:     {{ addr.longitude }},
                 address: {{ (addr.street ~ ', ' ~ addr.zipCode ~ ' ' ~ addr.country)|json_encode|raw }}

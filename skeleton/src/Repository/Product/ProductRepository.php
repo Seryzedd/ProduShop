@@ -5,6 +5,7 @@ namespace App\Repository\Product;
 use App\Entity\Product\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User\PostalAdress\Adress;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -34,6 +35,80 @@ class ProductRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    /**
+     * Returns products whose producer is located within $radiusKm
+     * kilometres of the logged-in client.
+     *
+     * Requires that Client->shippingAdress and Professional->adress
+     * both have their coordinates (lat/lng) stored in the database.
+     *
+     * Haversine formula:
+     *   d = 2R × arcsin(√( sin²(Δlat/2) + cos(lat1)·cos(lat2)·sin²(Δlng/2) ))
+     * where R = 6371 km (mean Earth radius)
+     *
+     * @return Product[]
+     */
+    public function findWithinRadius(
+        Adress $adress,
+        ?float $radiusKm = 20,
+        ?string  $shelfName  = null,
+    ): array {
+        $latitude = $adress->getLatitude();
+        $longitude = $adress->getLongitude();
+        // Haversine formula expressed in native SQL.
+        // Doctrine does not natively support SIN/COS/ASIN/SQRT in pure DQL,
+        // so we use a native SQL query which remains portable across MySQL/PostgreSQL.
+        $qb = $this->createQueryBuilder('p')
+            ->addSelect('company', 'addr', 'shelf', 'image')
+            ->join('p.company',      'company')
+            ->join('company.adress', 'addr')
+            ->leftJoin('p.shelf',    'shelf')
+            ->leftJoin('p.image',    'image')
+            // Only consider addresses with stored coordinates
+            ->where('addr.latitude  IS NOT NULL')
+            ->andWhere('addr.longitude IS NOT NULL')
+            // Haversine distance filter — all math functions are native DQL
+            ->andWhere('
+                (6371 * 2 * ASIN(SQRT(
+                    POWER(SIN(RADIANS(addr.latitude  - :lat) / 2), 2)
+                    + COS(RADIANS(:lat)) * COS(RADIANS(addr.latitude))
+                    * POWER(SIN(RADIANS(addr.longitude - :lng) / 2), 2)
+                ))) <= :radius
+            ')
+            ->setParameter('lat',    $latitude)
+            ->setParameter('lng',    $longitude)
+            ->setParameter('radius', $radiusKm);
+
+        // Optional shelf name filter — case-insensitive partial match
+        if ($shelfName !== null) {
+            $qb->andWhere('LOWER(shelf.name) LIKE LOWER(:shelfName)')
+               ->setParameter('shelfName', '%' . $shelfName . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+
+        // Reload full entities via Doctrine with all relations
+        return $query->getResult();
+    }
+
+    /**
+     * Fallback: returns all products with their relations (no distance filter).
+     *
+     * @return Product[]
+     */
+    public function findAllWithCompanyAndAddress(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->addSelect('company', 'addr', 'shelf', 'image')
+            ->leftJoin('p.company', 'company')
+            ->leftJoin('company.adress', 'addr')
+            ->leftJoin('p.shelf', 'shelf')
+            ->leftJoin('p.image', 'image')
+            ->where('company.adress IS NOT NULL')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

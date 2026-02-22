@@ -20,10 +20,35 @@
 {% block body %}
     <main class="container">
         <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
+        {{ block("radius_form") }}
+
+        {{ block('map') }}
+
         <div class="card-group row-cols-1 row-cols-lg-6">
             {% for product in products %}
                 {% include 'product/product/card.html.twig' %}
             {% endfor %}
         </div>
     </main>
+{% endblock %}
+
+{% block radius_form %}
+    <form methode="GET" class="d-flex align-items-center">
+        <div class="col px-2">
+            <label for="radius" class="form-label">
+                {% trans %}Distance{% endtrans %}
+            </label>
+            <input type="range" name="radius" value="{{ app.request.query.get('radius') ?: 20 }}" class="form-range" min="5" max="100" step="1" id="radius" unit="km">
+            <p class="position-relative"></p>
+        </div>
+        <button type="submit" class="btn btn-secondary">
+            {{ ux_icon('ic:outline-send') }}
+        </button>
+    </form>
+{% endblock %}
+
+{% block map %}
+    <div class="">
+        {% include 'components/map.html.twig' %}
+    </div>
 {% endblock %}

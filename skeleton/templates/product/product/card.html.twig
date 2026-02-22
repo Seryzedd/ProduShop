@@ -13,8 +13,8 @@
     {% if product.slider and product.slider.items|length > 0 %}
         <div class="row no-gutters">
             <div class="col-4 col-lg-3">
-                    <img class="img-thumbnail img-miniature" src="{{ product.image.src }}">
-                </div>
+                <img class="img-thumbnail img-miniature" src="{{ product.image.src }}">
+            </div>
             {% for item in product.slider.items %}
                 <div class="col-4 col-lg-3">
                     <img class="img-thumbnail img-miniature" src="{{ item.image.src}}">
@@ -24,6 +24,7 @@
     {% endif %}
     
     <div class="card-body position-relative">
+        <p class="text-end"><small class="text-muted text-end fst-italic">{{ product.shelf.name }}</small></p>
         <h5 class="card-title">{{ product.name }}</h5>
         <p class="card-text text-muted">{{ product.description }}</p>
         <p>

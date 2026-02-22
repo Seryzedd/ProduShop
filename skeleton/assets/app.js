@@ -116,3 +116,45 @@ $('.alert .btn-close').on('click', function() {
       $(this).closest('.alert').remove();
     }, 1000);
 });
+
+$('input[type="range"]').on('input', function() {
+    showRangeValue(this);
+})
+
+$(document).ready(function () {
+    $('input[type="range"]').each(function() {
+        showRangeValue(this);
+    })
+
+    $('.spinner').hide();
+    
+})
+
+function showRangeValue(element) {
+    var span = document.createElement('span');
+    $(span).addClass(['rounded-pill', 'text-bg-primary', 'px-2', 'py-1', 'position-absolute','text-white', 'z-3']);
+
+    var next = $(element).next('p');
+
+    var min = $(element).attr('min');
+    var max = $(element).attr('max');
+
+    if(typeof min === "undefined") {
+        min = 0;
+    }
+
+    if(typeof max === "undefined") {
+        max = 0;
+    }
+
+    span.innerText = $(element).val() + $(element).attr('unit');
+
+    span.style.left = percentage($(element).val(), min, max) + '%';
+    span.style.transform = 'translateX(-50%)';
+    
+    next.html(span);
+}
+
+function percentage(value, min, max) {
+    return Number(((value - min) * 100) / (max - min));
+}
