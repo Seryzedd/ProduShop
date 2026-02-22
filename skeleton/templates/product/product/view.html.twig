@@ -5,13 +5,17 @@
 {% endblock %}
 
 {% block breadcrumb %}
-
     {% set breadcrumb = [
         {
             label: 'Shelf "%shelf%" products'|trans({'%shelf%': package.product.shelf.name}),
             route: 'app_shelf_product',
             parameters: {'shelf': package.product.shelf.name}
         },
+        {
+            label: '"%name%" details'|trans({'%name%': package.product.name}),
+            route: 'app_view_product',
+            parameters: {'id': package.id}
+        }
     ] %}
 
     {{ parent() }}
@@ -21,7 +25,6 @@
     {% set product = package.product %}
     <main class="container">
         <div class="row">
-            <div class="col-12"><h1>{{ product.name }}</h1></div>
             <div class="col-lg-8">
                 {% if product.image.src|length > 0 %}
                     <img class="img-fluid" src="{{ product.image.src }}">
@@ -39,6 +42,7 @@
             </div>
             
             <div class="col-lg-4">
+                <h1>{{ product.name }}</h1>
                 <p class="text-muted">{{ product.description }}</p>
                 <div class="border-top"></div>
                 <div class="d-flex justify-content-between">
@@ -67,5 +71,10 @@
                 
             </div>
         </div>
+        <h3 class="text-muted py-4">
+            {{ ux_icon('ic:outline-map', {height: '30px', width: '30px'}) }}
+            {% trans with {'%merchant%': product.company.companyName} %}Where can I find this %merchant%{% endtrans %}
+        </h3>
+        {% include 'components/map.html.twig' with {'products': [product]} %}
     </main>
 {% endblock %}

@@ -49,23 +49,25 @@
                      onclick="mapFocusMarker({{ loop.index0 }})"
                      onmouseover="this.classList.add('bg-light')"
                      onmouseout="this.classList.remove('bg-light')"
-                     style="cursor:pointer;">
+                     style="cursor:pointer;"
+                >
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1 me-1 overflow-hidden">
-                            <p class="mb-0 fw-semibold small text-truncate">{{ product.name }}</p>
-                            <small class="text-primary">{{ product.company.companyName }}</small>
+                            <p class="text-primary mb-1">{{ product.company.companyName }}</p>
                         </div>
                         {% if product.shelf is defined and product.shelf %}
-                        <span class="badge text-bg-secondary flex-shrink-0" style="font-size:.65rem;">
-                            {{ product.shelf.name ?? 'Rayon' }}
-                        </span>
+                            <span class="badge text-bg-light flex-shrink-0" style="font-size:.65rem;">
+                                {{ product.shelf.name ?? 'Rayon' }}
+                            </span>
                         {% endif %}
                     </div>
                     {% if product.company.adress is defined and product.company.adress %}
-                    <p class="mb-0 text-muted" style="font-size:.68rem;">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
-                    </p>
+                        <p class="mb-0 text-muted" style="font-size:.68rem;">
+                            {{ ux_icon('ic:baseline-location-on') }}
+
+                            {{ product.company.adress.street }}
+                            {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
+                        </p>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -83,11 +85,16 @@
 
 {# ── Données JSON injectées depuis PHP (coordonnées déjà en base) ── #}
 <script>
-    window._mapData = {
+    {% set adress = null %}
+    {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
+        {% set adress = app.user.shippingAdress %}
+    {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
+        {% set adress = app.user.adress %}
+    {% endif %}
 
+    window._mapData = {
         client: {
-            {% set clientAddr = app.user is not null and app.user.shippingAdress is not empty
-                ? app.user.shippingAdress.first : null %}
+            {% set clientAddr = adress %}
             {% if clientAddr and clientAddr.hasCoordinates() %}
             lat: {{ clientAddr.latitude }},
             lng: {{ clientAddr.longitude }}
