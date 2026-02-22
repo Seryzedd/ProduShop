@@ -1,6 +1,9 @@
 <div class="card" style="min-width: 290px;">
+
     {% if product.image.src|length > 0 %}
-        <img src="{{ product.image.src }}" class="card-img-top" alt="{{ product.image.name }}">
+        <a href="{{ path('app_view_product', {id: product.packages|first.id}) }}" style="overflow: hidden;">
+            <img src="{{ product.image.src }}" class="card-img-top" id="main-img-preview" alt="{{ product.image.name }}">
+        </a>
     {% else %}
         <div class="d-flex align-items-center bg-light p-4 justify-content-center">
             {{ ux_icon('line-md:image', {width: '30px', height: '30px'}) }}
@@ -9,17 +12,25 @@
 
     {% if product.slider and product.slider.items|length > 0 %}
         <div class="row no-gutters">
+            <div class="col-4 col-lg-3">
+                    <img class="img-thumbnail img-miniature" src="{{ product.image.src }}">
+                </div>
             {% for item in product.slider.items %}
                 <div class="col-4 col-lg-3">
-                    <img class="img-thumbnail" src="{{ item.image.src}}">
+                    <img class="img-thumbnail img-miniature" src="{{ item.image.src}}">
                 </div>
             {% endfor %}
         </div>
     {% endif %}
     
-    <div class="card-body">
+    <div class="card-body position-relative">
         <h5 class="card-title">{{ product.name }}</h5>
         <p class="card-text text-muted">{{ product.description }}</p>
+        <p>
+            <a href="{{ path('app_view_product', {id: product.packages|first.id}) }}" class="stretched-link link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                {% trans %}See more{% endtrans %}
+            </a>
+        </p>
     </div>
 
     <div class="card-footer">

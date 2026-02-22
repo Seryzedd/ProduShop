@@ -39,6 +39,8 @@ class CartService
 
     public function isEmpty(): bool
     {
+        $this->load();
+
         return empty($this->items);
     }
 
@@ -113,6 +115,13 @@ class CartService
             if (!$item->isAvailable()) return true;
         }
         return false;
+    }
+
+    function load(): void
+    {
+        if ($this->items === null) {
+            $this->loadFromSession();
+        }
     }
 
     // -------------------------------------------------------------------------

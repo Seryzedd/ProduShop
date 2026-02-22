@@ -105,6 +105,10 @@ if(inputStreet) {
   }));
 }
 
+$('.img-miniature').on('click', function() {
+    $('#main-img-preview').attr('src', $(this).attr('src'));
+})
+
 $('.alert .btn-close').on('click', function() {
     $(this).closest('.alert').slideUp();
 
