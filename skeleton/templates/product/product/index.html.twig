@@ -25,11 +25,13 @@
 
         {{ block('map') }}
 
-        <div class="card-group row-cols-1 row-cols-lg-6">
-            {% for product in products %}
-                {% include 'product/product/card.html.twig' %}
-            {% endfor %}
-        </div>
+        {% block product_list %}
+            <div class="card-group row-cols-1 row-cols-lg-6">
+                {% for product in products %}
+                    {% include 'product/product/card.html.twig' %}
+                {% endfor %}
+            </div>
+        {% endblock %}
     </main>
 {% endblock %}
 

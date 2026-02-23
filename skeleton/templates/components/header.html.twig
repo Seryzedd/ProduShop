@@ -14,6 +14,13 @@
                             {{ ux_icon('ic:twotone-admin-panel-settings', {width: '24px', height: '24px'}) }}
                         </button>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_companies') }}" title="{% trans %}Companies{% endtrans %}">
+                            {% trans %}Companies{% endtrans %}
+                        </a>
+                    </li>
+
                     {% if shelvesEntities|length > 0 %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

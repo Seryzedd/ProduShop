@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Merchants{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Merchant list',
+            route: 'app_companies',
+        },
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container pb-4">
+        <h1>{% trans %}Merchants{% endtrans %}</h1>
+
+        {% if app.user %}
+            {{ block('radius_form', 'product/product/index.html.twig') }}
+        {% endif %}
+
+        {% include 'components/map.html.twig' with {'radius': radius} %}
+    </main>
+{% endblock %}

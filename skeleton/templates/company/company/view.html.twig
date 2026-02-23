@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'Merchant list',
+            route: 'app_companies',
+        },
+        {
+            label: 'Merchant %name%'|trans({'%name%': professional.companyName}),
+            route: 'app_company',
+            parameters: {id: professional.id}
+        },
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1>{% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}</h1>
+
+        {{ block('radius_form', 'product/product/index.html.twig') }}
+
+        {% include 'components/map.html.twig' with {'radius': radius} %}
+
+        <h3 class="text-primary mt-3">{% trans with {'%professional%': professional.companyName} %}Products of %professional%{% endtrans %}</h3>
+
+        {{ block('product_list', 'product/product/index.html.twig') }}
+    </main>
+{% endblock %}

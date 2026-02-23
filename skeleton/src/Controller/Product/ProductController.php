@@ -23,12 +23,21 @@ final class ProductController extends AbstractController
         $adress = $this->getAdress();
 
         $radius = $request->query->get('radius') ?? 20;
-
-        if($shelf === "All") {
-            $products = $productRepository->findWithinRadius($adress, $radius);
+        if($adress) {
+            if($shelf === "All") {
+                $products = $productRepository->findWithinRadius($adress, $radius);
+            } else {
+                $products = $productRepository->findWithinRadius($adress, $radius, $shelf);
+            }
         } else {
-            $products = $productRepository->findWithinRadius($adress, $radius, $shelf);
+            if($shelf === "All") {
+                $products = $productRepository->findAll();
+            } else {
+                $products = $productRepository->findByShelf($shelf);
+            }
         }
+        
+
         return $this->render('product/product/index.html.twig', [
             'products' => $products,
             'shelf' => $shelf
@@ -43,14 +52,14 @@ final class ProductController extends AbstractController
         ]);
     }
 
-    private function getAdress(): Adress
+    private function getAdress(): ?Adress
     {
         $user = $this->getUser();
 
-        if($user instanceof Client) {
-            return current($user->getShippingAdress());
-        } elseif ($user instanceof Professional) {
-            return $user->getAdress();
+        if($user) {
+            return $user->getPostalAdress();
         }
+
+        return null;
     }
 }

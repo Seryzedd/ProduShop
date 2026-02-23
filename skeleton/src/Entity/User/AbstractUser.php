@@ -10,6 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use App\Entity\User\Client;
 use App\Entity\User\Professional;
 use App\Validator\EmailFormat;
+use App\Entity\User\PostalAdress\Adress;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -144,5 +145,14 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
         $this->isVerified = $isVerified;
 
         return $this;
+    }
+
+    public function getPostalAdress(): ?Adress
+    {
+        if($this instanceof Client) {
+            return $this->getShippingAdress()->first();
+        } elseif ($this instanceof Professional) {
+            return $this->getAdress();
+        }
     }
 }
