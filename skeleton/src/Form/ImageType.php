@@ -30,6 +30,9 @@ class ImageType extends AbstractType
                     'accept' => 'image/*',
                     'class' => 'd-none'
                 ],
+                'label_attr' => [
+                    'class' => 'image-form'
+                ],
                 'constraints' => [
                     new File(
                         mimeTypes: ['image/*'],

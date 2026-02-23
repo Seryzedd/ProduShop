@@ -29,8 +29,6 @@ function addFormToCollection(e) {
     collectionHolder.dataset.index++;
 };
 
-addImgLabel();
-
 document
   .querySelectorAll('.add_collection_item_btn')
   .forEach(btn => {

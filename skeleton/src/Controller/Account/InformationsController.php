@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\User\AdressType;
 use App\Entity\User\PostalAdress\Adress;
+use App\Form\User\ProfessionalType;
 
 #[Route('/account')]
 final class InformationsController extends AbstractController
@@ -17,6 +18,28 @@ final class InformationsController extends AbstractController
     public function index(): Response
     {
         return $this->render('account/informations/index.html.twig', []);
+    }
+
+    #[Route('/update', name: 'app_account_update')]
+    public function UpdateInformations(Request $request, EntityManagerInterface $entityManager)
+    {
+        $form = $this->createForm(ProfessionalType::class, $this->getUser());
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            
+            $entityManager->persist($this->getUser());
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Your account is updated.');
+
+            return $this->redirectToRoute('app_account_informations');
+        }
+
+        return $this->render('account/informations/update.html.twig', [
+            'form' => $form
+        ]);
     }
 
     #[Route('/adress', name: 'app_account_adress')]

@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\Picture;
 use App\Entity\Product\Product;
 use App\Entity\User\PostalAdress\Adress;
 use App\Repository\User\ProfessionalRepository;
@@ -28,6 +29,9 @@ class Professional extends AbstractUser
      */
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'company', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $products;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Picture $logo = null;
 
     public function __construct()
     {
@@ -100,6 +104,18 @@ class Professional extends AbstractUser
                 $product->setCompany(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLogo(): ?Picture
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?Picture $logo): static
+    {
+        $this->logo = $logo;
 
         return $this;
     }

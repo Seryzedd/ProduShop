@@ -31,9 +31,14 @@
 {% endblock %}
 
 {% block base_details %}
-    <div class="border sticky-top p-4">
+    <div class="border sticky-top z-1 p-4">
         <h2 class="text-center">
-            {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
+            {% if app.user.logo and app.user.logo.src|length %}
+                <img src="{{ app.user.logo.src }}" class="img-fluid img-thumbnail" style="max-width: 100px;">
+            {% else %}
+                {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
+            {% endif %}
+            <br>
 
             {% if is_granted('ROLE_SELLER') %}
                 {{ app.user.companyName}}
@@ -54,6 +59,9 @@
         {% endif %}
 
         <ul class="nav flex-column">
+            <li class="nav-item text-end">
+                <a class="nav-link" href="{{ path('app_account_update') }}">{% trans %}Change my informations{% endtrans %}</a>
+            </li>
             <li class="nav-item text-end">
                 <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
             </li>

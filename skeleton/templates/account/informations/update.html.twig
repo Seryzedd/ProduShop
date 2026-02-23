@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Updating my account{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations'
+        },
+        {
+            label: 'Update',
+            route: 'app_account_update'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class='row'>
+            <div class="col-lg-4">
+                {{ block('base_details', 'account/informations/index.html.twig') }}
+            </div>
+
+            <div class="col-lg-8">
+                <h1 class="text-end text-secondary">{% trans %}Updating my account{% endtrans %}</h1>
+
+                {{ form_start(form) }}
+                    {{ form_row(form.logo) }}
+                    {{ form_row(form.companyName) }}
+                    {{ form_row(form.email) }}
+
+                    {{ form_label(form.siret) }}
+                    <div class="input-group">
+                        {{ form_widget(form.siret) }}
+                    </div>
+                    {{ form_help(form.siret) }}
+
+                    <button class="btn btn-primary mt-4 mb-4">
+                        {% trans %}Save{% endtrans %}
+                    </button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+{% endblock %}
