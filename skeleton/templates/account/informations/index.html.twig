@@ -34,7 +34,7 @@
     <div class="border sticky-top z-1 p-4">
         <h2 class="text-center">
             {% if app.user.logo and app.user.logo.src|length %}
-                <img src="{{ app.user.logo.src }}" class="img-fluid img-thumbnail" style="max-width: 100px;">
+                <img src="{{ app.user.logo.src }}" class="img-fluid" style="max-width: 100px;">
             {% else %}
                 {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
             {% endif %}

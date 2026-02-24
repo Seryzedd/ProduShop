@@ -215,6 +215,24 @@ input[type="checkbox"]:checked + label:hover::after {
     background-color: darken($success, 10%);
 }
 
+.form-label[data-current-image] {
+    border: solid 1px lighten($dark, 30%);
+    padding: 0.5rem;
+    color : lighten($dark, 10%);
+}
+
+.form-label[data-current-image]:hover, .drag-over {
+    border: solid 1px $dark;
+    background-color: $light;
+}
+
+.form-label[data-current-image]::after {
+    content: "upload";
+    font-family: 'Material Icons';
+    font-size: 24px;
+    color: $dark;
+}
+
 .validate-btn::after {
     content: "done";
     font-family: 'Material Icons';

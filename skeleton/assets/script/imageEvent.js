@@ -1,6 +1,5 @@
 var addimgEvents = function() {
     var inputs = document.querySelectorAll('input[type="file"]');
-    console.log(inputs);
     inputs.forEach(input => {
         addImgEvent(input);
     });
@@ -31,7 +30,7 @@ function addImgEvent(input) {
                 return;
             }
 
-            previewContainer.classList.add('d-flex', 'flex-wrap', 'align-items-center', 'gap-2');
+            previewContainer.classList.add('d-flex', 'flex-wrap', 'align-items-center', 'gap-2', 'justify-content-around', 'rounded');
 
             const existingImg = previewContainer.querySelector('img');
             if (existingImg) {
@@ -45,11 +44,47 @@ function addImgEvent(input) {
     });
 }
 
+var labels = document.querySelectorAll('label[data-current-image]');
+
+labels.forEach(label => {
+    label.addEventListener("dragover", (event) => {
+        // empêche le comportement par défaut pour autoriser le drop
+        event.preventDefault();
+    });
+
+    label.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        label.classList.add("drag-over"); // pour du style CSS si besoin
+    });
+
+    label.addEventListener("dragleave", () => {
+        label.classList.remove("drag-over");
+    });
+
+    label.addEventListener('drop', function (event) {
+        event.preventDefault();
+
+        var input = document.getElementById(label.getAttribute('for'));
+
+        if (!input || input.type !== 'file') return;
+
+            // Injecte les fichiers droppés dans l'input
+            const dataTransfer = new DataTransfer();
+            Array.from(event.dataTransfer.files)
+                .filter(file => file.type.startsWith("image/"))
+                .forEach(file => dataTransfer.items.add(file))
+            ;
+
+            input.files = dataTransfer.files;
+            input.dispatchEvent(new Event("change"));
+    })
+});
+
 var addImgLabel = function() {
     
     document.querySelectorAll('label[for$="_file"][data-current-image]').forEach(label => {
         var img = createImg(label.dataset.currentImage);
-        label.classList.add('d-flex', 'flex-wrap', 'align-items-center', 'gap-2');
+        label.classList.add('d-flex', 'flex-wrap', 'align-items-center', 'gap-2', 'justify-content-around', 'rounded');
         label.prepend(img);
     });
 };

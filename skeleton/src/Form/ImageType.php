@@ -30,6 +30,7 @@ class ImageType extends AbstractType
                     'accept' => 'image/*',
                     'class' => 'd-none'
                 ],
+                'help' => 'Upload image file type',
                 'label_attr' => [
                     'class' => 'image-form'
                 ],
@@ -53,7 +54,7 @@ class ImageType extends AbstractType
                 $form->add('file', FileType::class, [
                     'label' => $picture ? $picture->getName() : 'New image',
                     'label_attr' => [
-                        'data-current-image' => $picture ? $picture->getSrc() : '',
+                        'data-current-image' => $picture ? $picture->getSrc() : ''
                     ],
                     'attr' => [
                         'accept' => 'image/*',
