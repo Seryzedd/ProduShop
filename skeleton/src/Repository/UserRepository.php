@@ -8,6 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use App\Entity\User as userContainer;
 
 /**
  * @extends ServiceEntityRepository<AbstractUser>
@@ -31,6 +32,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    public function findAllByType(string $order = 'ASC'): array
+    {
+        return $this->getEntityManager()
+        ->createQuery('
+            SELECT u,
+                CASE
+                    WHEN u INSTANCE OF ' . userContainer\Client::class . ' THEN 1
+                    WHEN u INSTANCE OF ' . userContainer\Professional::class . ' THEN 2
+                    ELSE 3
+                END AS HIDDEN sort_order
+            FROM ' . AbstractUser::class . ' u
+            ORDER BY sort_order ' . $order . '
+        ')
+        ->getResult();
     }
 
     //    /**

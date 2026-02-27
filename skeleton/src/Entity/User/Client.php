@@ -43,6 +43,11 @@ class Client extends AbstractUser
         return $this->gender;
     }
 
+    public function getCleanGender(): string
+    {
+        return array_search($this->gender, $this::__GENDER);
+    }
+
     public function setGender(string $gender): static
     {
         $this->gender = $gender;

@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Users list{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'users',
+            route: 'app_admin_users'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1>{% trans %}Users list{% endtrans %}</h1>
+        
+        <ul class="list-group">
+            {{ block('list_title') }}
+            {% for user in users %}
+                <li class="list-group-item border-top">
+                    <div class="row">
+                        <div class="col-md-4 col-6">
+                            <a href="" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                                {{ user.email }}
+                            </a>
+                        </div>
+
+                        <div class="col-md-4 col-6">
+                            <p class="mb-0">
+                                {% if user|instanceOf('App\\Entity\\User\\Client') %}
+                                    {{ user.cleanGender }} {{ user.firstname }} {{ user.lastname }}
+                                {% elseif user|instanceOf('App\\Entity\\User\\Professional') %}
+                                    {{ user.companyName }}
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="col-md-2 col-6">
+                            {% if user|instanceOf('App\\Entity\\User\\Client') %}
+                                <p class="text-muted mb-0">{% trans %}Client{% endtrans %}</p>
+                            {% elseif user|instanceOf('App\\Entity\\User\\Professional') %}
+                                <p class="text-muted mb-0">{% trans  %}Professional{% endtrans %}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-2 col-6">
+                            <p class="{{ user.verified ? 'text-success' : 'text-danger' }} mb-0 text-end">{{ user.verified ? 'Yes'|trans : 'No'|trans }}</p>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}
+
+{% block list_title %}
+    {% set class = 'mb-0 fw-bold' %}
+    <li class="list-group-item d-none d-md-block">
+        <div class="row">
+            <div class="col-md-4">
+                <p class="{{ class }}">
+                    {% trans %}Email{% endtrans %}
+                </p>
+            </div>
+
+            <div class="col-md-4">
+                <p class="{{ class }}">
+                    {% trans %}Name{% endtrans %}
+                </p>
+            </div>
+
+            <div class="col-md-2">
+                <p class="{{ class }}">
+                    {% trans %}Type{% endtrans %}
+                </p>
+            </div>
+            
+            <div class="col-md-2">
+                <p class="{{ class }} text-end">
+                    {% trans %}Verified{% endtrans %}
+                </p>
+            </div>
+        </div>
+    </li>
+{% endblock %}
