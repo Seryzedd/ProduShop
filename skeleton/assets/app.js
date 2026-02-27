@@ -9,9 +9,11 @@ import $ from 'jquery';
 import 'bootstrap';
 
 import './styles/app.css';
-import './styles/app.scss';
+// import './styles/app.scss';
 
 import { LuhnCheck } from './luhn.js';
+
+import './script/async-search.js';
 
 // Validation du Siret
 
@@ -158,3 +160,8 @@ function showRangeValue(element) {
 function percentage(value, min, max) {
     return Number(((value - min) * 100) / (max - min));
 }
+
+// Fetch searching async
+$('input#app_async').on('input', function () {
+    
+})

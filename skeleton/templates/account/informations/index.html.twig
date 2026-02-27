@@ -32,26 +32,6 @@
 
 {% block base_details %}
     <div class="border sticky-top z-1 p-4">
-        <h2 class="text-center">
-            {% if app.user.logo and app.user.logo.src|length %}
-                <img src="{{ app.user.logo.src }}" class="img-fluid" style="max-width: 100px;">
-            {% else %}
-                {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
-            {% endif %}
-            <br>
-
-            {% if is_granted('ROLE_SELLER') %}
-                {{ app.user.companyName}}
-            {% elseif is_granted('ROLE_USER') %}
-                {{ app.user.gender }} {{ app.user.firstName }} {{ app.user.lastName }}
-            {% endif %}
-        </h2>
-
-        <p class=""><strong class="me-2">{% trans %}Email{% endtrans %} :</strong>{{ app.user.email }}</p>
-        {% if is_granted('ROLE_SELLER') %}
-            <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ app.user.siret }}</p>
-        {% endif %}
-
         {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
             {{ block('user_details') }}
         {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
@@ -78,6 +58,12 @@
 {% endblock %}
 
 {% block user_details %}
+    <h2 class="text-center">
+        {{ app.user.gender }} {{ app.user.firstName }} {{ app.user.lastName }}
+    </h2>
+
+    <p class=""><strong class="me-2">{% trans %}Email{% endtrans %} :</strong>{{ app.user.email }}</p>
+    
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
             <strong>{% trans %}Postale adress{% endtrans %}</strong>
@@ -99,6 +85,16 @@
 {% endblock %}
 
 {% block professional_details %}
+    {% if app.user.logo and app.user.logo.src|length %}
+        <img src="{{ app.user.logo.src }}" class="img-fluid" style="max-width: 100px;">
+    {% else %}
+        {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
+    {% endif %}
+
+    <h3>{{ app.user.companyName}}</h3>
+
+    <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ app.user.siret }}</p>
+
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
             <strong>{% trans %}Postale adress{% endtrans %}</strong>

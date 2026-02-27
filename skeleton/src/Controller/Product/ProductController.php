@@ -52,6 +52,12 @@ final class ProductController extends AbstractController
         ]);
     }
 
+    #[Route('/show/{id}', name: 'app_show_product')]
+    public function productView(Product\Product $product)
+    {
+        return $this->redirectToRoute('app_view_product', ['id' => $product->getPackages()->first()]);
+    }
+
     private function getAdress(): ?Adress
     {
         $user = $this->getUser();

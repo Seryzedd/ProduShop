@@ -149,10 +149,15 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
 
     public function getPostalAdress(): ?Adress
     {
+        
         if($this instanceof Client) {
-            return $this->getShippingAdress()->first();
+            if($this->getShippingAdress()->first()) {
+                return $this->getShippingAdress()->first();
+            }
         } elseif ($this instanceof Professional) {
             return $this->getAdress();
         }
+
+        return null;
     }
 }
