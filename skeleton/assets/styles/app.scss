@@ -27,6 +27,20 @@ body {
     height: 100vh;
 }
 
+.lined::before {
+    content: '';
+    height: 3px;
+    width: -webkit-fill-available;
+    background: currentColor;
+    border-radius: 25px;
+}
+
+.lined {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
 a img {
     transition: transform 1s;
 }
@@ -121,7 +135,7 @@ span.is-error::before {
 
 input[type="radio"] + label,
 input[type="checkbox"] + label {
-    padding-left: 55px;
+    padding-left: 2rem;
 }
 
 input[type="radio"]:not(:checked) + label:hover::before,

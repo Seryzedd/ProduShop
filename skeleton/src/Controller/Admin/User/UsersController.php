@@ -8,6 +8,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\User\AbstractUser;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UserRepository;
+use App\Form\Admin\User\RolesManagerType;
+use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/admin/users')]
 final class UsersController extends AbstractController
@@ -21,6 +23,25 @@ final class UsersController extends AbstractController
         
         return $this->render('admin/user/users/index.html.twig', [
             'users' => $users,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_admin_user')]
+    public function view(AbstractUser $user, Request $request)
+    {
+        $form = $this
+            ->createForm(RolesManagerType::class, $user)
+        ;
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+        }
+
+        return $this->render('admin/user/users/view.html.twig', [
+            'user' => $user,
+            'form' => $form
         ]);
     }
 }

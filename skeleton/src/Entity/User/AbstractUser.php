@@ -29,6 +29,12 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     #[EmailFormat]
     private ?string $email = null;
 
+    const __ROLES = [
+        'ROLE_USER',
+        'ROLE_SELLER',
+        'ROLE_ADMIN'
+    ];
+
     /**
      * @var list<string> The user roles
      */
@@ -81,6 +87,17 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
+    }
+
+    public static function getNamedRoles()
+    {
+        $roles = [];
+
+        foreach(self::__ROLES as $role) {
+            $roles[ucfirst(strtolower(str_replace('ROLE_', '', $role)))] = $role;
+        }
+
+        return $roles;
     }
 
     /**
