@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Packages Stocks{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        },
+        {
+            label: 'My stocks',
+            route: 'app_merchant_stocks',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1>{% trans %}Packages Stocks{% endtrans %}</h1>
+
+        {{ form_start(form) }}
+
+            {% for child in form.children %}
+                {% if child.vars.data.name is defined %}
+                    <a class="fw-bold lined link-underline link-underline-opacity-0 mb-0" href="{{ path('app_merchant_product_edit', {product: child.vars.data.id}) }}">{{ child.vars.data.name|capitalize }}</a>
+                    {{ form_row(child) }}
+                {% endif %}
+            {% endfor %}
+
+            {{ block('save_button') }}
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block save_button %}
+    <div class="">
+        <button type="submit" class="btn btn-primary ms-auto">
+            {% trans %}Save{% endtrans %}
+        </button>
+    </div>
+{% endblock %}

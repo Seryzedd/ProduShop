@@ -39,14 +39,22 @@
             {{ block('professional_details') }}
         {% endif %}
 
-        {% if app.user and app.user == user %}
+        {% if app.user  %}
             <ul class="nav flex-column">
-                <li class="nav-item text-end">
-                    <a class="nav-link" href="{{ path('app_account_update') }}">{% trans %}Change my informations{% endtrans %}</a>
-                </li>
-                <li class="nav-item text-end">
-                    <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
-                </li>
+                {% if app.user == user %}
+                    <li class="nav-item text-end">
+                        <a class="nav-link" href="{{ path('app_account_update') }}">{% trans %}Change my informations{% endtrans %}</a>
+                    </li>
+                    <li class="nav-item text-end">
+                        <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
+                    </li>
+
+                    {% if is_granted('ROLE_SELLER') %}
+                        <li class="nav-item text-end">
+                            <a class="nav-link" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
             </ul>
         {% endif %}
     </div>
@@ -88,13 +96,15 @@
 {% endblock %}
 
 {% block professional_details %}
-    {% if user.logo and user.logo.src|length %}
-        <img src="{{ user.logo.src }}" class="img-fluid" style="max-width: 100px;">
-    {% else %}
-        {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
-    {% endif %}
+    <h3>
+        {% if user.logo and user.logo.src|length %}
+            <img src="{{ user.logo.src }}" class="img-fluid" style="max-width: 100px;">
+        {% else %}
+            {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
+        {% endif %}
 
-    <h3>{{ user.companyName}}</h3>
+        {{ user.companyName}}
+    </h3>
 
     <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ user.siret }}</p>
 

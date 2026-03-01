@@ -97,6 +97,12 @@
                                         {% trans %}My products{% endtrans %}
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_merchant_stocks') }}" title="{% trans %}My products pakages stocks{% endtrans %}">
+                                        {{ ux_icon('ic:round-inventory', {height: '20px', width: '20px'}) }}
+                                        {% trans %}My products pakages stocks{% endtrans %}
+                                    </a>
+                                </li>
                             {% endif %}
 
                             {% if is_granted('ROLE_ADMIN') %}

@@ -6,6 +6,7 @@ use App\Entity\Product\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User\PostalAdress\Adress;
+use App\Entity\User\Professional;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -17,11 +18,17 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    public function findByMerchant($merchant)
+    /**
+     * Returns products of merchant
+     *
+     * @return Product[]
+     */
+    public function findByMerchant(Professional $merchant)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.company = :merchant')
-            ->setParameter('merchant', $merchant)
+            ->join('p.company', 'company')
+            ->andWhere('company.id = :id')
+            ->setParameter('id', $merchant->getId())
             ->getQuery()
             ->getResult()
         ;
@@ -62,7 +69,7 @@ class ProductRepository extends ServiceEntityRepository
         // so we use a native SQL query which remains portable across MySQL/PostgreSQL.
         $qb = $this->createQueryBuilder('p')
             ->addSelect('company', 'addr', 'shelf', 'image')
-            ->join('p.company',      'company')
+            ->join('p.company', 'company')
             ->join('company.adress', 'addr')
             ->leftJoin('p.shelf',    'shelf')
             ->leftJoin('p.image',    'image')

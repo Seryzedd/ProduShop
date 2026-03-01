@@ -29,7 +29,7 @@ body {
 
 .lined::before {
     content: '';
-    height: 3px;
+    height: 0.1em;
     width: -webkit-fill-available;
     background: currentColor;
     border-radius: 25px;
@@ -135,7 +135,8 @@ span.is-error::before {
 
 input[type="radio"] + label,
 input[type="checkbox"] + label {
-    padding-left: 2rem;
+    padding-left: 60px;
+    position: relative;
 }
 
 input[type="radio"]:not(:checked) + label:hover::before,
