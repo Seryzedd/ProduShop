@@ -10,12 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Repository\Product\ProductRepository;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/merchant/stocks')]
 final class StocksController extends AbstractController
 {
     #[Route('/', name: 'app_merchant_stocks')]
-    public function index(ProductRepository $productRepository, Request $request): Response
+    public function index(ProductRepository $productRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
         $products = $productRepository->findByMerchant($this->getUser());
 
@@ -27,7 +28,13 @@ final class StocksController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            # code...
+            foreach($products as $product) {
+                $entityManager->persist($product);
+            }
+            
+            $entityManager->flush();
+
+            $this->AddFlash('success', 'Products packages updated.');
         }
 
         return $this->render('merchant/stocks/index.html.twig', [
