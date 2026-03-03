@@ -105,7 +105,7 @@
                 {% for product in products %}
                     {% if product.company not in companies %}
                         {% set companies = companies|merge([product.company]) %}
-                        <a href="" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                        <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
                             {{ product.company.companyName }}
                         </a>
                         <div class="p-2 border-bottom map-product-card"
