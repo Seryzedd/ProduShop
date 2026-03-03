@@ -5,6 +5,7 @@ namespace App\Controller\Admin\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 use App\Entity\User\AbstractUser;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UserRepository;
@@ -27,7 +28,7 @@ final class UsersController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_admin_user')]
-    public function view(AbstractUser $user, Request $request)
+    public function view(AbstractUser $user, Request $request, EntityManagerInterface $entityManager)
     {
         $form = $this
             ->createForm(RolesManagerType::class, $user)
@@ -36,7 +37,10 @@ final class UsersController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($user);
+            $entityManager->flush();
 
+            $this->addFlash('success', new TranslatableMessage('User with email "%username%" updated.', ['%username%' => $user->getEmail()]));
         }
 
         return $this->render('admin/user/users/view.html.twig', [
