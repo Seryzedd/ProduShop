@@ -8,6 +8,7 @@ use App\Entity\User\Professional;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -38,6 +39,17 @@ class ProfessionalType extends AbstractType
                 'attr' => [
                     'placeholder' => 'My company name'
                 ]
+            ])
+            ->add('description', TextareaType::class, [
+                'attr' => [
+                    'rows' => 6,
+                    'placeholder' => 'Introduce your company with 160 characters maximum',
+                    'class' => 'text-preview',
+                    'min' => 0,
+                    'max' => 250
+                ],
+                'help' => 'Introduce your company with <span id="count">0</span>/160 characters',
+                'help_html' => true,
             ])
         ;
     }

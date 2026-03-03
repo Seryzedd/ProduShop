@@ -69,6 +69,9 @@
 {% endblock %}
 
 {% block base_details %}
+    {% if user is not defined %}
+        {% set user = app.user %}
+    {% endif %}
     <div class="border sticky-top z-1 p-4">
         {% if user|instanceOf('App\\Entity\\User\\Client') %}
             {{ block('user_details') }}
@@ -85,19 +88,10 @@
                     <li class="nav-item text-end">
                         <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
                     </li>
-
                 {% endif %}
             </ul>
         {% endif %}
     </div>
-{% endblock %}
-
-{% block main_informations %}
-    {% if is_granted('ROLE_SELLER') %}
-        {{ block("professional_details") }}
-    {% elseif is_granted('ROLE_USER') %}
-        {{ block("user_details") }}
-    {% endif %}
 {% endblock %}
 
 {% block user_details %}
@@ -106,7 +100,7 @@
     </h3>
 
     <p class=""><strong class="me-2">{% trans %}Email{% endtrans %} :</strong>{{ user.email }}</p>
-    
+
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
             <strong>{% trans %}Postale adress{% endtrans %}</strong>
@@ -137,6 +131,11 @@
 
         {{ user.companyName}}
     </h3>
+
+    <p>
+        <strong>{% trans %}Description{% endtrans %} :</strong><br>
+        <small class="text-muted">{{ user.description ?: 'Empty description'|trans }}</small>
+    </p>
 
     <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ user.siret }}</p>
 
