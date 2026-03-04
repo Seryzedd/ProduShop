@@ -15,16 +15,16 @@
 
 {% block header %}{% endblock %}
 
+{% block footer %}{% endblock %}
+
 {% block breadcrumb %}{% endblock %}
 
 {% block body %}
     <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
         <div class="col-lg-8 card p-3">
-            <p class="text-end text-muted">
-                <a href="{{ path('app_home_index') }}" class="btn btn-light">{% trans %}Homepage{% endtrans %}</a>
-            </p>
+            <a class='text-center' href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
 
-            <h1 class="text-center text-primary">{% trans %}Register{% endtrans %}</h1>
+            <h1 class="text-center">{% trans %}Register{% endtrans %}</h1>
 
             {% for flash_error in app.flashes('verify_email_error') %}
                 <div class="alert alert-danger" role="alert">{{ flash_error }}</div>

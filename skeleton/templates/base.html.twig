@@ -63,6 +63,10 @@
 
         {% block body %}{% endblock %}
 
+        {% block footer %}
+            {% include 'components/footer.html.twig' %}
+        {% endblock %}
+
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}

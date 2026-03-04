@@ -13,8 +13,7 @@
                     <label class="p-2 text-muted" for="floatingInputValue">{{ ux_icon('line-md:search') }}</label>
                 </form>
 
-
-                <ul class="navbar-nav me-auto mb-2 mt-2 mb-lg-0">
+                <ul class="navbar-nav justify-content-center me-auto mb-2 mt-2 mb-lg-0">
                     {% if is_granted('ROLE_ADMIN') %}
                         <li class="nav-item">
                             <button class="nav-link text-dark px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMenu" aria-controls="adminMenu">
@@ -32,7 +31,7 @@
                     {% if shelvesEntities|length > 0 %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% trans %}Shelves products{% endtrans %}
+                                {% trans %}Shelves{% endtrans %}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ path('app_shelf_product') }}">{% trans %}All{% endtrans %}</a></li>
