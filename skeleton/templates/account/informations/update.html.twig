@@ -29,22 +29,28 @@
 
             <div class="col-lg-8">
                 {{ form_start(form) }}
-                    {{ form_row(form.logo) }}
-                    {{ form_row(form.companyName) }}
-                    {{ form_row(form.email) }}
+                    {% if form.vars.data|instanceOf('App\\Entity\\User\\Professional') %}
+                        {{ form_row(form.logo) }}
+                        {{ form_row(form.companyName) }}
+                        {{ form_row(form.email) }}
 
-                    {{ form_label(form.siret) }}
-                    <div class="input-group">
-                        {{ form_widget(form.siret) }}
-                    </div>
-                    {{ form_help(form.siret) }}
+                        {{ form_label(form.siret) }}
+                        <div class="input-group">
+                            {{ form_widget(form.siret) }}
+                        </div>
+                        {{ form_help(form.siret) }}
 
-                    <div id="description-preview" class="my-2 d-none">
-                        <p class="mb-0 text-dark">{% trans %}Short preview{% endtrans %} : </p>
-                        <p class="content text-muted"></p>
-                    </div>
+                        <div id="description-preview" class="my-2 d-none">
+                            <p class="mb-0 text-dark">{% trans %}Short preview{% endtrans %} : </p>
+                            <p class="content text-muted"></p>
+                        </div>
 
-                    {{ form_row(form.description) }}
+                        {{ form_row(form.description) }}
+                    {% else %}
+                        {{ form_row(form.gender) }}
+                        {{ form_row(form.firstname) }}
+                        {{ form_row(form.lastname) }}
+                    {% endif %}
 
                     <button class="btn btn-primary mt-4 mb-4">
                         {% trans %}Save{% endtrans %}

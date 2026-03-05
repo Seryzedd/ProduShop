@@ -10,6 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\User\AdressType;
 use App\Entity\User\PostalAdress\Adress;
 use App\Form\User\ProfessionalType;
+use App\Form\User\ClientType;
+use App\Entity\User\Client;
+use App\Entity\User\Professional;
 
 #[Route('/account')]
 final class InformationsController extends AbstractController
@@ -23,13 +26,18 @@ final class InformationsController extends AbstractController
     #[Route('/update', name: 'app_account_update')]
     public function UpdateInformations(Request $request, EntityManagerInterface $entityManager)
     {
-        $form = $this->createForm(ProfessionalType::class, $this->getUser());
+        $user = $this->getUser();
+        $proClass = Professional::class;
+        if($user instanceof $proClass){
+            $form = $this->createForm(ProfessionalType::class, $user);
+        } else {
+            $form = $this->createForm(ClientType::class, $user);
+        }
 
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
-            
-            $entityManager->persist($this->getUser());
+            $entityManager->persist($user);
             $entityManager->flush();
 
             $this->addFlash('success', 'Your account is updated.');
