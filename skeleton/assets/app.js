@@ -165,3 +165,27 @@ function percentage(value, min, max) {
 $('input#app_async').on('input', function () {
     
 })
+
+$('#admin-btn').on('change', function() {
+    sendRequest($(this).attr('request-url'), {isChecked: $(this).is(':checked')})
+})
+
+async function sendRequest(url, params) {
+  try {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams(params)
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(result);
+  } catch (error) {
+    console.error(error.message);
+  }
+}

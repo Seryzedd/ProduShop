@@ -2,7 +2,7 @@
 
     <div class="h-100 border-end" id="adminMenu" style="width: fit-content;">
         <div class="text-end p-2">
-            <input type="checkbox" id="admin-btn" >
+            <input type="checkbox" id="admin-btn" request-url="{{ path('admin_menu') }}" {% if session('admin-menu-expanded') %}checked{% endif %}>
             <label for="admin-btn" class="btn-more-less"></label>
         </div>
         <div class="offcanvas-body">

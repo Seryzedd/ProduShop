@@ -71,4 +71,15 @@ final class AsyncController extends AbstractController
 
         return new JsonResponse($results);
     }
+
+    #[Route('/admin-menu', name: 'admin_menu')]
+    public function adminMenuSaver(Request $request)
+    {
+        $session = $request->getSession();
+        dump((bool) $request->request->get('isChecked'));
+        
+        $session->set('admin-menu-expanded', (bool) $request->request->get('isChecked'));
+        
+        return new JsonResponse(true);
+    }
 }
