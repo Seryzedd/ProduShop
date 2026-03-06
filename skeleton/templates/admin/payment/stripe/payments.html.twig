@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Payment list{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Stripe',
+            route: 'app_admin_payment_stripe',
+            parameters: []
+        },
+        {
+            label: 'Payments',
+            route: 'app_admin_payments_stripe',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1>{% trans %}Payment list{% endtrans %}</h1>
+        {{ block('stripe_navigation', 'admin/payment/stripe/index.html.twig') }}
+        
+        {% for payment in payments.data %}
+            <div class="row">
+                <div class="col-12"></div>
+            </div>
+        {% endfor %}
+    </main>
+{% endblock %}

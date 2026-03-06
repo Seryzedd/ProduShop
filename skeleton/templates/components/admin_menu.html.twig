@@ -1,52 +1,70 @@
 {% if is_granted('ROLE_ADMIN') %}
 
-    <div class="h-100 border-end" id="adminMenu" style="width: fit-content;">
-        <div class="text-end p-2">
-            <input type="checkbox" id="admin-btn" request-url="{{ path('admin_menu') }}" {% if session('admin-menu-expanded') %}checked{% endif %}>
-            <label for="admin-btn" class="btn-more-less"></label>
-        </div>
-        <div class="offcanvas-body">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link text-start {% if app.request.attributes.get('_route') == 'app_admin_index' %} active disabled{% endif %}" aria-current="page" href="{{ path('app_admin_index') }}">
-                        {{ ux_icon('line-md:home-alt-twotone') }}
-                        <span>{% trans %}Admin Homepage{% endtrans %}</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link text-start" type="button" data-bs-toggle="collapse" data-bs-target="#lang_sub" aria-expanded="false" aria-controls="lang_sub">
-                        {{ ux_icon('mdi:google-translate' )}}
-                        <span>{% trans %}Languages{% endtrans %}</span>
-                    </button>
-                    <div class="collapse" id="lang_sub">
-                        <ul class="nav flex-column ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_manager' %} active disabled{% endif %}" href="{{ path('app_admin_translations_manager') }}">
-                                    <span>{% trans %}Manager{% endtrans %}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_files' %} active disabled{% endif %}" href="{{ path('app_admin_translations_files') }}">
-                                    <span>{% trans %}Files{% endtrans %}</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_product_shelf' %} active disabled{% endif %}" href="{{ path('app_admin_product_shelf') }}">
-                        {{ ux_icon('mdi:store') }}
-                        <span>{% trans %}Products{% endtrans %}</span>
-                    </a>
-                </li>
+    <div class="h-100 border-end position-relative" id="adminMenu" style="width: fit-content;">
+        <div class="">
+            <div class="text-end p-2">
+                <input type="checkbox" title="{% trans %}Show more or less{% endtrans %}" id="admin-btn" request-url="{{ path('admin_menu') }}" {% if session('admin-menu-expanded') %}checked{% endif %}>
+                <label for="admin-btn" class="btn-more-less"></label>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a title="{% trans %}Admin Homepage{% endtrans %}" class="nav-link text-start {% if app.request.attributes.get('_route') == 'app_admin_index' %} active disabled{% endif %}" aria-current="page" href="{{ path('app_admin_index') }}">
+                            {{ ux_icon('line-md:home-alt-twotone') }}
+                            <span>{% trans %}Admin Homepage{% endtrans %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button title="{% trans %}Admin languages configurations{% endtrans %}" class="nav-link text-start" type="button" data-bs-toggle="collapse" data-bs-target="#lang_sub" aria-expanded="false" aria-controls="lang_sub">
+                            {{ ux_icon('mdi:google-translate' )}}
+                            <span>{% trans %}Languages{% endtrans %}</span>
+                        </button>
+                        <div class="collapse" id="lang_sub">
+                            <ul class="nav flex-column ps-3">
+                                <li class="nav-item">
+                                    <a title="{% trans %}Admin languages manager{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_manager' %} active disabled{% endif %}" href="{{ path('app_admin_translations_manager') }}">
+                                        {% trans %}Manager{% endtrans %}
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a title="{% trans %}Admin languages files{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_translations_files' %} active disabled{% endif %}" href="{{ path('app_admin_translations_files') }}">
+                                        {% trans %}Files{% endtrans %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_product_shelf' %} active disabled{% endif %}" href="{{ path('app_admin_product_shelf') }}">
+                            {{ ux_icon('mdi:store') }}
+                            <span>{% trans %}Products{% endtrans %}</span>
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_users' %} active disabled{% endif %}" href="{{ path('app_admin_users') }}">
-                        {{ ux_icon('ic:baseline-group') }}
-                        <span>{% trans %}Users{% endtrans %}</span>
-                    </a>
-                </li>
-            </ul>
+                    <li class="nav-item">
+                        <a title="{% trans %}Admin users{% endtrans %}" class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_users' %} active disabled{% endif %}" href="{{ path('app_admin_users') }}">
+                            {{ ux_icon('ic:baseline-group') }}
+                            <span>{% trans %}Users{% endtrans %}</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link text-start" title="{% trans %}Admin payments{% endtrans %}" type="button" data-bs-toggle="collapse" data-bs-target="#payments_sub" aria-expanded="false" aria-controls="payments_sub">
+                            {{ ux_icon('ic:outline-payments' )}}
+                            <span>{% trans %}Payments{% endtrans %}</span>
+                        </button>
+                        <div class="collapse" id="payments_sub">
+                            <ul class="nav flex-column ps-3">
+                                <li class="nav-item">
+                                    <a title="{% trans %}Stripe configuration{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_payment_stripe' %} active disabled{% endif %}" href="{{ path('app_admin_payment_stripe') }}">
+                                        {% trans %}Stripe{% endtrans %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 {% endif %}

@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Stripe configuration{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Stripe',
+            route: 'app_admin_payment_stripe',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex mb-3 align-items-end justify-content-between">
+            <h1 class="mb-0">{% trans %}Stripe's configuration{% endtrans %}</h1>
+
+            {% if error == null %}
+                <span class="text-success">
+                    {{ ux_icon('line-md:check-all', {width: '30px', height: '30px'}) }}
+                </span>
+            {% endif %}
+        </div>
+
+        {{ block('stripe_navigation') }}
+        
+        {% if error %}
+            <div class="alert alert-danger row align-items-center mx-auto" style="width: fit-content;">
+                <div class="col-md-1">
+                    {% set size = {width: '30px', height: '30px'} %}
+                    {{ ux_icon('ic:outline-report-problem', size) }}
+                </div>
+
+                <p class="col-md-10 mb-0 px-4">
+                    {{ error|trans }}
+                </p>
+
+                <p class="mb-0 col-md-1 text-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </p>
+            </div>
+        {% endif %}
+
+        {{ form_start(form) }}
+            {{ form_row(form.active) }}
+            {{ form_row(form.authenticationKey) }}
+            {{ form_row(form.publicKey) }}
+            {{ form_row(form.secretKey) }}
+
+            <button type="submit" class="btn btn-primary">
+                {% trans %}Save configuration{% endtrans %}
+            </button>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block stripe_navigation %}
+    <ul class="nav justify-content-end">
+        <li class="nav-item">
+            <a class="nav-link{% if app.request.attributes.get('_route') == 'app_admin_payments_stripe' %} disabled{% endif %}" aria-current="page" href="{{ path('app_admin_payments_stripe') }}">
+                {% trans %}Payments{% endtrans %}
+            </a>
+        </li>
+    </ul>
+{% endblock %}

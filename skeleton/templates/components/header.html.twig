@@ -14,13 +14,6 @@
                 </form>
 
                 <ul class="navbar-nav justify-content-center me-auto mb-2 mt-2 mb-lg-0">
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <li class="nav-item">
-                            <button class="nav-link text-dark px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMenu" aria-controls="adminMenu">
-                                {{ ux_icon('ic:twotone-admin-panel-settings', {width: '24px', height: '24px'}) }}
-                            </button>
-                        </li>
-                    {% endif %}
 
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('app_companies') }}" title="{% trans %}Companies{% endtrans %}">

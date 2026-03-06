@@ -323,7 +323,7 @@ input[type="checkbox"]:checked + label.form-check-label:hover::after,
     width: fit-content;
 }
 
-#flash-messages .alert {
+.alert {
     background-color: $white;
 
 }
@@ -374,7 +374,7 @@ input[type='checkbox']:checked + label.btn-more-less::after {
 }
 
 @each $color, $value in $theme-colors {
-    #flash-messages .alert-#{$color} {
+    .alert-#{$color} {
         border-left: 6px solid $value;
         border-right: #ddd solid 1px;
         border-top: #ddd solid 1px;
