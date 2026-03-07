@@ -21,10 +21,11 @@ $theme-colors: (
 
 // Importer le reste des variables par défaut
 @import '../../node_modules/bootstrap/scss/bootstrap';
+@import 'stripe.scss';
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 body {
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .container {

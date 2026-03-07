@@ -1,0 +1,65 @@
+/**
+ * assets/styles/stripe.scss
+ * Importé depuis app.scss après Bootstrap.
+ */
+
+#card-number-element,
+#card-expiry-element,
+#card-cvc-element {
+    display          : block;
+    position         : relative;
+    width            : 100%;
+    // Un peu plus de hauteur pour que l'icône de validation Stripe ne soit pas rognée
+    height           : calc(1.5em + 0.75rem + 2px + 4px);
+    padding          : $input-padding-y $input-padding-x;
+    background-color : transparent;
+    border           : 1px solid $input-border-color;
+    border-radius    : $input-border-radius;
+    transition       : border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    // Autorise le svg Stripe à déborder verticalement sans être rogné
+    overflow         : visible;
+
+    iframe {
+        position : relative !important;
+        width    : 100% !important;
+        height   : 100% !important;
+        top      : auto !important;
+        left     : auto !important;
+        overflow : visible !important;
+    }
+
+    &.StripeElement--focus {
+        border-color : $input-focus-border-color;
+        box-shadow   : $input-focus-box-shadow;
+        outline      : 0;
+    }
+
+    &.StripeElement--invalid,
+    &.is-invalid {
+        border-color : $form-feedback-invalid-color;
+
+        &.StripeElement--focus {
+            box-shadow: 0 0 0 $input-focus-width rgba($form-feedback-invalid-color, 0.25);
+        }
+    }
+
+    &.is-valid {
+        border-color : $form-feedback-valid-color;
+
+        &.StripeElement--focus {
+            box-shadow: 0 0 0 $input-focus-width rgba($form-feedback-valid-color, 0.25);
+        }
+    }
+}
+
+#card-errors {
+    display    : none;
+    width      : 100%;
+    margin-top : $form-feedback-margin-top;
+    font-size  : $form-feedback-font-size;
+    color      : $form-feedback-invalid-color;
+
+    &:not(:empty) {
+        display: block;
+    }
+}

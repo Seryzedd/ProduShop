@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\User\Payment\StripeCustomer;
 use App\Entity\User\PostalAdress\Adress;
 use App\Repository\User\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -31,6 +32,9 @@ class Client extends AbstractUser
      */
     #[ORM\OneToMany(targetEntity: Adress::class, mappedBy: 'user', cascade: ['persist'])]
     private Collection $shippingAdresses;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?StripeCustomer $stripe = null;
 
     public function __construct()
     {
@@ -105,6 +109,28 @@ class Client extends AbstractUser
                 $shippingAdress->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStripe(): ?Stripe
+    {
+        return $this->stripe;
+    }
+
+    public function setStripe(?Stripe $stripe): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($stripe === null && $this->stripe !== null) {
+            $this->stripe->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($stripe !== null && $stripe->getUser() !== $this) {
+            $stripe->setUser($this);
+        }
+
+        $this->stripe = $stripe;
 
         return $this;
     }

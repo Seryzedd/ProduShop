@@ -34,6 +34,16 @@ class StripeService extends AbstractApi
         ]);
     }
 
+    public function getPublicKey()
+    {
+        return $this->stripeConfig->getPublicKey();
+    }
+
+    public function getSecretKey()
+    {
+        return $this->stripeConfig->getSecretKey();
+    }
+
     public function getAccounts()
     {
         return $this->sendRequest(self::BASE_URL . '/accounts', 'GET', [], [])->toArray();
@@ -90,7 +100,65 @@ class StripeService extends AbstractApi
         return $response->toArray();
     }
 
-    public function createCusomer(Client $user)
+    /**
+     * ========================
+     * Payment methods requests
+     * ========================
+     */
+
+    public function attachPaymentMethod(string $paymentMethodId, string $stripeCustomerId): array
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/payment_methods/' . $paymentMethodId . '/attach',
+            'POST',
+            ['customer' => $stripeCustomerId]
+        )->toArray();
+    }
+
+    /**
+     * Detach payment method
+     */
+    public function detachPaymentMethod(string $paymentMethodId): array
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/payment_methods/' . $paymentMethodId . '/detach',
+            'POST'
+        )->toArray();
+    }
+
+    /**
+     * Define default payment method
+     */
+    public function setDefaultPaymentMethod(string $stripeCustomerId, string $paymentMethodId): array
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/customers/' . $stripeCustomerId,
+            'POST',
+            ['invoice_settings' => ['default_payment_method' => $paymentMethodId]]
+        )->toArray();
+    }
+
+    /**
+     * All user payment methods
+     */
+    public function getPaymentMethods(string $stripeCustomerId, string $type = 'card'): array
+    {
+        $response = $this->sendRequest(
+            self::BASE_URL . '/payment_methods',
+            'GET',
+            ['customer' => $stripeCustomerId, 'type' => $type]
+        )->toArray();
+
+        return $response['data'] ?? [];
+    }
+
+    /**
+     * =======================
+     * -- Customer requests --
+     * =======================
+     */
+
+    public function createCustomer(Client $user)
     {
         
         $params = $this->customerParameters($user);
@@ -125,6 +193,17 @@ class StripeService extends AbstractApi
         );
 
         return $response->toArray();
+    }
+
+    public function findCustomerByEmail(string $email): ?array
+    {
+        $response = $this->sendRequest(
+            self::BASE_URL . '/customers',
+            'GET',
+            ['email' => $email, 'limit' => 1]
+        )->toArray();
+
+        return $response['data'][0] ?? null;
     }
 
     private function customerParameters(Client $user)

@@ -18,7 +18,7 @@
 
 {% block body %}
     {% set products = [] %}
-    <main class="container">
+    <main class="container pb-4">
         {% if cart.empty %}
             <h3 class="text-center text-muted">
                 {% trans %}Cart is empty{% endtrans %}
@@ -74,9 +74,13 @@
                         {{ block('cart_total') }}
                     </li>
                 </ul>
-                <p class="text-end">
-                    <button type="submit" class="btn btn-primary">
-                        {% trans %}Save{% endtrans %}
+                <p class="text-end mt-4">
+                    <a href="{{ path('app_cart_payment') }}" class="btn btn-outline-dark btn-lg">
+                        {% trans %}Validate and pay{% endtrans %}
+                    </a>
+
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        {% trans %}Save modifications{% endtrans %}
                     </button>
                 </p>
             {{ form_end(form) }}

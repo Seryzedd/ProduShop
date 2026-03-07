@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Create payment method{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'My cart',
+            route: 'app_cart'
+        },
+        {
+            label: 'Select payment method',
+            route: 'app_cart_payment'
+        }
+    ] %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container pb-3">
+        <h1>{% trans %}Create payment method{% endtrans %}</h1>
+
+        <p class="text-muted">
+            {% trans %}No payment method created.{% endtrans %}
+        </p>
+
+        {{ form_start(form, {
+            attr: {
+                id: 'payment-form',
+                'data-public-key'       : stripe_public_key,
+                'data-has-saved-methods': has_saved_methods ? 'true' : 'false',
+                'data-label-processing' : 'processing payment...'|trans,
+                'data-label-pay'        : 'Pay'|trans,
+                'data-label-card-error' : 'An error occured'|trans,
+                'data-label-key-missing': 'Configuration error'|trans
+            }
+        }) }}
+
+        {{ form_row(form.paymentMethodId) }}
+
+        <div id="new-card-section" class="position-relative card p-3" style="overflow: hidden;">
+
+            <div id="card-style-bridge" class="form-control" style="display:none" aria-hidden="true"></div>
+
+            <div class="mb-3">
+                <label class="form-label">{{ 'Card number'|trans }}</label>
+                <div id="card-number-element" class="form-control"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">{{ 'Expiration date'|trans }}</label>
+                    <div id="card-expiry-element" class="form-control"></div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label">{{ 'CVC'|trans }}</label>
+                    <div id="card-cvc-element" class="form-control"></div>
+                </div>
+            </div>
+
+            <div id="card-errors" class="text-danger small mb-3"></div>
+
+            <div id="payment-spinner" class="text-center w-100 h-100 top-0 start-0 d-flex align-items-center position-absolute bg-white mb-3">
+                <div class="spinner-grow mx-auto" role="status">
+                    <span class="visually-hidden">{% trans %}Loading{% endtrans %}...</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="mb-0 text-center">
+            <button type="submit" id="submit-btn" class="btn btn-primary btn-lg mt-2 w-50 mx-auto">
+                <p class="mb-0">
+                    <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                    <span role="status">Loading...</span>
+                </p>
+                <span class="d-none txt">{% trans %}Pay{% endtrans %}</span>
+            </button>
+        </p>
+
+    {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="{{ asset('script/checkout.js') }}"></script>
+{% endblock %}
