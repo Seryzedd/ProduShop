@@ -91,7 +91,6 @@ final class InformationsController extends AbstractController
     #[Route('/order/{id}', name: 'app_account_order')]
     public function accountOrder(Order $order): Response
     {
-        
         return $this->render('account/informations/order/index.html.twig', [
             'order' => $order
         ]);

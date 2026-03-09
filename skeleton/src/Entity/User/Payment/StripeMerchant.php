@@ -24,6 +24,9 @@ class StripeMerchant
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column]
+    private bool $isReady = false;
+
     public function __construct(Professional $user, string $accountId)
     {
         $this->user = $user;
@@ -68,6 +71,18 @@ class StripeMerchant
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function isReady(): bool
+    {
+        return $this->isReady;
+    }
+
+    public function setIsReady(bool $isReady): static
+    {
+        $this->isReady = $isReady;
 
         return $this;
     }

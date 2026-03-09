@@ -50,16 +50,21 @@
         {% endif %}
 
         {% if app.user  %}
-            <ul class="nav flex-column">
+            <div>
                 {% if app.user == user %}
-                    <li class="nav-item text-end">
-                        <a class="nav-link" href="{{ path('app_account_update') }}">{% trans %}Change my informations{% endtrans %}</a>
-                    </li>
-                    <li class="nav-item text-end">
-                        <a class="nav-link" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
-                    </li>
+                    <p class="mb-1">
+                        <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_account_update') }}">{% trans %}Change my informations{% endtrans %}</a>
+                    </p>
+                    <p class="mb-1">
+                        <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
+                    </p>
+                    {% if is_granted('ROLE_SELLER') and not user.stripeAccount.isReady %}
+                        <p class="mb-1">
+                            <a href="{{ path('app_professional_stripe_onboarding') }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{% trans %}Complete my banking account{% endtrans %}</a>
+                        </p>
+                    {% endif %}
                 {% endif %}
-            </ul>
+            </div>
         {% endif %}
     </div>
 {% endblock %}
@@ -157,7 +162,7 @@
                 <div class="col-md-4">
                     {% for package in product.packages %}
                         <p class="text-end">
-                            x{{ package.quantity }} <strong class="text-secondary fs-4">{{ package.finalPrice }}€</strong><br>
+                            x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice }}€</strong><br>
                             <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
                         </p>
                     {% endfor %}

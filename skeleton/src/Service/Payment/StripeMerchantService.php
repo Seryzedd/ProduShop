@@ -68,6 +68,25 @@ class StripeMerchantService
         $this->entityManager->flush();
     }
 
+    /**
+     * Syncs isReady from Stripe API and persists it.
+     * Called on the onboarding return URL.
+     */
+    public function refreshIsReady(Professional $professional): bool
+    {
+        $stripeMerchant = $this->stripeMerchantRepository->findByProfessional($professional);
+
+        if ($stripeMerchant === null) {
+            return false;
+        }
+
+        $isReady = $this->stripeService->isConnectAccountReady($stripeMerchant->getAccountId());
+        $stripeMerchant->setIsReady($isReady);
+        $this->entityManager->flush();
+
+        return $isReady;
+    }
+
     // =========================================================================
     // Private
     // =========================================================================
@@ -75,6 +94,8 @@ class StripeMerchantService
     private function saveStripeMerchant(Professional $professional, string $accountId): StripeMerchant
     {
         $stripeMerchant = new StripeMerchant($professional, $accountId);
+        $stripeMerchant->setIsReady($this->stripeService->isConnectAccountReady($accountId));
+
         $this->entityManager->persist($stripeMerchant);
         $this->entityManager->flush();
 
