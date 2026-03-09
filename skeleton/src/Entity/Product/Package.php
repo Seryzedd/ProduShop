@@ -2,7 +2,10 @@
 
 namespace App\Entity\Product;
 
+use App\Entity\User\OrderItem;
 use App\Repository\Product\PackageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
@@ -35,10 +38,17 @@ class Package
     #[ORM\Column]
     private ?float $taxe = null;
 
+    /**
+     * @var Collection<int, OrderItem>
+     */
+    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'package')]
+    private Collection $orderItems;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
+        $this->orderItems = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -140,5 +150,35 @@ class Package
     public function getFinalPrice(): float
     {
         return $this->price + ($this->price * $this->taxe /100);
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getOrderItems(): Collection
+    {
+        return $this->orderItems;
+    }
+
+    public function addOrderItem(OrderItem $orderItem): static
+    {
+        if (!$this->orderItems->contains($orderItem)) {
+            $this->orderItems->add($orderItem);
+            $orderItem->setPackage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderItem(OrderItem $orderItem): static
+    {
+        if ($this->orderItems->removeElement($orderItem)) {
+            // set the owning side to null (unless already changed)
+            if ($orderItem->getPackage() === $this) {
+                $orderItem->setPackage(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -62,6 +62,8 @@
                             </div>
                         </div>
                     {% endfor %}
+                {% else %}
+                    {{ block('orders_buyer') }}
                 {% endif %}
             </div>
         </div>
@@ -154,5 +156,21 @@
                 {% trans %}No postal adress{% endtrans %}
             </p>
         {% endif %}
+    </div>
+{% endblock %}
+
+{% block orders_buyer %}
+    <h3 class="lined text-secondary">{% trans %}Orders{% endtrans %}</h3>
+
+    <div class="list-group list-group-flush">
+        {% for order in user.orders %}
+            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action" aria-current="true">
+                <div class="row">
+                    <div class="col-md-4">{{ order.paidAt|date('d/m/Y H:i') }}</div>
+                    <div class="col-md-4 {% if order.status == 'succeeded' %}text-success{% else %}text-warning{% endif %}">{{ order.status }}</div>
+                    <div class="col-md-4 text-dark text-end"><p class="mb-0">{{ order.amount|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
+                </div>
+            </a>
+        {% endfor %}
     </div>
 {% endblock %}

@@ -145,7 +145,7 @@ class CartService
     // Session : sérialisation / désérialisation
     // -------------------------------------------------------------------------
 
-    private function save(): void
+    public function save(): void
     {
         $data = array_map(fn(CartItem $i) => $i->toArray(), $this->items);
         $this->requestStack->getSession()->set('cart', $data);

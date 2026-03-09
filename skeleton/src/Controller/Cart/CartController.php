@@ -31,7 +31,9 @@ final class CartController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump($form->getData());
+            $form->getData()->save();
+
+            $this->addFlash('success', 'Cart updated.');
         }
 
         return $this->render('cart/cart/index.html.twig', [

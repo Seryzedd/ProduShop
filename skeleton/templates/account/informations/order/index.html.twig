@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Order{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations'
+        },
+        {
+            label: 'Order "%id%"'|trans({'%id%': order.intentId}),
+            route: 'app_account_order',
+            parameters: {id: order.id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1 class="">{% trans with {'%id%': order.intentId} %}Order{% endtrans %}<small class="text-muted fs-6">{{ order.intentId }}</small></h1>
+        
+        <div class="d-flex justify-content-end align-items-end">
+            <p class="mb-0 me-2">{% trans %}Amount{% endtrans %} :</p>
+            <h4 class="mb-0 text-secondary">{{ (order.amount / 100)|number_format(2, ',', ' ') }}</h4>
+            <p class="mb-0 text-secondary"><small>{{ order.currency }}</small></p>
+        </div>
+        <p class='text-muted text-end'>{% trans with {'%paidAt%': order.paidAt|date('d/m/Y H:i')} %}Paid at : %paidAt%{% endtrans %}</p>
+
+        <ul class="list-group">
+            {% for item in order.orderItems %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ item.package.product.name }}
+                        </div>
+
+                        <div class="col-md-2">
+                            x{{ item.quantity }}
+                        </div>
+
+                        <div class="col-md-2 text-end">
+                            <strong class="me-2">{{ item.unitPrice|number_format(2, ',', ' ') }}</strong>{{ order.currency }}
+                        </div>
+
+                        <div class="col-md-2 text-end">
+                            <strong class="me-2">{{ (item.unitPrice * item.quantity)|number_format(2, ',', ' ') }}</strong>{{ order.currency }}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}

@@ -151,6 +151,8 @@ class StripeCustomerService
             $professional = $group['professional'];
             $items        = $group['items'];
 
+            dump($group);
+
             $merchant  = $this->stripeMerchantService->resolveAccount($professional);
             try {
                 
@@ -230,6 +232,7 @@ class StripeCustomerService
                 'name'     => $package->getProduct()->getName() . ' x' . $package->getQuantity(),
                 'quantity' => $item->getQuantity(),
                 'price'    => $package->getFinalPrice(), // unit price TTC in euros (float)
+                'package'  => $package
             ];
         }
 

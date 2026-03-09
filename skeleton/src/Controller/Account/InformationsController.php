@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User\Order;
 use App\Form\User\AdressType;
 use App\Entity\User\PostalAdress\Adress;
 use App\Form\User\ProfessionalType;
@@ -17,9 +18,11 @@ use App\Entity\User\Professional;
 #[Route('/account')]
 final class InformationsController extends AbstractController
 {
+    public function __construct() {}
     #[Route('/', name: 'app_account_informations')]
     public function index(): Response
     {
+
         return $this->render('account/informations/index.html.twig', []);
     }
 
@@ -72,6 +75,15 @@ final class InformationsController extends AbstractController
         }
         return $this->render('account/informations/adress.html.twig', [
             'form' => $form
+        ]);
+    }
+
+    #[Route('/order/{id}', name: 'app_account_order')]
+    public function accountOrder(Order $order): Response
+    {
+        
+        return $this->render('account/informations/order/index.html.twig', [
+            'order' => $order
         ]);
     }
 }

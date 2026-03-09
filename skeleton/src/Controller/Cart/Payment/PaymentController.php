@@ -11,11 +11,17 @@ use App\Form\Payment\StripeCardType;
 use App\Service\Api\StripeService;
 use App\Service\Payment\StripeCustomerService;
 use App\Service\Cart\CartService;
+use App\Service\Order\OrderService;
 
 #[Route('/cart/payment')]
 final class PaymentController extends AbstractController
 {
-    public function __construct(private CartService $cart, private StripeCustomerService $stripeCustomerService, private StripeService $stripeService) {}
+    public function __construct(
+        private CartService $cart,
+        private StripeCustomerService $stripeCustomerService,
+        private StripeService $stripeService,
+        private OrderService $orderService,
+    ) {}
 
     #[Route('/', name: 'app_cart_payment')]
     public function index(Request $request): Response
@@ -41,7 +47,7 @@ final class PaymentController extends AbstractController
             $paymentMethodId = $selectedId === 'new' ? $newMethodId : $selectedId;
 
             if (empty($paymentMethodId)) {
-                $this->addFlash('error', 'payment.method_required');
+                $this->addFlash('danger', 'Payment method required.');
                 return $this->redirectToRoute('app_cart_payment');
             }
 
@@ -60,6 +66,7 @@ final class PaymentController extends AbstractController
                 $confirmed = [];
                 foreach ($result['succeeded'] as $entry) {
                     $intent = $entry['intent'];
+                    $professional = $entry['professional'];
 
                     if (in_array($intent['status'], ['requires_confirmation', 'requires_payment_method'])) {
                         $intent = $this->stripeService->confirmPaymentIntent(
@@ -73,13 +80,17 @@ final class PaymentController extends AbstractController
                         throw new \RuntimeException('payment.card_requires_3ds');
                     }
 
+                    $this->orderService->persistFromIntent($client, $professional, $intent, $entry['items']);
+
                     $confirmed[] = [
                         'intent'   => $intent,
                         'merchant' => $entry['merchant'],
-                        'professional' => $entry['professional'],
+                        'professional' => $professional,
                         'items'    => $entry['items'],
                     ];
                 }
+
+                $this->orderService->save();
 
                 $this->savePaymentSummary($request, $confirmed, $result['failed']);
 
