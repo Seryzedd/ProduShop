@@ -27,43 +27,11 @@
 
             <div class="col-lg-8 col-md-6">
                 {% if is_granted('ROLE_SELLER') %}
-                    <h3 class="lined text-nowrap flex-row-reverse">
-                        {% trans %}My products{% endtrans %}
-                    </h3>
-
-                    <p class="text-end">
-                        <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
-                    </p>
-
-                    {% for product in user.products %}
-                        <div class="row position-relative align-items-center">
-                            <div class="col-md-2">
-                                {% if product.image %}
-                                    <img class="img-fluid" src="{{ product.image.src }}" alt="{{ product.image.name }}">
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                <p class="fw-light mb-0">
-                                    <a class="stretched-link fw-bold fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
-                                        {{ product.name }}</a>
-                                        <small class="fst-italic">{{ product.shelf.name }}</small>
-                                    </p>
-                                <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
-                            </div>
-
-                            <div class="col-md-4">
-                                {% for package in product.packages %}
-                                    <p class="text-end">
-                                        x{{ package.quantity }} <strong class="text-secondary fs-4">{{ package.finalPrice }}€</strong><br>
-                                        <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
-                                    </p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endfor %}
+                    {{ block('products') }}
+                    {{ block('orders') }}
                 {% else %}
-                    {{ block('orders_buyer') }}
+                    {{ block('orders') }}
+                    {{ block('payment_methods') }}
                 {% endif %}
             </div>
         </div>
@@ -159,18 +127,87 @@
     </div>
 {% endblock %}
 
-{% block orders_buyer %}
-    <h3 class="lined text-secondary">{% trans %}Orders{% endtrans %}</h3>
+{% block products %}
+    <div class="mb-4">
+        <h3 class="lined text-nowrap flex-row-reverse">
+            {% trans %}My products{% endtrans %}
+        </h3>
 
-    <div class="list-group list-group-flush">
+        <p class="text-end">
+            <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
+        </p>
+
+        {% for product in user.products %}
+            <div class="row position-relative align-items-center">
+                <div class="col-md-2">
+                    {% if product.image %}
+                        <img class="img-fluid" src="{{ product.image.src }}" alt="{{ product.image.name }}">
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <p class="fw-light mb-0">
+                        <a class="stretched-link fw-bold fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
+                            {{ product.name }}</a>
+                            <small class="fst-italic">{{ product.shelf.name }}</small>
+                        </p>
+                    <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
+                </div>
+
+                <div class="col-md-4">
+                    {% for package in product.packages %}
+                        <p class="text-end">
+                            x{{ package.quantity }} <strong class="text-secondary fs-4">{{ package.finalPrice }}€</strong><br>
+                            <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block orders %}
+    <h3 class="lined flex-row-reverse">{% trans %}Orders{% endtrans %}</h3>
+
+    {{ block('order_list') }}
+{% endblock %}
+
+{% block order_list %}
+    <div class="list-group list-group-flush mb-4">
         {% for order in user.orders %}
-            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action" aria-current="true">
+            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action">
+
                 <div class="row">
                     <div class="col-md-4">{{ order.paidAt|date('d/m/Y H:i') }}</div>
-                    <div class="col-md-4 {% if order.status == 'succeeded' %}text-success{% else %}text-warning{% endif %}">{{ order.status }}</div>
-                    <div class="col-md-4 text-dark text-end"><p class="mb-0">{{ order.amount|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
+                    <div class="col-md-2 text-center {% if order.status == 'succeeded' %}text-success{% else %}text-warning{% endif %}">{{ order.status }}</div>
+                    <div class="col-md-2 text-center">{% trans with {'%number%': order.orderItems|length} %}%number% products{% endtrans %}</div>
+                    <div class="col-md-4 text-secondary text-end"><p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
                 </div>
             </a>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block payment_methods %}
+    <div class="mb-4">
+        <h3 class="lined flex-row-reverse text-nowrap">{% trans %}Payment methods{% endtrans %}</h3>
+
+        {% for method in paymentMethods %}
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    {{ method.type }}
+                </div>
+                <div class="col-md-6">
+                    {% trans with {'%createdAt%': method.created|date('d/m/Y H:i')} %}Created at %createdAt%{% endtrans %}
+                </div>
+                <div class="col-md-4">
+                    <p class="mb-0 text-end text-muted">
+                        xxxx xxxx xxxx {{ method.card.last4 }}<br>
+                        {% trans with {'%month%': method.card.exp_month, '%year%': method.card.exp_year} %}Expire %month%/%year%{% endtrans %}
+                    </p>
+                </div>
+            </div>
         {% endfor %}
     </div>
 {% endblock %}

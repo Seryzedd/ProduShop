@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Api\StripeService;
 use App\Entity\User\Order;
 use App\Form\User\AdressType;
 use App\Entity\User\PostalAdress\Adress;
@@ -18,12 +19,21 @@ use App\Entity\User\Professional;
 #[Route('/account')]
 final class InformationsController extends AbstractController
 {
-    public function __construct() {}
+    public function __construct(private StripeService $stripeService) {}
     #[Route('/', name: 'app_account_informations')]
     public function index(): Response
     {
+        $user = $this->getUser();
+        $paymentMethods = [];
+        if ($user instanceOf Client) {
+            $stripeCustomerId = $this->getUser()->getStripe()->getCustomerId();
 
-        return $this->render('account/informations/index.html.twig', []);
+            $paymentMethods = $this->stripeService->getPaymentMethods($stripeCustomerId);
+        }
+
+        return $this->render('account/informations/index.html.twig', [
+            'paymentMethods' => $paymentMethods
+        ]);
     }
 
     #[Route('/update', name: 'app_account_update')]

@@ -113,12 +113,12 @@ class Client extends AbstractUser
         return $this;
     }
 
-    public function getStripe(): ?Stripe
+    public function getStripe(): ?StripeCustomer
     {
         return $this->stripe;
     }
 
-    public function setStripe(?Stripe $stripe): static
+    public function setStripe(?StripeCustomer $stripe): static
     {
         // unset the owning side of the relation if necessary
         if ($stripe === null && $this->stripe !== null) {
