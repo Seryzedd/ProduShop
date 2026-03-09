@@ -4,6 +4,7 @@ namespace App\Entity\User;
 
 use App\Entity\Picture;
 use App\Entity\Product\Product;
+use App\Entity\User\Payment\StripeMerchant;
 use App\Entity\User\PostalAdress\Adress;
 use App\Repository\User\ProfessionalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -36,6 +37,9 @@ class Professional extends AbstractUser
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?StripeMerchant $stripeAccount = null;
 
     public function __construct()
     {
@@ -132,6 +136,28 @@ class Professional extends AbstractUser
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getStripeAccount(): ?StripeMerchant
+    {
+        return $this->stripeAccount;
+    }
+
+    public function setStripeAccount(?StripeMerchant $stripeAccount): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($stripeAccount === null && $this->stripeAccount !== null) {
+            $this->stripeAccount->setOneToOne(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($stripeAccount !== null && $stripeAccount->getOneToOne() !== $this) {
+            $stripeAccount->setOneToOne($this);
+        }
+
+        $this->stripeAccount = $stripeAccount;
 
         return $this;
     }

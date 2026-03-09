@@ -67,6 +67,11 @@ class CartItem
         return $this->package->getFinalPrice() * $this->quantity;
     }
 
+    public function getFinalPriceCents(): int
+    {
+        return round($this->getLineTotal() * 100);
+    }
+
     /** Vérifie si la quantité demandée est disponible en stock */
     public function isAvailable(): bool
     {

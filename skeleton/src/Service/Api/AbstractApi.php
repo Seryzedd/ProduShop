@@ -49,7 +49,12 @@ abstract class AbstractApi
 
         if ($statusCode < 200 || $statusCode >= 300) {
             throw new \Exception(
-                sprintf('API request failed: status code "%d" for URL "%s"', $statusCode, $url)
+                sprintf(
+                    'API request failed: status code "%d" for URL "%s". Response: %s',
+                    $statusCode,
+                    $url,
+                    $response->getContent(false)
+                )
             );
         }
 

@@ -92,6 +92,23 @@ class CartService
         return $this->items;
     }
 
+    public function getMerchants()
+    {
+        if ($this->items === null) {
+            $this->loadFromSession();
+        }
+
+        $merchants = [];
+        /** @param $item CartItem */
+        foreach($this->items as $item) {
+            $merchant = $item->getPackage()->getProduct()->getCompany();
+
+            $merchants[$merchant->getId()] = $merchant;
+        }
+
+        return $merchants;
+    }
+
     public function getItemCount(): int
     {
         $this->loadFromSession();

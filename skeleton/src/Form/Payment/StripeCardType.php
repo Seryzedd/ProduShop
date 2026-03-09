@@ -28,7 +28,7 @@ class StripeCardType extends AbstractType
             ])
             // Champ caché alimenté par Stripe.js uniquement quand "new" est sélectionné
             ->add('newPaymentMethodId', HiddenType::class, [
-                'attr'     => ['id' => 'new-payment-method-id'],
+                'attr'     => ['id' => 'stripe_card_newPaymentMethodId'],
                 'required' => false,
             ]);
     }

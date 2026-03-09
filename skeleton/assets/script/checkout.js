@@ -1,21 +1,18 @@
-/**
- * checkout.js
- */
-
 document.addEventListener('DOMContentLoaded', () => {
 
     const form            = document.getElementById('payment-form');
     const newCardSection  = document.getElementById('new-card-section');
     const cardErrors      = document.getElementById('card-errors');
     const submitBtn       = document.getElementById('submit-btn');
-    const newMethodInput  = document.getElementById('new-payment-method-id');
+    const newMethodInput  = document.getElementById('stripe_card_newPaymentMethodId');
     const spinner         = document.getElementById('payment-spinner');
 
     if (!form) return;
 
-    const publicKey       = form.dataset.publicKey       ?? null;
-    const labelProcessing = form.dataset.labelProcessing ?? 'Processing...';
-    const labelPay        = form.dataset.labelPay        ?? 'Pay';
+    const publicKey        = form.dataset.publicKey        ?? null;
+    const labelProcessing  = form.dataset.labelProcessing  ?? 'Processing...';
+    const labelPay         = form.dataset.labelPay         ?? 'Pay';
+    const labelAuthRequired= form.dataset.labelAuthRequired ?? 'Authentication required, please wait...';
 
     if (!publicKey) {
         console.error('[Stripe] Missing data-public-key on form.');
@@ -25,8 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setLoading(false);
 
     // -------------------------------------------------------------------------
-    // Lecture des variables CSS Bootstrap directement sur :root
-    // Plus fiable que de passer par un élément intermédiaire
+    // ----------------- Variable from :root -------------------
     // -------------------------------------------------------------------------
 
     const rootStyles = getComputedStyle(document.documentElement);
@@ -36,17 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return value !== '' ? value : fallback;
     }
 
-    const colorBody    = cssVar('--bs-body-color',        '#212529');
+    const colorBody    = cssVar('--bs-body-color',           '#212529');
     const colorDanger  = cssVar('--bs-danger-text-emphasis', cssVar('--bs-danger', '#dc3545'));
-    const colorSuccess = cssVar('--bs-success',            '#198754');
-    const colorMuted   = cssVar('--bs-secondary-color',    '#6c757d');
-    const colorPrimary = cssVar('--bs-primary',            '#0d6efd');
-    const fontFamily   = cssVar('--bs-body-font-family',   'system-ui, sans-serif');
-    const fontSize     = cssVar('--bs-body-font-size',     '24px');
+    const colorSuccess = cssVar('--bs-success',              '#198754');
+    const colorMuted   = cssVar('--bs-secondary-color',      '#6c757d');
+    const colorPrimary = cssVar('--bs-primary',              '#0d6efd');
+    const fontFamily   = cssVar('--bs-body-font-family',     'system-ui, sans-serif');
+    const fontSize     = cssVar('--bs-body-font-size',       '24px');
 
     // -------------------------------------------------------------------------
-    // Style Stripe — pas de backgroundColor pour laisser le .form-control gérer
-    // le fond, ce qui évite tout conflit de rendu dans l'iframe
+    // Style Stripe
     // -------------------------------------------------------------------------
 
     const stripeStyle = {
@@ -56,19 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
             fontSmoothing  : 'antialiased',
             color          : colorBody,
             iconColor      : colorPrimary,
-            '::placeholder': {
-                color: colorMuted,
-            },
+            '::placeholder': { color: colorMuted },
         },
         invalid: {
-            color    : colorDanger,
-            iconColor: colorDanger,
-            backgroundColor: 'transparent'
+            color          : colorDanger,
+            iconColor      : colorDanger,
+            backgroundColor: 'transparent',
         },
         complete: {
-            color    : colorBody,
-            iconColor: colorSuccess,
-            backgroundColor: 'transparent'
+            color          : colorBody,
+            iconColor      : colorSuccess,
+            backgroundColor: 'transparent',
         },
     };
 
@@ -78,11 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const stripe   = Stripe(publicKey);
     const elements = stripe.elements({
-        // Passe la couleur de fond globalement à tous les éléments
-        // Stripe l'applique correctement à l'iframe sans conflit
-        appearance: {
-            theme: 'none', // désactive le thème Stripe par défaut
-        },
+        appearance: { theme: 'none' },
     });
 
     const cardNumber = elements.create('cardNumber', { style: stripeStyle, showIcon: true });
@@ -115,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------------------
-    // Affichage conditionnel
+    // Affichage conditionnel du Card Element
     // -------------------------------------------------------------------------
 
     function syncCardVisibility() {
@@ -140,26 +129,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const selected = form.querySelector('input[type="radio"]:checked');
         const isNew    = !selected || selected.value === 'new';
 
+        // Carte existante → soumission classique
         if (!isNew) {
-            setLoading(true);
+            setLoading(true, labelProcessing);
             form.submit();
             return;
         }
 
-        setLoading(true);
+        setLoading(true, labelProcessing);
 
-        const { paymentMethod, error } = await stripe.createPaymentMethod({
+        // Nouvelle carte → tokenisation Stripe.js
+        const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
             type: 'card',
             card: cardNumber,
         });
 
-        if (error) {
-            if (cardErrors) cardErrors.textContent = error.message;
+        if (pmError) {
+            showError(pmError.message);
             setLoading(false);
             return;
         }
 
         if (newMethodInput) newMethodInput.value = paymentMethod.id;
+
         form.submit();
     });
 
@@ -167,23 +159,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helpers
     // -------------------------------------------------------------------------
 
-    function setLoading(isLoading) {
+    function showError(message) {
+        if (cardErrors) cardErrors.textContent = message;
+    }
+
+    function setLoading(isLoading, label = labelPay) {
         if (!submitBtn) return;
 
         submitBtn.disabled = isLoading;
 
-        if (isLoading) {
-            if (spinner) {
-                spinner.classList.remove('d-none');
-                submitBtn.querySelector('p').classList.add('d-none');
-                submitBtn.querySelector('.txt').classList.remove('d-none');
-            }
+        if (spinner) spinner.classList.toggle('d-none', !isLoading);
+
+        const p   = submitBtn.querySelector('p');
+        const txt = submitBtn.querySelector('.txt');
+
+        if (isLoading === false) {
+            if (p)   p.classList.add('d-none');
+            if (txt) { txt.textContent = label; txt.classList.remove('d-none'); }
         } else {
-            if (spinner) {
-                spinner.classList.add('d-none');
-                submitBtn.querySelector('p').classList.add('d-none');
-                submitBtn.querySelector('.txt').classList.remove('d-none');
-            };
+            if (p)   p.classList.remove('d-none');
+            if (txt) txt.classList.add('d-none');
         }
     }
 });

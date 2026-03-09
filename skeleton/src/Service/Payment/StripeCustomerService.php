@@ -6,19 +6,21 @@ use App\Entity\User\Payment\StripeCustomer;
 use App\Entity\User\Client;
 use App\Repository\User\Payment\StripeRepository as StripeCustomerRepository;
 use App\Service\Api\StripeService;
+use App\Service\Payment\StripeMerchantService;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\Cart\CartService;
 
 /**
- * Responsabilité : faire le lien entre un Client Symfony et son customer Stripe.
- * Orchestre StripeService (API) + Doctrine (persistance).
- * C'est ici que vit toute la logique métier liée au customer.
+ * Responsability : Link Customer and update it with Doctrine to API Stripe Service
  */
 class StripeCustomerService
 {
     public function __construct(
         private readonly StripeService $stripeService,
         private readonly StripeCustomerRepository $stripeCustomerRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly StripeMerchantService $stripeMerchantService,
+        private readonly EntityManagerInterface $entityManager,
+        private CartService $cart
     ) {}
 
     // =========================================================================
@@ -117,26 +119,139 @@ class StripeCustomerService
     }
 
     // =========================================================================
-    // Payment Intents
+    // Payment Intents — multi-vendor
     // =========================================================================
 
     /**
-     * Crée un PaymentIntent depuis une liste de produits pour un client.
-     * Crée le customer Stripe si nécessaire.
+     * Creates one PaymentIntent per Professional found in the cart.
+     * If a merchant account is not ready, that group is skipped and added to $failures.
+     *
+     * Returns:
+     * [
+     *   'succeeded' => [
+     *     ['intent' => [...], 'merchant' => 'acct_xxx', 'items' => [...]], ...
+     *   ],
+     *   'failed' => [
+     *     ['merchant' => 'CompanyName', 'reason' => '...', 'items' => [...]], ...
+     *   ],
+     * ]
      */
-    public function createPaymentIntentFromItems(
-        array  $items,
-        Client $client,
-        string $currency        = 'eur',
-        string $paymentMethodId = ''
+    public function createPaymentIntentsFromCart(
+        Client  $client,
+        string  $currency        = 'eur',
+        ?string $paymentMethodId = null
     ): array {
         $stripeCustomer = $this->resolveCustomer($client);
+        $grouped        = $this->getCartItemsGroupedByProfessional();
 
-        return $this->stripeService->createPaymentIntentFromItems(
-            $items,
-            $stripeCustomer->getCustomerId(),
-            $currency,
-            $paymentMethodId
-        );
+        $succeeded = [];
+        $failed    = [];
+
+        foreach ($grouped as $professionalId => $group) {
+            $professional = $group['professional'];
+            $items        = $group['items'];
+
+            $merchant  = $this->stripeMerchantService->resolveAccount($professional);
+            try {
+                
+                $accountId = $merchant->getAccountId();
+
+                if ($accountId === null) {
+                    throw new \RuntimeException(sprintf(
+                        'No Stripe Connect account found for "%s".',
+                        $professional->getCompanyName()
+                    ));
+                }
+
+                // Check if account is iban etc is complete with iban etc
+                // If the account is not ready yet, funds are held on the platform.
+                // Stripe will automatically transfer them once onboarding is complete.
+                $resolvedAccountId = $this->stripeService->isConnectAccountReady($accountId)
+                    ? $accountId
+                    : null;
+
+                $intent = $this->stripeService->createPaymentIntentFromItems(
+                    $items,
+                    $stripeCustomer->getCustomerId(),
+                    $currency,
+                    $paymentMethodId,
+                    $resolvedAccountId
+                );
+
+                $succeeded[] = [
+                    'intent'   => $intent,
+                    'merchant' => $accountId,
+                    'professional' => $professional,
+                    'items'    => $items,
+                ];
+
+            } catch (\Exception $e) {
+                $failed[] = [
+                    'merchant' => $professional->getCompanyName(),
+                    'reason'   => $e->getMessage(),
+                    'items'    => $items,
+                ];
+            }
+        }
+
+        return ['succeeded' => $succeeded, 'failed' => $failed];
+    }
+
+    /**
+     * Converts cart items into the array format expected by StripeService,
+     * grouped by Professional.
+     *
+     * Returns:
+     * [
+     *   $professionalId => [
+     *     'professional' => Professional,
+     *     'items'        => [['name', 'quantity', 'price' (float € unit TTC)], ...]
+     *   ],
+     *   ...
+     * ]
+     */
+    public function getCartItemsGroupedByProfessional(): array
+    {
+        $grouped = [];
+
+        foreach ($this->cart->getItems() as $item) {
+            $package      = $item->getPackage();
+            $professional = $package->getProduct()->getCompany();
+            $id           = $professional->getId();
+
+            if (!isset($grouped[$id])) {
+                $grouped[$id] = [
+                    'professional' => $professional,
+                    'items'        => [],
+                ];
+            }
+
+            $grouped[$id]['items'][] = [
+                'name'     => $package->getProduct()->getName() . ' x' . $package->getQuantity(),
+                'quantity' => $item->getQuantity(),
+                'price'    => $package->getFinalPrice(), // unit price TTC in euros (float)
+            ];
+        }
+
+        return $grouped;
+    }
+
+    /**
+     * Flat list of cart items (all professionals merged).
+     * Used for the success page summary.
+     *
+     * @return array [['name', 'quantity', 'price'], ...]
+     */
+    public function getCartItems(): array
+    {
+        $items = [];
+
+        foreach ($this->getCartItemsGroupedByProfessional() as $group) {
+            foreach ($group['items'] as $item) {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
     }
 }

@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Create payment method{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'My cart',
+            route: 'app_cart'
+        },
+        {
+            label: 'Payment',
+            route: 'app_cart_payment'
+        },
+        {
+            label: 'Payment succeed',
+            route: 'app_payment_success'
+        }
+    ] %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container py-3">
+        <div class="text-center mb-5">
+            <div class="d-flex text-success align-items-center mx-auto justify-content-center">
+                {{ ux_icon('line-md:thumbs-up', {width: '30px', height: '30px'}) }}
+                <h1 class="mb-0">{{ 'Payment succeed'|trans }}</h1>
+            </div>
+            
+            <p class="text-muted">{{ 'Purchases summary'|trans }}</p>
+        </div>
+
+        <div class="card mx-auto" style="">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">{{ 'Payment summary'|trans }}</span>
+                <small class="text-muted">{{ summary.paid_at }}</small>
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-borderless table caption-top mb-0">
+                    <tbody>
+                        {% for order in summary.orders %}
+                            <tr>
+                                <td colspan="2"><p class="text-primary fw-bold mb-0">{{ order.merchant.company_name }}</p></td>
+                                <td colspan="2" class="text-end text-muted">
+                                    {{ order.merchant.street }}, {{ order.merchant.zip_code}} {{ order.merchant.country }}
+                                </td>
+                            </tr>
+                            {% for item in order.items %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td class="text-center">x{{ item.quantity }}</td>
+                                    <td class="text-end">{{ item.price|number_format(2, ',', ' ') }} {{ order.currency|upper }}</td>
+                                    <td class="text-end">{{ (item.price * item.quantity)|number_format(2, ',', ' ') }} {{ order.currency|upper }}</td>
+                                </tr>
+                            {% endfor %}
+                            
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-top">
+                            <td colspan="3" class="fw-bold">{{ 'Total'|trans }}</td>
+                            <td class="text-end fw-bold text-success">
+                                {{ (summary.total / 100)|number_format(2, ',', ' ') }} EUR
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </main>
+{% endblock %}
