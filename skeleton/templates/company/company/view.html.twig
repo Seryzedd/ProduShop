@@ -34,10 +34,12 @@
 
             {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
         </h1>
+        <p>
+            <strong class="text-primary">{{ ux_icon('line-md:phone') }}</strong>
+            {{ professional.phone ?: 'Not registered'|trans }}
+        </p>
 
         <p class="text-muted">{{ professional.description }}</p>
-
-        {{ block('radius_form', 'product/product/index.html.twig') }}
 
         {% include 'components/map.html.twig' with {'radius': radius} %}
 

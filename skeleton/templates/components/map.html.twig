@@ -184,22 +184,22 @@
             lng: null
             {% endif %}
         },
-
         products: [
             {% for company in companies %}
                 {% set addr = company.adress %}
             {% if addr and addr.hasCoordinates() %}
-            {
-                company: {{ (company.companyName ?? '')|json_encode|raw }},
-                companyLink: {{ path('app_company', { id: company.id })|json_encode|raw }},
-                lat:     {{ addr.latitude }},
-                lng:     {{ addr.longitude }},
-                address: {{ (addr.street ~ ', ' ~ addr.zipCode ~ ' ' ~ addr.country)|json_encode|raw }}
-            }{% if not loop.last %},{% endif %}
+                {
+                    company: {{ (company.companyName ?? '')|json_encode|raw }},
+                    companyLink: {{ path('app_company', { id: company.id })|json_encode|raw }},
+                    lat:     {{ addr.latitude }},
+                    lng:     {{ addr.longitude }},
+                    phone: {{ company.phone|json_encode|raw }},
+                    address: {{ (addr.street ~ ', ' ~ addr.zipCode ~ ' ' ~ addr.country)|json_encode|raw }}
+                }
+                {% if not loop.last %},{% endif %}
             {% endif %}
             {% endfor %}
         ]
-
     };
 </script>
 
@@ -209,6 +209,8 @@
 (function () {
     const data    = window._mapData;
     const markers = [];
+
+    console.log(data);
 
     // ── Product icon (inline SVG) ─────────────────────────────
     const productIcon = L.divIcon({
@@ -288,9 +290,11 @@
 
     // ── Popup content ─────────────────────────────────────────
     function buildPopup(p) {
+        console.log(p);
         return `
             <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
                 <a href="${p.companyLink}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover fw-semibold">${esc(p.company)}</a>
+                <p class="mb-0">${p.phone}</p>
                 <hr class="my-2">
                 <p class="mb-0 text-muted small">
                     <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}

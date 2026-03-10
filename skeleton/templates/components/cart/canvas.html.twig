@@ -6,13 +6,13 @@
         </div>
         <div class="offcanvas-body">
             {% if cart.items|length > 0 %}
+                <p class="text-end">
+                    <a href="" class="btn btn-light">
+                        {% trans %}Clear my cart{% endtrans %}
+                        {{ ux_icon('ic:round-delete') }}
+                    </a>
+                </p>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item text-end">
-                        <a href="" class="btn btn-light">
-                            {% trans %}Clear my cart{% endtrans %}
-                            {{ ux_icon('ic:round-delete') }}
-                        </a>
-                    </li>
                     {% for item in cart.items %}
                         <li class="list-group-item">
                             <div class="row align-items-center">
@@ -23,8 +23,8 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_view_product', {id: item.package.id}) }}">{{ item.package.product.name }}</a>
-                                    <p class="mb-0">
-                                        {% trans with {'%count%': item.package.quantity} %}%count% product|]1,Inf[%count% products{% endtrans %}
+                                    <p class="mb-0 text-muted">
+                                        <small>{{ item.package.name}}</small>
                                     </p>
                                 </div>
                                 <div class="col-lg-2">
