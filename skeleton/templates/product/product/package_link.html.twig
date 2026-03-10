@@ -7,7 +7,10 @@
                 <p class="text-info"><small>{% trans with {'%count%': package.stock} %}%count% left{% endtrans %}</small></p>
             {% endif %}
             
-            <p class="mb-0 text-end fw-semibold">x{{ package.quantity }}</p>
+            <p class="mb-0 text-end fw-semibold">
+                {{ package.name }}<br>
+                <small>x{{ package.quantity }}</small>
+            </p>
         </div>
         <h4 class="text-center text-muted">
             {{ package.finalPrice|number_format(2, ',', ' ') }}

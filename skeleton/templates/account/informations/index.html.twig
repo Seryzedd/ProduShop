@@ -76,6 +76,8 @@
 
     <p class=""><strong class="me-2">{% trans %}Email{% endtrans %} :</strong>{{ user.email }}</p>
 
+    <p class=""><strong class="me-2">{% trans %}Phone{% endtrans %} :</strong>{{ user.phone ?: 'Not registered' }}</p>
+
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
             <strong>{% trans %}Postale adress{% endtrans %}</strong>
@@ -111,6 +113,8 @@
         <strong>{% trans %}Description{% endtrans %} :</strong><br>
         <small class="text-muted">{{ user.description ?: 'Empty description'|trans }}</small>
     </p>
+
+    <p class=""><strong class="me-2">{% trans %}Phone{% endtrans %} :</strong>{{ user.phone ?: 'Not registered' }}</p>
 
     <p class=""><strong class="me-2">{% trans %}Siret{% endtrans %} :</strong>{{ user.siret }}</p>
 

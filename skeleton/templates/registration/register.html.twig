@@ -19,6 +19,18 @@
 
 {% block breadcrumb %}{% endblock %}
 
+{% block phone_scripts %}
+    <script>
+        window.phoneValidation = {
+            messages: {
+                required: "{{ 'Phone number required'|trans|e('js') }}",
+                invalid:  "{{ 'Invalid phone number'|trans|e('js') }}",
+            }
+        };
+    </script>
+    {{ phone_format_scripts() }}
+{% endblock %}
+
 {% block body %}
     <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
         <div class="col-lg-8 card p-3">

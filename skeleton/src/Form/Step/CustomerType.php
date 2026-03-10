@@ -7,7 +7,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\DTO\User\CustomerSign;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class CustomerType extends AbstractType
 {
@@ -16,6 +18,12 @@ class CustomerType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'attr' => ['placeholder' => 'example@contact.com']
+            ])
+            ->add('phone', TextType::class, [
+                'attr' => [
+                    'class' => 'phoneFormat',
+                    'placeholder' => 'xx xx xx xx xx'
+                ]
             ])
             ->add('professional', ChoiceType::class, [
                 'label' => false,

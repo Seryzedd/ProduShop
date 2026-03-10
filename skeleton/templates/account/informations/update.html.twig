@@ -52,6 +52,8 @@
                         {{ form_row(form.lastname) }}
                     {% endif %}
 
+                    {{ form_row(form.phone) }}
+
                     <button class="btn btn-primary mt-4 mb-4">
                         {% trans %}Save{% endtrans %}
                     </button>
@@ -65,4 +67,16 @@
     {{ parent() }}
     {{ importmap('collection-form') }}
     <script src="{{ asset('script/textPreviewInput.js') }}"
+{% endblock %}
+
+{% block phone_scripts %}
+    <script>
+        window.phoneValidation = {
+            messages: {
+                required: "{{ 'Phone number required'|trans|e('js') }}",
+                invalid:  "{{ 'Invalid phone number'|trans|e('js') }}",
+            }
+        };
+    </script>
+    {{ phone_format_scripts() }}
 {% endblock %}

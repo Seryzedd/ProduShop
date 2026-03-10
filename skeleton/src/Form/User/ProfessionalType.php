@@ -26,6 +26,12 @@ class ProfessionalType extends AbstractType
                 ],
                 'disabled' => true
             ])
+            ->add('phone', TextType::class, [
+                'attr' => [
+                    'class' => 'phoneFormat',
+                    'placeholder' => 'xx xx xx xx xx'
+                ]
+            ])
             ->add('siret', TextType::class, [
                 'attr' => [
                     'class' => 'siret',

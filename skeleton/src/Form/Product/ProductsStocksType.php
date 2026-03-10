@@ -22,7 +22,8 @@ class ProductsStocksType extends AbstractType
             ->add('packages', CollectionType::class, [
                 // each entry in the array will be an "email" field
                 'entry_type' => PackageType::class,
-                'label' => false
+                'label' => false,
+                'by_reference' => false
             ])
         ;
     }

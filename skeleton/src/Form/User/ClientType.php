@@ -22,6 +22,12 @@ class ClientType extends AbstractType
             ])
             ->add('firstname', TextType::class)
             ->add('lastname', TextType::class)
+            ->add('phone', TextType::class, [
+                'attr' => [
+                    'class' => 'phoneFormat',
+                    'placeholder' => 'xx xx xx xx xx'
+                ]
+            ])
         ;
     }
 

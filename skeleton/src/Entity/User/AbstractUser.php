@@ -58,6 +58,9 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
+    #[ORM\Column(length: 100)]
+    private ?string $phone = null;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -217,6 +220,18 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
                 $order->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(string $phone): static
+    {
+        $this->phone = $phone;
 
         return $this;
     }

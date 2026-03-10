@@ -25,8 +25,10 @@ let validation = {
     }
 };
 
-passwordInputFirst.addEventListener('input', validatePassword);
-passwordInputFirst.addEventListener('blur', validatePassword);
+if(passwordInputFirst) {
+    passwordInputFirst.addEventListener('input', validatePassword);
+    passwordInputFirst.addEventListener('blur', validatePassword);
+}
 
 // Password validation
 function validatePassword() {

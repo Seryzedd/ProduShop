@@ -44,6 +44,9 @@ class Package
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'package')]
     private Collection $orderItems;
 
+    #[ORM\Column(length: 255)]
+    private string $name = '';
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
@@ -178,6 +181,18 @@ class Package
                 $orderItem->setPackage(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }

@@ -64,7 +64,6 @@ class CartItem
     /** Prix total de la ligne (prix TTC * quantité) */
     public function getLineTotal(): float
     {
-        dump($this);
         return $this->package->getFinalPrice() * $this->quantity;
     }
 

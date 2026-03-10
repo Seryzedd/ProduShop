@@ -151,8 +151,6 @@ class StripeCustomerService
             $professional = $group['professional'];
             $items        = $group['items'];
 
-            dump($group);
-
             $merchant  = $this->stripeMerchantService->resolveAccount($professional);
             try {
                 
@@ -186,6 +184,8 @@ class StripeCustomerService
                     'professional' => $professional,
                     'items'    => $items,
                 ];
+
+                $this->stripeMerchantService->updateStocks($items);
 
             } catch (\Exception $e) {
                 $failed[] = [

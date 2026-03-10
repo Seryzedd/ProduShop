@@ -4,6 +4,7 @@ namespace App\Service\Payment;
 
 use App\Entity\User\Payment\StripeMerchant;
 use App\Entity\User\Professional;
+use App\Entity\Product\Package;
 use App\Repository\User\Payment\StripeMerchantRepository;
 use App\Service\Api\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -87,6 +88,23 @@ class StripeMerchantService
         return $isReady;
     }
 
+    public function updatePackageStock(Package $package, string $quantity)
+    {
+        $package->setStock(max(0, $package->getStock() - $quantity));
+
+        $this->entityManager->persist($package);
+
+        return $package;
+    }
+
+    public function updateStocks(array $items)
+    {
+        foreach ($items as $item) {
+            $this->updatePackageStock($item['package'], $item['quantity']);
+        }
+    }
+
+
     // =========================================================================
     // Private
     // =========================================================================
@@ -101,4 +119,5 @@ class StripeMerchantService
 
         return $stripeMerchant;
     }
+
 }
