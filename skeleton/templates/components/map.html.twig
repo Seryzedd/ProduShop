@@ -187,17 +187,17 @@
         products: [
             {% for company in companies %}
                 {% set addr = company.adress %}
-            {% if addr and addr.hasCoordinates() %}
-                {
-                    company: {{ (company.companyName ?? '')|json_encode|raw }},
-                    companyLink: {{ path('app_company', { id: company.id })|json_encode|raw }},
-                    lat:     {{ addr.latitude }},
-                    lng:     {{ addr.longitude }},
-                    phone: {{ company.phone|json_encode|raw }},
-                    address: {{ (addr.street ~ ', ' ~ addr.zipCode ~ ' ' ~ addr.country)|json_encode|raw }}
-                }
-                {% if not loop.last %},{% endif %}
-            {% endif %}
+                {% if addr and addr.hasCoordinates() %}
+                    {
+                        company: {{ (company.companyName ?? '')|json_encode|raw }},
+                        companyLink: {{ path('app_company', { id: company.id })|json_encode|raw }},
+                        lat:     {{ addr.latitude }},
+                        lng:     {{ addr.longitude }},
+                        phone: {{ company.phone|json_encode|raw }},
+                        address: {{ (addr.street ~ ', ' ~ addr.zipCode ~ ' ' ~ addr.country)|json_encode|raw }}
+                    }
+                    {% if not loop.last %},{% endif %}
+                {% endif %}
             {% endfor %}
         ]
     };

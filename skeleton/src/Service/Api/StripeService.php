@@ -14,7 +14,7 @@ class StripeService extends AbstractApi
 
     private const MINIMUM_AMOUNT_EUR = 50;
 
-    private const PLATFORM_FEE_PERCENT = 5; // % kept by the platform
+    private float $amountFees = 5; // % kept by the platform
 
     private ?Stripe $stripeConfig = null;
 
@@ -28,6 +28,8 @@ class StripeService extends AbstractApi
         $config = $this->stripeRepository->findStripe();
 
         $this->stripeConfig = $config;
+
+        $this->amountFees = $config->getFeesAmount();
 
         // Configure requests options
         $this->setOptions([
@@ -47,6 +49,11 @@ class StripeService extends AbstractApi
     public function getSecretKey()
     {
         return $this->stripeConfig->getSecretKey();
+    }
+
+    public function isActive()
+    {
+        return $this->stripeConfig->isActive();
     }
 
     public function getAccounts()
@@ -133,6 +140,17 @@ class StripeService extends AbstractApi
         $account = $this->getConnectAccount($accountId);
 
         return $account['charges_enabled'] && $account['payouts_enabled'];
+    }
+
+    public function isReady(): bool
+    {
+        try{
+            $this->getAccount();
+        } catch(\Exception $e) {
+            return false;
+        }
+
+        return $this->isActive() === true;
     }
 
     /**
@@ -274,7 +292,7 @@ class StripeService extends AbstractApi
 
         if($merchantAccountId) {
             // Connect: transfer 95% to the merchant, keep 5% as platform fee
-            $params['application_fee_amount']      = (int) round($total * self::PLATFORM_FEE_PERCENT / 100);
+            $params['application_fee_amount']      = (int) round($total * $this->amountFees / 100);
             $params['transfer_data[destination]']  = $merchantAccountId;
         }
         

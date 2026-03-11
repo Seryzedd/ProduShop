@@ -30,6 +30,12 @@ final class PaymentController extends AbstractController
             $this->addFlash('info', 'No product in cart to pay. Try to add some first.');
         }
 
+        if(!$this->stripeService->isReady()) {
+            $this->addFlash('info', 'Payments configuration are inactive.');
+
+            return $this->redirectToRoute('app_cart');
+        }
+
         /** @var \App\Entity\User\Client $client */
         $client = $this->getUser();
 

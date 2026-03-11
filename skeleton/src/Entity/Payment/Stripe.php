@@ -26,6 +26,9 @@ class Stripe
     #[ORM\Column]
     private bool $active = false;
 
+    #[ORM\Column]
+    private ?float $feesAmount = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class Stripe
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function getFeesAmount(): ?float
+    {
+        return $this->feesAmount;
+    }
+
+    public function setFeesAmount(float $feesAmount): static
+    {
+        $this->feesAmount = $feesAmount;
 
         return $this;
     }
