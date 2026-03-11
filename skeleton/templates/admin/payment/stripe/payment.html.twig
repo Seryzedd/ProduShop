@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%id%': payment.id} %}Payment "%id%"{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard'|trans,
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Payments'|trans,
+            route: 'app_admin_payments_stripe',
+            parameters: []
+        },
+        {
+            label: 'Payment "%id%"'|trans({'%id%': payment.id}),
+            route: 'app_admin_payment_stripe',
+            parameters: {id: payment.id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container mb-3">
+        <h1>{% trans %}Payment details{% endtrans %}</h1>
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="text-muted">{{ payment.id }}</p>
+                <p class="mb-0">{{ payment.created|date('l d F Y H:i') }}</p>
+            </div>
+            
+            <div>
+                <h4 class="text-end text-secondary mb-0"><strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</h4>
+                <p class="text-end text-muted mb-0">{{ (payment.amount_received / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</p>
+            </div>
+            
+        </div>
+        <div class="card p-4">
+            <div class="row align-items-center">
+                <div class="col-12">
+                    {% if payment.status == "succeeded" %}
+                        <p class="text-end text-success">{{ payment.status }}</p>
+                    {% elseif payment.status == "requires_confirmation" %}
+                        <p class="text-end text-info">{{ payment.status }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-lg-5">
+                    <h5>{% trans %}Customer{% endtrans %} :</h5>
+                    <p>
+                        <strong class="text-primary">{{ payment.customer.name }}</strong><br>
+                        {{ payment.customer.email }}<br>
+                        <code>{{ payment.customer.id }}</code>
+                    </p>
+
+                    <p class="mb-0">
+                        {{ payment.payment_method.card.brand }}<br>
+                        <small class="text-muted">
+                            xxxx xxxx xxxx {{ payment.payment_method.card.last4 }}
+                            {% trans with {'%month%': payment.payment_method.card.exp_month, '%year%': payment.payment_method.card.exp_year} %}Expire at %month%/%year%{% endtrans %}
+                        </small>
+                    </p>
+                </div>
+
+                <div class="col-lg-2">
+                    <p class="text-center mb-0">
+                        {{ ux_icon('line-md:arrow-right') }}
+                    </p>
+                </div>
+
+                <div class="col-lg-5">
+                    <h5>{% trans %}Merchant{% endtrans %} :</h5>
+
+                    {% if payment.transfer_data %}
+                        <p>
+                            <strong class="text-primary">{{ payment.transfer_data.destination.individual.first_name }} {{ payment.transfer_data.destination.individual.last_name }}</strong>
+                        </p>
+                        <p class="mb-0">{{ payment.transfer_data.destination.email }}</p>
+                        <code>{{ payment.transfer_data.destination.id }}</code>
+
+                        
+                        {% for bank in payment.transfer_data.destination.external_accounts.data %}
+                            <p class="text-muted">
+                                <small>
+                                    {{ bank.bank_name }}<br>
+                                    xxxx xxxx xxxx {{ bank.last4 }}
+                                </small>
+                            </p>
+                        {% endfor %}
+                    {% else %}
+                        {% trans %}Account is not ready{% endtrans %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

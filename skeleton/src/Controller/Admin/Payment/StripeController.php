@@ -20,7 +20,7 @@ final class StripeController extends AbstractController
 
     }
 
-    #[Route('/', name: 'app_admin_payment_stripe')]
+    #[Route('/', name: 'app_admin_config_stripe')]
     public function index(Request $request, StripeRepository $stripeRepository, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(StripeType::class, $stripeRepository->findStripe());
@@ -52,12 +52,20 @@ final class StripeController extends AbstractController
     }
 
     #[Route('/payments', name: 'app_admin_payments_stripe')]
-    public function getPayments()
+    public function getPayments(): Response
     {
         $payments = $this->stripe->getPaymentsIntents();
 
         return $this->render('admin/payment/stripe/payments.html.twig', [
             'payments' => $payments
+        ]);
+    }
+
+    #[Route('/payment/{id}', name: 'app_admin_payment_stripe')]
+    public function payment(string $id): Response
+    {
+        return $this->render('admin/payment/stripe/payment.html.twig', [
+            'payment' => $this->stripe->getPaymentIntent($id)
         ]);
     }
 }

@@ -245,7 +245,11 @@ class StripeService extends AbstractApi
     public function getPaymentsIntents(): array
     {
         $response = $this->sendRequest(
-            self::BASE_URL . '/payment_intents'
+            self::BASE_URL . '/payment_intents',
+            'GET',
+            [
+                'expand' => ['data.customer', 'data.payment_method'],
+            ]
         );
 
         return $response->toArray();
@@ -320,7 +324,11 @@ class StripeService extends AbstractApi
     public function getPaymentIntent(string $paymentIntentId): array
     {
         return $this->sendRequest(
-            self::BASE_URL . '/payment_intents/' . $paymentIntentId
+            self::BASE_URL . '/payment_intents/' . $paymentIntentId,
+            'GET',
+            [
+                'expand' => ['customer', 'payment_method', 'transfer_data.destination']
+            ]
         )->toArray();
     }
 

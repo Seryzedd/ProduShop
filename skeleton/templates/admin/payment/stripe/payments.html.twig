@@ -12,11 +12,6 @@
             parameters: []
         },
         {
-            label: 'Stripe',
-            route: 'app_admin_payment_stripe',
-            parameters: []
-        },
-        {
             label: 'Payments',
             route: 'app_admin_payments_stripe',
             parameters: []
@@ -27,14 +22,48 @@
 {% endblock %}
 
 {% block body %}
-    <main class="container">
+    <main class="container mb-3">
         <h1>{% trans %}Payment list{% endtrans %}</h1>
-        {{ block('stripe_navigation', 'admin/payment/stripe/index.html.twig') }}
         
-        {% for payment in payments.data %}
-            <div class="row">
-                <div class="col-12"></div>
-            </div>
-        {% endfor %}
+        <ul class="list-group">
+            {% for payment in payments.data %}
+                <li class="list-group-item list-group-item-action position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4">
+                            <a class="link-offset-2 stretched-link link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_admin_payment_stripe', {id: payment.id}) }}">
+                                <strong>{{ payment.customer.name }}</strong><br>
+                                <small>{{ payment.customer.email }}</small>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <p class="mb-0 text-muted">
+                                {{ payment.description }}
+                            </p>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <p class="mb-0">
+                                {{ payment.created|date('d/m/Y H:i') }}
+                            </p>
+                        </div>
+
+                        <div class="col-lg-2">
+                            {% if payment.status == "succeeded" %}
+                                <p class="text-center text-success mb-0">{{ payment.status }}</p>
+                            {% elseif payment.status == "requires_confirmation" %}
+                                <p class="text-center text-info mb-0">{{ payment.status }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-lg-2">
+                            <p class="mb-0 text-end">
+                                <strong class="text-secondary">{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}
+                            </p>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     </main>
 {% endblock %}
