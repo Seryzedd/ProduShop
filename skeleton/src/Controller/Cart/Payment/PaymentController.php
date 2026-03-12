@@ -65,6 +65,8 @@ final class PaymentController extends AbstractController
                     paymentMethodId: $paymentMethodId
                 );
 
+                dump($result);
+
                 if (empty($result['succeeded'])) {
                     throw new \RuntimeException('All payment intents failed. No charge was made.');
                 }

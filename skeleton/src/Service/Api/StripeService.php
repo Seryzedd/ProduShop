@@ -299,16 +299,16 @@ class StripeService extends AbstractApi
             $params['application_fee_amount']      = (int) round($total * $this->amountFees / 100);
             $params['transfer_data[destination]']  = $merchantAccountId;
         }
-        
 
-        foreach ($items as $i => $item) {
-            $params['metadata[item_' . $i . ']'] = sprintf(
-                '%s x%d @ %.2f €',
-                $item['name'],
-                $item['quantity'],
-                $item['price']
-            );
-        }
+        $params['metadata[items]'] = json_encode(array_map(
+            fn(array $item) => [
+                'name'  => $item['name'],
+                'qty'   => $item['quantity'],
+                'price' => $item['price'],
+                'tva'   => $item['tax'] ?? 0.0,
+            ],
+            $items
+        ));
 
         $params['metadata[total_items]'] = count($items);
 

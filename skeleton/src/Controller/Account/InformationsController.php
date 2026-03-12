@@ -20,6 +20,7 @@ use App\Entity\User\Professional;
 final class InformationsController extends AbstractController
 {
     public function __construct(private StripeService $stripeService) {}
+    
     #[Route('/', name: 'app_account_informations')]
     public function index(): Response
     {

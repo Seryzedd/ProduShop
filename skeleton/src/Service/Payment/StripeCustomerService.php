@@ -229,10 +229,11 @@ class StripeCustomerService
             }
 
             $grouped[$id]['items'][] = [
-                'name'     => $package->getProduct()->getName() . ' x' . $package->getQuantity(),
+                'name'     => $package->getProduct()->getName() . ' ' . $package->getName(),
                 'quantity' => $item->getQuantity(),
                 'price'    => $package->getFinalPrice(), // unit price TTC in euros (float)
-                'package'  => $package
+                'package'  => $package,
+                'tax' => $package->getTaxe() *100
             ];
         }
 

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facture {{ invoice_number }}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #0f0f0f;
+    --muted:    #6b7280;
+    --line:     #343a40;
+    --accent:   #343a40;
+    --accent2:  #75D947;
+    --bg:       #ffffff;
+    --surface:  #f9fafb;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 56px 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 36px;
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 40px;
+  }
+
+  .brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .brand span { color: var(--accent2); }
+
+  .invoice-meta { text-align: right; }
+
+  .invoice-meta .invoice-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .invoice-meta .invoice-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--accent);
+  }
+
+  .invoice-meta .invoice-date {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── Status badge ── */
+  .status-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .status-succeeded { background: #d1fae5; color: #065f46; }
+  .status-pending   { background: #fef3c7; color: #92400e; }
+  .status-failed    { background: #fee2e2; color: #991b1b; }
+
+  /* ── Parties ── */
+  .parties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 44px;
+  }
+
+  .party-block .party-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .party-block .party-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .party-block .party-detail {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* ── Items table ── */
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  table.items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 36px;
+  }
+
+  table.items thead tr {
+    background: var(--accent);
+    color: white;
+  }
+
+  table.items thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  table.items thead th:not(:first-child) { text-align: right; }
+
+  table.items tbody tr { border-bottom: 1px solid var(--line); }
+  table.items tbody tr:last-child { border-bottom: none; }
+  table.items tbody tr:nth-child(even) { background: var(--surface); }
+
+  table.items tbody td { padding: 11px 14px; font-size: 13px; }
+  table.items tbody td:not(:first-child) { text-align: right; }
+
+  /* ── Totals ── */
+  .totals-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 44px;
+  }
+
+  .totals { width: 320px; }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+
+  .totals-row:last-child { border-bottom: none; }
+  .totals-row .label { color: var(--muted); }
+  .totals-row .value { font-weight: 500; }
+
+  .totals-row.total-ttc {
+    background: var(--accent);
+    color: white;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-top: 4px;
+    border-bottom: none;
+  }
+
+  .totals-row.total-ttc .label { color: rgba(255,255,255,0.75); font-weight: 600; }
+  .totals-row.total-ttc .value { font-size: 16px; font-weight: 700; }
+
+  /* ── Platform note ── */
+  .platform-note {
+    background: var(--surface);
+    border-left: 3px solid var(--accent2);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 40px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .platform-note strong { color: var(--ink); }
+
+  /* ── Footer ── */
+  .footer {
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .footer .pi-id {
+    font-family: monospace;
+    font-size: 10px;
+    background: var(--surface);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  {# ── Header ── #}
+  <div class="header">
+    <div class="brand">
+        <img src="{{ imgToBase64(asset("icons/logo.png")) }}">
+    </div>
+    <div class="invoice-meta">
+      <div class="invoice-label">Facture</div>
+      <div class="invoice-number">{{ invoice_number }}</div>
+      <div class="invoice-date">Émise le {{ invoice_date }}</div>
+      <div>
+        <span class="status-badge status-{{ status }}">
+          {{ status == 'succeeded' ? 'Payé' : status }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Parties ── #}
+  <div class="parties">
+    <div class="party-block">
+      <div class="party-label">Client</div>
+      <div class="party-name">{{ client.name }}</div>
+      <div class="party-detail">{{ client.email }}</div>
+    </div>
+    <div class="party-block">
+      <div class="party-label">Marchand</div>
+      <div class="party-name">{{ merchant.name }}</div>
+      <div class="party-detail">{{ merchant.email }}</div>
+      <div class="party-detail" style="font-size:10px; margin-top:4px; font-family:monospace;">
+        {{ merchant.id }}
+      </div>
+    </div>
+  </div>
+
+  {# ── Items ── #}
+  <div class="section-title">Détail de la commande</div>
+  <table class="items">
+    <thead>
+      <tr>
+        <th>Désignation</th>
+        <th>Qté</th>
+        <th>Prix unitaire HT</th>
+        <th>TVA</th>
+        <th>Sous-total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit_price }} {{ currency }}</td>
+            <td>{{ item.tva_rate }}%</td>
+            <td>{{ item.subtotal }} {{ currency }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# ── Totals ── #}
+  <div class="totals-wrapper">
+    <div class="totals">
+      <div class="totals-row">
+        <span class="label">Sous-total HT</span>
+        <span class="value">{{ amounts.total_ht }} {{ currency }}</span>
+      </div>
+      <div class="totals-row">
+        <span class="label">TVA</span>
+        <span class="value">{{ amounts.tva_amount }} {{ currency }}</span>
+      </div>
+      <div class="totals-row total-ttc">
+        <span class="label">Total TTC</span>
+        <span class="value">{{ amounts.total_ttc }} {{ currency }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Platform note ── #}
+  <div class="platform-note">
+    <strong>Répartition plateforme :</strong>
+    Commission prélevée&nbsp;: <strong>{{ amounts.fee }} {{ currency }}</strong>
+    &nbsp;·&nbsp;
+    Reversé au marchand&nbsp;: <strong>{{ amounts.merchant_net }} {{ currency }}</strong>
+  </div>
+
+  {# ── Footer ── #}
+  <div class="footer">
+    <div>Document généré automatiquement — non soumis à TVA si auto-entrepreneur</div>
+    <div class="pi-id">{{ payment_intent_id }}</div>
+  </div>
+
+</div>
+</body>
+</html>

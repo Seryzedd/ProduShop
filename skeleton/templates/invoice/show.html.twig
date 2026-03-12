@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}My products{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations'
+        },
+        {
+            label: 'Payments',
+            route: 'app_admin_payments_stripe'
+        },
+        {
+            label: 'Payment "%id%"'|trans({'%id%': payment_intent_id}),
+            route: 'app_admin_payment_stripe',
+            parameters: {id: payment_intent_id}
+        },
+        {
+            label: 'Invoice'|trans,
+            route: 'app_invoice_show',
+            parameters: {id: payment_intent_id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container py-4">
+        <h1>
+            {% trans %}Invoice{% endtrans %}
+        </h1>
+        <p class="text-end mb-0">
+            <a href="{{ path('invoice_pdf', {id: payment_intent_id}) }}" class="btn btn-dark">
+                {% trans %}Download{% endtrans %}
+                {{ ux_icon('line-md:download') }}
+            </a>
+        </p>
+
+        <iframe
+            src="{{ path('invoice_preview', { id: payment_intent_id }) }}"
+            class="border"
+            width="100%"
+            height="900"
+            style="border: none;"
+        ></iframe>
+    </main>
+{% endblock %}

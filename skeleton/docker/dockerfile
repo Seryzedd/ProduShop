@@ -12,6 +12,11 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libicu-dev \
     libzip-dev \
+    libfontconfig1 \
+    libxrender1 \
+    libxext6 \
+    xfonts-75dpi \
+    xfonts-base \
     && rm -rf /var/lib/apt/lists/*
 
 # Installer les extensions PHP (en une seule commande)
@@ -43,5 +48,7 @@ WORKDIR /var/www/html
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY /var/www/html/assets/scripts/html-to-pdf.js /usr/local/bin/html-to-pdf.js
 
 EXPOSE 80
