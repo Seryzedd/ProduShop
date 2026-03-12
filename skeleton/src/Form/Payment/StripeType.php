@@ -14,7 +14,11 @@ class StripeType extends AbstractType
     {
         $builder
             ->add('authenticationKey')
-            ->add('feesAmount', PercentType::class)
+            ->add('feesAmount', PercentType::class, [
+                'scale' => 2,
+                'type' => 'integer',
+                'html5' => true
+            ])
             ->add('publicKey')
             ->add('secretKey')
             ->add('active')

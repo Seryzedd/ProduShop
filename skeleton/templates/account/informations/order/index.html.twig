@@ -22,7 +22,16 @@
 
 {% block body %}
     <main class="container">
-        <h1 class="">{% trans with {'%id%': order.intentId} %}Order{% endtrans %}<small class="text-muted fs-6">{{ order.intentId }}</small></h1>
+        <h1 class="">
+            {% trans with {'%id%': order.intentId} %}Order{% endtrans %}
+        </h1>
+        <p>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_admin_payment_stripe', {id: order.intentId}) }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ order.intentId }}</a>
+            {% else %}
+                <small class="text-muted fs-6">{{ order.intentId }}</small>
+            {% endif %}
+        </p>
         
         <div class="d-flex justify-content-end align-items-end">
             <p class="mb-0 me-2">{% trans %}Amount{% endtrans %} :</p>
@@ -30,7 +39,7 @@
             <p class="mb-0 text-secondary"><small>{{ order.currency }}</small></p>
         </div>
         <p class='text-muted text-end'>{% trans with {'%paidAt%': order.paidAt|date('d/m/Y H:i')} %}Paid at : %paidAt%{% endtrans %}</p>
-
+        {{ dump(order) }}
         <ul class="list-group">
             {% for item in order.orderItems %}
                 <li class="list-group-item">

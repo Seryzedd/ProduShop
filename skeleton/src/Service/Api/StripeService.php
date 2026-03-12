@@ -341,6 +341,28 @@ class StripeService extends AbstractApi
         )->toArray();
     }
 
+    public function getPaymentIntentsByCustomer(string $stripeCustomerId): array
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/payment_intents',
+            'GET',
+            [
+                'customer' => $stripeCustomerId,
+                'expand'   => ['data.customer', 'data.payment_method', 'data.latest_charge'],
+            ]
+        )->toArray();
+    }
+
+    public function getPaymentIntentsByMerchant(string $merchantAccountId): array
+{
+    return $this->sendRequest(
+        self::BASE_URL . '/payment_intents',
+        'GET',
+        ['expand' => ['data.customer', 'data.latest_charge']],
+        ['Stripe-Account' => $merchantAccountId]
+    )->toArray();
+}
+
     /**
      * =======================
      * -- Customer requests --

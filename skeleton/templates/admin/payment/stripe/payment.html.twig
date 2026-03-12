@@ -37,10 +37,11 @@
             
             <div>
                 <h4 class="text-end text-secondary mb-0"><strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</h4>
-                <p class="text-end text-muted mb-0">{{ (payment.amount_received / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</p>
+                <p class="text-end text-muted mb-0">{% trans with {'%amount%': (payment.application_fee_amount / 100)|number_format(2, ',', ' ')} %}fees %amount%{% endtrans %}</strong>{{ payment.currency }}</p>
             </div>
             
         </div>
+
         <div class="card p-4">
             <div class="row align-items-center">
                 <div class="col-12">
@@ -51,13 +52,17 @@
                     {% endif %}
                 </div>
 
-                <div class="col-lg-5">
-                    <h5>{% trans %}Customer{% endtrans %} :</h5>
-                    <p>
-                        <strong class="text-primary">{{ payment.customer.name }}</strong><br>
-                        {{ payment.customer.email }}<br>
+                <div class="col-lg-5 position-relative card p-3">
+                    <h5 class="text-muted">{% trans %}Customer{% endtrans %} :</h5>
+
+                    <p>{% trans %}Paid{% endtrans %} : <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}<br>
+                        <a href="{{ path('app_admin_email_user', {email: payment.customer.email}) }}" class="link-offset-2 stretched-link link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                            <strong class="text-primary">{{ payment.customer.name }}</strong><br>
+                            {{ payment.customer.email }}
+                        </a><br>
                         <code>{{ payment.customer.id }}</code>
                     </p>
+                    
 
                     <p class="mb-0">
                         {{ payment.payment_method.card.brand }}<br>
@@ -74,19 +79,19 @@
                     </p>
                 </div>
 
-                <div class="col-lg-5">
-                    <h5>{% trans %}Merchant{% endtrans %} :</h5>
+                <div class="col-lg-5 card position-relative p-3">
+                    <h5 class="text-muted">{% trans %}Merchant{% endtrans %} :</h5>
 
                     {% if payment.transfer_data %}
-                        <p>
+                        <p>{% trans %}Received{% endtrans %} : <strong>{{ ((payment.amount - payment.application_fee_amount) / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</p>
+                        <p class="mb-0">
                             <strong class="text-primary">{{ payment.transfer_data.destination.individual.first_name }} {{ payment.transfer_data.destination.individual.last_name }}</strong>
                         </p>
                         <p class="mb-0">{{ payment.transfer_data.destination.email }}</p>
-                        <code>{{ payment.transfer_data.destination.id }}</code>
+                        <code class="">{{ payment.transfer_data.destination.id }}</code>
 
-                        
                         {% for bank in payment.transfer_data.destination.external_accounts.data %}
-                            <p class="text-muted">
+                            <p class="text-muted mt-2">
                                 <small>
                                     {{ bank.bank_name }}<br>
                                     xxxx xxxx xxxx {{ bank.last4 }}

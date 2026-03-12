@@ -34,13 +34,19 @@
             </div>
             
             <div class="col-lg-8">
-                <h3 class="text-end text-secondary lined pt-2">{% trans %}Authorizations{% endtrans %}</h3>
-                {{ form_start(form) }}
+                <h3 class="text-end flex-row-reverse lined pt-2">{% trans %}Authorizations{% endtrans %}</h3>
+                {{ form_start(form, {attr: {class: 'mb-4'}}) }}
                     {{ form_row(form.roles) }}
                     <button class="btn btn-primary" type="submit">
                         {% trans %}Save{% endtrans %}
                     </button>
                 {{ form_end(form) }}
+
+                {{ block('orders', 'account/informations/index.html.twig') }}
+
+                {% if user|instanceOf('App\\Entity\\User\\Professional') %}
+                    {{ block('products', 'account/informations/index.html.twig') }}
+                {% endif %}
             </div>
         </div>
     </main>

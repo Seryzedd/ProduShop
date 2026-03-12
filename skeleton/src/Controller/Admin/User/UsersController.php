@@ -11,10 +11,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UserRepository;
 use App\Form\Admin\User\RolesManagerType;
 use Symfony\Component\HttpFoundation\Request;
+use App\Service\Api\StripeService;
+use App\Entity\User\Professional;
 
 #[Route('/admin/users')]
 final class UsersController extends AbstractController
 {
+    public function __construct(private readonly StripeService $stripe) {}
     #[Route('/', name: 'app_admin_users')]
     public function index(EntityManagerInterface $entityManager, UserRepository $repository): Response
     {
@@ -28,8 +31,28 @@ final class UsersController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_admin_user')]
-    public function view(AbstractUser $user, Request $request, EntityManagerInterface $entityManager)
+    #[Route('/email/{email}', name: 'app_admin_email_user')]
+    public function view(?string $id, ?string $email, Request $request, EntityManagerInterface $entityManager)
     {
+        if ($id) {
+            $user = $entityManager->getRepository(AbstractUser::class)->findOneBy(['id' => $id]);
+        } else {
+            $user = $entityManager->getRepository(AbstractUser::class)->findOneBy(['email' => $email]);
+        }
+
+        /**
+        * $payments = [];
+        * if($user instanceof Professional) {
+        *     if($user->getStripeAccount()) {
+        *         $payments = $this->stripe->getPaymentIntentsByMerchant($user->getStripeAccount()->getAccountId());
+        *     }
+        * } else {
+        *     if ($user->getStripe()) {
+        *         $payments = $this->stripe->getPaymentIntentsByCustomer($user->getStripeAccount()->getCustomerId());
+        *     }
+        * }
+        */
+
         $form = $this
             ->createForm(RolesManagerType::class, $user)
         ;
@@ -45,7 +68,8 @@ final class UsersController extends AbstractController
 
         return $this->render('admin/user/users/view.html.twig', [
             'user' => $user,
-            'form' => $form
+            'form' => $form,
+            'payments' => $payments
         ]);
     }
 }
