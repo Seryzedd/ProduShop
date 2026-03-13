@@ -63,7 +63,6 @@ class InvoiceService
     {
         $pi = $this->stripeService->getPaymentIntent($paymentIntentId);
 
-        
         // --- Client ---
         $customer = is_array($pi['customer']) ? $pi['customer'] : [];
         $client = [
@@ -71,14 +70,8 @@ class InvoiceService
             'email' => $customer['email'] ?? 'N/A',
         ];
 
-        // --- Merchant ---
-        $transferData   = $pi['transfer_data'] ?? [];
-        $destination    = is_array($transferData['destination'] ?? null) ? $transferData['destination'] : [];
-        $merchant = [
-            'name'  => $destination['business_profile']['name'] ?? ($destination['email'] ?? 'N/A'),
-            'email' => $destination['email'] ?? 'N/A',
-            'id'    => $destination['id']    ?? ($pi['metadata']['merchant_account'] ?? 'N/A'),
-        ];
+        // --- Merchants --- (extraits depuis les items metadata, multi-marchand)
+        $merchants = $this->extractMerchants($pi['metadata'] ?? []);
 
         // --- Items from metadata ---
         $items = $this->extractItems($pi['metadata'] ?? []);
@@ -105,14 +98,12 @@ class InvoiceService
             'status'         => $pi['status'],
             'currency'       => strtoupper($pi['currency'] ?? 'EUR'),
             'client'         => $client,
-            'merchant'       => $merchant,
+            'merchants'      => $merchants,
             'items'          => $items,
             'amounts'        => [
-                'total_ht'     => number_format($totalHT,                             2, ',', ' '),
-                'tva_amount'   => number_format($tvaAmount,                           2, ',', ' '),
-                'total_ttc'    => number_format($totalTTC,                            2, ',', ' '),
-                'fee'          => number_format($this->centsToEuros($feeCents),       2, ',', ' '),
-                'merchant_net' => number_format($this->centsToEuros($merchantCents),  2, ',', ' '),
+                'total_ht'   => number_format($totalHT,   2, ',', ' '),
+                'tva_amount' => number_format($tvaAmount, 2, ',', ' '),
+                'total_ttc'  => number_format($totalTTC,  2, ',', ' '),
             ],
             'payment_intent_id' => $paymentIntentId,
         ];
@@ -120,36 +111,61 @@ class InvoiceService
 
     /**
      * Parses items from PaymentIntent metadata.
-     * Expected format: "Poulet x1 @ 9.00 € tva:20.00"
+     * Format: metadata[items] = JSON array of {name, qty, price, tva}
      */
     private function extractItems(array $metadata): array
     {
         $raw     = $metadata['items'] ?? null;
         $decoded = $raw ? json_decode($raw, true) : [];
- 
+
         if (!is_array($decoded)) {
             return [];
         }
- 
+
         return array_map(function (array $item): array {
             $qty      = (int)   ($item['qty']   ?? 1);
             $priceTTC = (float) ($item['price'] ?? 0);
             $tvaRate  = (float) ($item['tva']   ?? 0);
- 
+
             $priceHT    = $tvaRate > 0 ? $priceTTC / (1 + $tvaRate / 100) : $priceTTC;
             $subtotalHT = $priceHT * $qty;
             $tvaAmount  = ($priceTTC - $priceHT) * $qty;
- 
+
             return [
-                'name'         => $item['name'] ?? '—',
-                'quantity'     => $qty,
-                'tva_rate'     => $tvaRate,
-                'unit_price'   => number_format($priceHT,    2, ',', ' '),
-                'subtotal'     => number_format($subtotalHT, 2, ',', ' '),
-                '_subtotal_ht' => $subtotalHT,
-                '_tva_amount'  => $tvaAmount,
+                'name'          => $item['name'] ?? '—',
+                'quantity'      => $qty,
+                'tva_rate'      => $tvaRate,
+                'merchant_name' => $item['merchant']['name'] ?? '—',
+                'merchant_id'   => $item['merchant']['id']   ?? null,
+                'merchant_adress' => $item['merchant']['adress'] ?? null,
+                'unit_price'    => number_format($priceHT,    2, ',', ' '),
+                'subtotal'      => number_format($subtotalHT, 2, ',', ' '),
+                '_subtotal_ht'  => $subtotalHT,
+                '_tva_amount'   => $tvaAmount,
             ];
         }, $decoded);
+    }
+
+    /**
+     * Extrait la liste unique des marchands depuis les items metadata.
+     * Retourne un tableau indexé par merchant_id.
+     */
+    private function extractMerchants(array $metadata): array
+    {
+        $raw     = $metadata['items'] ?? null;
+        $decoded = $raw ? json_decode($raw, true) : [];
+
+        $merchants = [];
+        foreach ($decoded as $item) {
+            $id   = $item['merchant']['id']   ?? null;
+            $name = $item['merchant']['name'] ?? null;
+            $adress = $item['merchant']['adress'] ?? null;
+            if ($id && !isset($merchants[$id])) {
+                $merchants[$id] = ['id' => $id, 'name' => $name ?? '—'];
+            }
+        }
+
+        return array_values($merchants);
     }
 
     private function buildInvoiceNumber(array $pi): string
@@ -171,40 +187,39 @@ class InvoiceService
     }
 
     // =========================================================================
-    // PDF generation via wkhtmltopdf
+    // PDF generation via Puppeteer/Chromium
     // =========================================================================
 
     private function htmlToPdf(string $html): string
     {
-        
         $tmpHtml = tempnam(sys_get_temp_dir(), 'invoice_') . '.html';
         $tmpPdf  = tempnam(sys_get_temp_dir(), 'invoice_') . '.pdf';
- 
+
         file_put_contents($tmpHtml, $html);
- 
+
         $script = '/usr/local/bin/html-to-pdf.js';
- 
+
         $cmd = sprintf(
-            'NODE_PATH=/usr/local/lib/node_modules_custom/node_modules node %s %s %s 2>&1',
+            'node %s %s %s 2>/dev/null',
             escapeshellarg($script),
             escapeshellarg($tmpHtml),
             escapeshellarg($tmpPdf)
         );
- 
+
         exec($cmd, $output, $returnCode);
- 
+
         if ($returnCode !== 0 || !file_exists($tmpPdf)) {
             @unlink($tmpHtml);
             throw new \RuntimeException(
                 'Puppeteer PDF generation failed. Check that Node, Puppeteer and Chromium are installed.'
             );
         }
- 
+
         $pdf = file_get_contents($tmpPdf);
- 
+
         @unlink($tmpHtml);
         @unlink($tmpPdf);
- 
+
         return $pdf;
     }
 

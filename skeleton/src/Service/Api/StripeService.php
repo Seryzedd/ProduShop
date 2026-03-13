@@ -306,6 +306,11 @@ class StripeService extends AbstractApi
                 'qty'   => $item['quantity'],
                 'price' => $item['price'],
                 'tva'   => $item['tax'] ?? 0.0,
+                'merchant' => [
+                    'id'   => $item['merchant_account_id'] ?? null,
+                    'name' => $item['merchant_name'] ?? null,
+                    'adress' => $item['merchant_adress']
+                ],
             ],
             $items
         ));
@@ -354,14 +359,87 @@ class StripeService extends AbstractApi
     }
 
     public function getPaymentIntentsByMerchant(string $merchantAccountId): array
-{
-    return $this->sendRequest(
-        self::BASE_URL . '/payment_intents',
-        'GET',
-        ['expand' => ['data.customer', 'data.latest_charge']],
-        ['Stripe-Account' => $merchantAccountId]
-    )->toArray();
-}
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/payment_intents',
+            'GET',
+            ['expand' => ['data.customer', 'data.latest_charge']],
+            ['Stripe-Account' => $merchantAccountId]
+        )->toArray();
+    }
+
+    // =========================================================================
+    // Transfers — redistribution multi-marchands après paiement
+    // =========================================================================
+ 
+    /**
+     * Crée un Transfer vers un compte Connect.
+     * À appeler après confirmation du PaymentIntent (webhook payment_intent.succeeded).
+     *
+     * @param int    $amount            Montant en centimes à reverser
+     * @param string $merchantAccountId Compte Connect destination (acct_xxx)
+     * @param string $chargeId          ID de la Charge liée au PaymentIntent (ch_xxx)
+     */
+    public function createTransfer(int $amount, string $merchantAccountId, string $chargeId): array
+    {
+        return $this->sendRequest(
+            self::BASE_URL . '/transfers',
+            'POST',
+            [
+                'amount'             => $amount,
+                'currency'           => 'eur',
+                'destination'        => $merchantAccountId,
+                'source_transaction' => $chargeId,
+            ]
+        )->toArray();
+    }
+
+    /**
+     * Distribue le montant d'un PaymentIntent confirmé vers chaque marchand.
+     * À appeler depuis le webhook payment_intent.succeeded.
+     *
+     * Les items doivent contenir 'merchant_account_id', 'price' et 'quantity'.
+     * La plateforme conserve $this->amountFees % sur chaque item.
+     *
+     * @return array Liste des transfers créés
+     */
+    public function distributePayment(string $paymentIntentId): array
+    {
+        $pi = $this->getPaymentIntent($paymentIntentId);
+ 
+        if ($pi['status'] !== 'succeeded') {
+            throw new \RuntimeException('PaymentIntent is not succeeded.');
+        }
+ 
+        $chargeId = is_array($pi['latest_charge'])
+            ? $pi['latest_charge']['id']
+            : $pi['latest_charge'];
+ 
+        $items = json_decode($pi['metadata']['items'] ?? '[]', true);
+ 
+        // Calculer le net par marchand après déduction des frais plateforme
+        $byMerchant = [];
+        foreach ($items as $item) {
+            $merchantId = $item['merchant'] ?? null;
+            if (!$merchantId) {
+                continue;
+            }
+ 
+            $itemTotal = (int) round($item['price'] * $item['qty'] * 100);
+            $fee       = (int) round($itemTotal * $this->amountFees / 100);
+            $net       = $itemTotal - $fee;
+ 
+            $byMerchant[$merchantId] = ($byMerchant[$merchantId] ?? 0) + $net;
+        }
+ 
+        // Créer un Transfer par marchand
+        $transfers = [];
+        foreach ($byMerchant as $merchantId => $amount) {
+            $transfers[] = $this->createTransfer($amount, $merchantId, $chargeId);
+        }
+ 
+        return $transfers;
+    }
 
     /**
      * =======================

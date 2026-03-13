@@ -233,7 +233,10 @@ class StripeCustomerService
                 'quantity' => $item->getQuantity(),
                 'price'    => $package->getFinalPrice(), // unit price TTC in euros (float)
                 'package'  => $package,
-                'tax' => $package->getTaxe() *100
+                'tax' => $package->getTaxe() *100,
+                'merchant_account_id' => $professional->getStripeAccount()->getAccountId(),
+                'merchant_name' => $professional->getCompanyName(),
+                'merchant_adress' => $professional->getAdress()->getFullAddress() ?: "_"
             ];
         }
 
