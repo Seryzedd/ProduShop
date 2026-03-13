@@ -41,6 +41,9 @@ class Professional extends AbstractUser
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?StripeMerchant $stripeAccount = null;
 
+    #[ORM\OneToOne(mappedBy: 'User', cascade: ['persist', 'remove'])]
+    private ?OpeningSchedule $openingSchedule = null;
+
     public function __construct()
     {
         $this->addRole('ROLE_SELLER');
@@ -158,6 +161,28 @@ class Professional extends AbstractUser
         }
 
         $this->stripeAccount = $stripeAccount;
+
+        return $this;
+    }
+
+    public function getOpeningSchedule(): ?openingSchedule
+    {
+        return $this->openingSchedule;
+    }
+
+    public function setOpeningSchedule(?openingSchedule $openingSchedule): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($openingSchedule === null && $this->openingSchedule !== null) {
+            $this->openingSchedule->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($openingSchedule !== null && $openingSchedule->getUser() !== $this) {
+            $openingSchedule->setUser($this);
+        }
+
+        $this->openingSchedule = $openingSchedule;
 
         return $this;
     }

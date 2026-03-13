@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Schedules{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        },
+        {
+            label: 'My schedules',
+            route: 'app_merchant_schedule',
+            parameters: []
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1>{% trans %}Schedules{% endtrans %}</h1>
+
+        {{ form_start(form) }}
+            {% include 'form/collectionType.html.twig' with {'collection': form.scheduleDays} %}
+            <button class="btn btn-primary" type="submit">
+                {% trans %}Save{% endtrans %}
+            </button>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}

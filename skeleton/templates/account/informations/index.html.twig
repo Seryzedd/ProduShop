@@ -134,6 +134,20 @@
             </p>
         {% endif %}
     </div>
+
+    <div class="position-relative">
+        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
+            <strong>{% trans %}Schedules{% endtrans %}</strong>
+            <a href="{{ path('app_merchant_schedule') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+        </p>
+        {% if user.openingSchedule %}
+            {{ block('pro_schedules') }}
+        {% else %}
+            <p class="ms-2 text-muted">
+                {% trans %}No Schedules{% endtrans %}
+            </p>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block products %}
@@ -174,6 +188,29 @@
             </div>
         {% endfor %}
     </div>
+{% endblock %}
+
+{% block pro_schedules %}
+    <ul class="list-group list-group-flush">
+        {% for day in user.openingSchedule.scheduleDays %}
+            <li class="list-group-item">
+                <div class="row align-items-center">
+                    <div class="col-6 text-dark">
+                        {{ day.dayName }}
+                    </div>
+                    <ul class="list-group list-group-flush col-6">
+                        {% for hour in day.hours %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+                                {{ '%02d'|format(hour.startHour) }}h{{ '%02d'|format(hour.startMinutes) }}
+                                {{ ux_icon('line-md:arrow-right') }}
+                                {{ '%02d'|format(hour.endHour) }}h{{ '%02d'|format(hour.endMinutes) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}
 
 {% block orders %}
