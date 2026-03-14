@@ -27,16 +27,31 @@ class ProductRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->join('p.company', 'company')
-            ->andWhere('company.id = :id')
+            ->join('company.stripeAccount', 'stripe')
+            ->where('stripe.ready = true')
+            ->andWhere('company.stripeAccount = :id')
             ->setParameter('id', $merchant->getId())
             ->getQuery()
             ->getResult()
         ;
     }
 
-    public function findByShelf(string $shelf)
+    public function findAll(): array
     {
         return $this->createQueryBuilder('p')
+            ->join('p.company', 'company')
+            ->join('company.stripeAccount', 'stripe')
+            ->where('stripe.ready = true')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findByShelf(string $shelf): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.stripeAccount', 'stripe')
+            ->where('stripe.ready = true')
             ->andWhere('p.shelf = :shelf')
             ->setParameter('shelf', $shelf)
             ->getQuery()
@@ -71,6 +86,7 @@ class ProductRepository extends ServiceEntityRepository
             ->addSelect('company', 'addr', 'shelf', 'image')
             ->join('p.company', 'company')
             ->join('company.adress', 'addr')
+            ->join('company.stripeAccount', 'stripe')
             ->leftJoin('p.shelf',    'shelf')
             ->leftJoin('p.image',    'image')
             // Only consider addresses with stored coordinates
@@ -84,6 +100,8 @@ class ProductRepository extends ServiceEntityRepository
                     * POWER(SIN(RADIANS(addr.longitude - :lng) / 2), 2)
                 ))) <= :radius
             ')
+            // Filter completed Stripe's account
+            ->andWhere('stripe.ready = true')
             ->setParameter('lat',    $latitude)
             ->setParameter('lng',    $longitude)
             ->setParameter('radius', $radiusKm);
@@ -95,9 +113,6 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
-
-        // Reload full entities via Doctrine with all relations
-        return $query->getResult();
     }
 
     /**

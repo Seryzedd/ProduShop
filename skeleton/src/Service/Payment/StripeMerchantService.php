@@ -82,7 +82,7 @@ class StripeMerchantService
         }
 
         $isReady = $this->stripeService->isConnectAccountReady($stripeMerchant->getAccountId());
-        $stripeMerchant->setIsReady($isReady);
+        $stripeMerchant->setReady($isReady);
         $this->entityManager->flush();
 
         return $isReady;

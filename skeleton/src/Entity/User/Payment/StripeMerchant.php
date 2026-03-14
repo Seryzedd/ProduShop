@@ -22,10 +22,10 @@ class StripeMerchant
     private ?Professional $user = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    private bool $isReady = false;
+    private bool $ready = false;
 
     public function __construct(Professional $user, string $accountId)
     {
@@ -77,12 +77,12 @@ class StripeMerchant
 
     public function isReady(): bool
     {
-        return $this->isReady;
+        return $this->ready;
     }
 
-    public function setIsReady(bool $isReady): static
+    public function setReady(bool $ready): static
     {
-        $this->isReady = $isReady;
+        $this->ready = $ready;
 
         return $this;
     }
