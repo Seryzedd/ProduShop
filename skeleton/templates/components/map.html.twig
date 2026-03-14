@@ -47,92 +47,104 @@
     #routeSummary { font-size: 0.82rem; }
 </style>
 
-{% set adress = null %}
+{% if adress is not defined %}
+    {% set adress = null %}
+{% endif %}
 
 <div class="d-flex border rounded overflow-hidden" style="max-height: 520px;">
+    {% set companies = [] %}
+    {% if list is not defined %}
+        {% set list = true %}
+    {% endif %}
 
     {# ── Sidebar ── #}
-    <div class="d-flex flex-column border-end bg-white" style="width: 50%; flex-shrink: 0;">
+    {% if list == true %}
+        <div class="d-flex flex-column border-end bg-white" style="width: 50%; flex-shrink: 0;">
 
-        <div class="p-2 border-bottom">
-            <div class="d-flex align-items-start my-2">
+            <div class="p-2 border-bottom">
+                <div class="d-flex align-items-start my-2">
 
-                {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
-                    <form method="POST" class="d-flex mx-auto justify-content-center">
-                        <select class="form-select" name="adressId" aria-label="Default select example">
-                            {% for shippingAdress in app.user.shippingAdress %}
-                                {% if app.request.request.get('adressId') %}
-                                    {% set adress = shippingAdress %}
+                    {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
+                        <form method="POST" class="d-flex mx-auto justify-content-center">
+                            <select class="form-select" name="adressId" aria-label="Default select example">
+                                {% for shippingAdress in app.user.shippingAdress %}
+                                    {% if app.request.request.get('adressId') %}
+                                        {% set adress = shippingAdress %}
+                                    {% endif %}
+
+                                    <option value="{{ shippingAdress.id }}" {% if app.request.request.get('adressId') == shippingAdress.id %}selected{% endif %}>
+                                        {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
+                                    </option>
+                                    
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit" class="btn btn-secondary ms-2">
+                                {{ ux_icon('ic:round-send') }}
+                            </button>
+                        </form>
+                    {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
+                        {% set adress = app.user.adress %}
+                        <p class="me-2">
+                            {% trans %}My adress{% endtrans %} :
+                        </p>
+                        <p class="text-muted">
+                            {{ adress.street }}<br>
+                            {{ adress.zipCode }} {{ adress.country }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <input type="search" id="mapSearchInput" class="form-control form-control-sm"
+                    placeholder="Rechercher…">
+            </div>
+            {% if adress == null and app.user and app.user.shippingAdress|length > 0 %}
+                {% set adress = app.user.shippingAdress|first %}
+            {% endif %}
+
+            <div class="map-sidebar-list flex-grow-1">
+                {% if products is empty %}
+                    <p class="text-muted text-center small py-4">
+                        {% trans %}No product available{% endtrans %}
+                    </p>
+                {% else %}
+                    {% for product in products %}
+                        {% if product.company not in companies %}
+                            {% set companies = companies|merge([product.company]) %}
+                            <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                                {{ product.company.companyName }}
+                            </a>
+                            <div class="p-2 border-bottom map-product-card"
+                                role="button"
+                                data-index="{{ loop.index0 }}"
+                                data-name="{{ product.name|lower }}"
+                                data-company="{{ product.company.companyName|lower }}"
+                                onclick="mapFocusMarker({{ loop.index0 }})"
+                                onmouseover="this.classList.add('bg-light')"
+                                onmouseout="this.classList.remove('bg-light')"
+                                style="cursor:pointer;"
+                            >
+                                {% if product.company.adress is defined and product.company.adress %}
+                                    <p class="mb-0 text-muted" style="font-size:.68rem;">
+                                        {{ ux_icon('ic:baseline-location-on') }}
+
+                                        {{ product.company.adress.street }}
+                                        {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
+                                    </p>
                                 {% endif %}
-
-                                <option value="{{ shippingAdress.id }}" {% if app.request.request.get('adressId') == shippingAdress.id %}selected{% endif %}>
-                                    {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
-                                </option>
-                                
-                            {% endfor %}
-                        </select>
-
-                        <button type="submit" class="btn btn-secondary ms-2">
-                            {{ ux_icon('ic:round-send') }}
-                        </button>
-                    </form>
-                {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
-                    {% set adress = app.user.adress %}
-                    <p class="me-2">
-                        {% trans %}My adress{% endtrans %} :
-                    </p>
-                    <p class="text-muted">
-                        {{ adress.street }}<br>
-                        {{ adress.zipCode }} {{ adress.country }}
-                    </p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             </div>
-
-            <input type="search" id="mapSearchInput" class="form-control form-control-sm"
-                   placeholder="Rechercher…">
         </div>
-        {% if adress == null and app.user and app.user.shippingAdress|length > 0 %}
-            {% set adress = app.user.shippingAdress|first %}
-        {% endif %}
-
-        {% set companies = [] %}
-        <div class="map-sidebar-list flex-grow-1">
-            {% if products is empty %}
-                <p class="text-muted text-center small py-4">
-                    {% trans %}No product available{% endtrans %}
-                </p>
-            {% else %}
-                {% for product in products %}
-                    {% if product.company not in companies %}
-                        {% set companies = companies|merge([product.company]) %}
-                        <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                            {{ product.company.companyName }}
-                        </a>
-                        <div class="p-2 border-bottom map-product-card"
-                            role="button"
-                            data-index="{{ loop.index0 }}"
-                            data-name="{{ product.name|lower }}"
-                            data-company="{{ product.company.companyName|lower }}"
-                            onclick="mapFocusMarker({{ loop.index0 }})"
-                            onmouseover="this.classList.add('bg-light')"
-                            onmouseout="this.classList.remove('bg-light')"
-                            style="cursor:pointer;"
-                        >
-                            {% if product.company.adress is defined and product.company.adress %}
-                                <p class="mb-0 text-muted" style="font-size:.68rem;">
-                                    {{ ux_icon('ic:baseline-location-on') }}
-
-                                    {{ product.company.adress.street }}
-                                    {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
-                                </p>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
+    {% else %}
+        {% for product in products %}
+            {% if product.company not in companies %}
+                {% set companies = companies|merge([product.company]) %}
             {% endif %}
-        </div>
-
-    </div>
+        {% endfor %}
+    {% endif %}
 
     {# ── Carte ── #}
     <div class="flex-grow-1 position-relative">
@@ -143,10 +155,11 @@
                 class="btn btn-primary btn-sm position-absolute d-none"
                 style="bottom: 1rem; right: 1rem; z-index: 999;"
                 onclick="document.getElementById('routeOffcanvas').classList.toggle('show')">
-            <i class="bi bi-signpost-2-fill me-1"></i>Itinerary
+            <i class="bi bi-signpost-2-fill me-1"></i>{% trans %}Itinerary{% endtrans %}
         </button>
     </div>
 </div>
+
 
 {# ── Itinerary offcanvas panel (Bootstrap, no JS plugin needed) ── #}
 <div id="routeOffcanvas"
@@ -177,11 +190,11 @@
         locale:   {{ app.request.locale|slice(0, 2)|json_encode|raw }},
         client: {
             {% if adress and adress.hasCoordinates() %}
-            lat: {{ adress.latitude }},
-            lng: {{ adress.longitude }}
+                lat: {{ adress.latitude }},
+                lng: {{ adress.longitude }}
             {% else %}
-            lat: null,
-            lng: null
+                lat: null,
+                lng: null
             {% endif %}
         },
         products: [
@@ -209,8 +222,6 @@
 (function () {
     const data    = window._mapData;
     const markers = [];
-
-    console.log(data);
 
     // ── Product icon (inline SVG) ─────────────────────────────
     const productIcon = L.divIcon({
@@ -287,10 +298,13 @@
         markers.push(marker);
     });
 
+    console.log(clientLatLng)
+    if (clientLatLng && markers.length === 1) {
+        drawRoute(markers[0].getLatLng());
+    }
 
     // ── Popup content ─────────────────────────────────────────
     function buildPopup(p) {
-        console.log(p);
         return `
             <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
                 <a href="${p.companyLink}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover fw-semibold">${esc(p.company)}</a>
@@ -384,6 +398,15 @@
             // Show the toggle button and open the panel automatically
             document.getElementById('routeToggleBtn').classList.remove('d-none');
             document.getElementById('routeOffcanvas').classList.add('show');
+
+            const start = L.latLng(clientLatLng[0], clientLatLng[1]);
+            console.log(start.distanceTo(destination));
+            if (start.distanceTo(destination) < 50) {
+                
+                map.setView(clientLatLng, 15);
+                document.getElementById('routeOffcanvas').classList.remove('show');
+                document.getElementById('routeToggleBtn').classList.add('d-none');
+            }
         });
     }
 
@@ -395,18 +418,29 @@
     }
 
     // ── Search filter ─────────────────────────────────────────
-    document.getElementById('mapSearchInput').addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('.map-product-card').forEach(card => {
-            card.style.display =
-                card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
+    const searchInput = document.getElementById('mapSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.map-product-card').forEach(card => {
+                card.style.display =
+                    card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
+            });
         });
-    });
+    }
 
     function esc(s) {
         return String(s ?? '')
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Fix Leaflet dans un Bootstrap Collapse ────────────────
+    const collapseEl = document.getElementById('map')?.closest('.collapse');
+    if (collapseEl) {
+        collapseEl.addEventListener('shown.bs.collapse', function () {
+            map.invalidateSize();
+        });
     }
 })();
 </script>

@@ -80,4 +80,15 @@ class OpeningSchedule
 
         return $this;
     }
+
+    public function getToday()
+    {
+        $date = new \Datetime();
+
+        $dayKey = (int) $date->format('N');
+
+        $filtered = $this->scheduleDays->filter(static fn (ScheduleDay $day) => $day->getDay() === ($dayKey - 1));
+
+        return $filtered->first();
+    }
 }

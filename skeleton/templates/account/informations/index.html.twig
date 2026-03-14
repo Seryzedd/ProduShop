@@ -27,6 +27,19 @@
 
             <div class="col-lg-8 col-md-6">
                 {% if is_granted('ROLE_SELLER') %}
+                    <div class="position-relative">
+                        <h3 class="lined mb-0 mt-2 flex-row-reverse justify-content-between">
+                            <a href="{{ path('app_merchant_schedule') }}" class="btn btn-light">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+                            <strong>{% trans %}Schedules{% endtrans %}</strong>
+                        </h3>
+                        {% if user.openingSchedule %}
+                            {{ block('pro_schedules') }}
+                        {% else %}
+                            <p class="ms-2 text-muted">
+                                {% trans %}No Schedules{% endtrans %}
+                            </p>
+                        {% endif %}
+                    </div>
                     {{ block('products') }}
                     {{ block('orders') }}
                 {% else %}
@@ -131,20 +144,6 @@
         {% else %}
             <p class="ms-2 text-muted">
                 {% trans %}No postal adress{% endtrans %}
-            </p>
-        {% endif %}
-    </div>
-
-    <div class="position-relative">
-        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
-            <strong>{% trans %}Schedules{% endtrans %}</strong>
-            <a href="{{ path('app_merchant_schedule') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
-        </p>
-        {% if user.openingSchedule %}
-            {{ block('pro_schedules') }}
-        {% else %}
-            <p class="ms-2 text-muted">
-                {% trans %}No Schedules{% endtrans %}
             </p>
         {% endif %}
     </div>

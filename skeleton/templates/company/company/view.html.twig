@@ -34,14 +34,85 @@
 
             {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
         </h1>
-        <p>
-            <strong class="text-primary">{{ ux_icon('line-md:phone') }}</strong>
-            {{ professional.phone ?: 'Not registered'|trans }}
-        </p>
 
         <p class="text-muted">{{ professional.description }}</p>
+        
+        <div class="row mb-4">
+            <p class="col-lg-4">
+                <strong class="text-primary">{{ ux_icon('line-md:phone') }}</strong>
+                <strong>{% trans %}Phone{% endtrans %} :</strong><br>
+                {{ professional.phone ?: 'Not registered'|trans }}
+            </p>
 
-        {% include 'components/map.html.twig' with {'radius': radius} %}
+            <div class="col-lg-4">
+                <p class="fw-bold mb-0">
+                    <strong class="text-primary">{{ ux_icon('ic:outline-view-agenda') }}</strong>
+                    {% trans %}Opening schedules{% endtrans %} :
+                </p>
+                {% if professional.openingSchedule %}
+                    {% set today = professional.openingSchedule.today %}
+                    <p>
+                        {% trans %}Today{% endtrans %} :
+                        {% for hour in today.hours %}
+                            <small class="text-muted ms-2">
+                                {{ '%02d'|format(hour.startHour) }}h{{ '%02d'|format(hour.startMinutes) }}
+                                {{ ux_icon('line-md:arrow-right') }}
+                                {{ '%02d'|format(hour.endHour) }}h{{ '%02d'|format(hour.endMinutes) }}
+                            </small>
+
+                            {% if not loop.last %}
+                                <br>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <a href="#week-shcedules" class="link-offset-2 ms-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" type="button" data-bs-toggle="collapse" data-bs-target="#week-shcedules" aria-expanded="false" aria-controls="week-shcedules">
+                            {% trans %}Show more{% endtrans %}
+                        </a>
+                    </p>
+
+                    <div class="collapse" id="week-shcedules">
+                        <ul class="list-group list-group-flush card">
+                            {% for day in professional.openingSchedule.scheduleDays %}
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center py-0">
+                                        <small>{{ day.dayName }}</small>
+                                        <ul class="list-group list-group-flush">
+                                            {% for hour in day.hours %}
+                                                <li class="list-group-item py-0">
+                                                    <p class="mb-0 text-muted text-end">
+                                                        <small>
+                                                            {{ '%02d'|format(hour.startHour) }}h{{ '%02d'|format(hour.startMinutes) }}
+                                                            {{ ux_icon('line-md:arrow-right') }}
+                                                            {{ '%02d'|format(hour.endHour) }}h{{ '%02d'|format(hour.endMinutes) }}
+                                                        </small>
+                                                    </p>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-lg-4">
+                <p class="">
+                    <strong class="text-primary">{{ ux_icon('line-md:my-location') }}</strong>
+                    <strong>{% trans %}Adress{% endtrans %} :</strong><br>
+                    {{ professional.adress.fullAddress ?: 'Not registered'|trans }}
+
+                    <a href="#company-map" class="link-offset-2 ms-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" type="button" data-bs-toggle="collapse" data-bs-target="#company-map" aria-expanded="false" aria-controls="company-map">
+                        {% trans %}Show more{% endtrans %}
+                    </a>
+                </p>
+
+                <div class="collapse" id="company-map">
+                    {% include 'components/map.html.twig' with {'radius': radius, 'list': false, 'adress': professional.adress} %}
+                </div>
+            </div>
+        </div>
 
         <h3 class="text-primary mt-3">{% trans with {'%professional%': professional.companyName} %}Products of %professional%{% endtrans %}</h3>
 
