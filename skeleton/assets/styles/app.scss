@@ -384,3 +384,9 @@ input[type='checkbox']:checked + label.btn-more-less::after {
     }
 }
 
+/* Couleur de l'en-tête et de la bordure du popover */
+.popover-success .popover-header { background-color: $success; color: $dark; }
+.popover-success .popover        { background-color: lighten($success, 30%); border-color: $success; color: $dark; }
+
+.popover-danger  .popover-header { background-color: $danger; color: $dark; }
+.popover-danger  .popover-body { background-color: lighten($danger, 30%); border-color: $danger; color: $dark; }

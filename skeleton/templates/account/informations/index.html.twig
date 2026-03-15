@@ -21,6 +21,15 @@
     <main class="container">
         <h1 class="">{% trans %}My account{% endtrans %}</h1>
         <div class='row'>
+            {% if app.user|instanceOf('App\\Entity\\User\\Professional') and app.user.stripeAccount.ready == false %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <p>{% trans %}Your account is not completed.{% endtrans %}</p>
+                        <p>{% trans %}Complete it to have your products shown in shelves.{% endtrans %}</p>
+                        <a href="#account-complete-link" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{% trans %}Complete{% endtrans %}</a>
+                    </div>
+                </div>
+            {% endif %}
             <div class="col-lg-4 col-md-6">
                 {{ block('base_details') }}
             </div>
@@ -74,7 +83,15 @@
                     
                     {% if is_granted('ROLE_SELLER') and user.stripeAccount.ready == false %}
                         <p class="mb-1">
-                            <a href="{{ path('app_professional_stripe_onboarding') }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{% trans %}Complete my banking account{% endtrans %}</a>
+                            <a  
+                                href="{{ path('app_professional_stripe_onboarding') }}"
+                                class="link-offset-2 popover-danger link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                                data-bs-toggle="popover"
+                                id="account-complete-link"
+                                data-bs-placement="right"
+                                data-bs-content="{% trans %}Complete your account{% endtrans %}"
+                            >
+                                {% trans %}Complete my banking account{% endtrans %}</a>
                         </p>
                     {% endif %}
                 {% endif %}
