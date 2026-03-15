@@ -390,3 +390,10 @@ input[type='checkbox']:checked + label.btn-more-less::after {
 
 .popover-danger  .popover-header { background-color: $danger; color: $dark; }
 .popover-danger  .popover-body { background-color: lighten($danger, 30%); border-color: $danger; color: $dark; }
+
+#top-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 20;
+}

@@ -24,9 +24,9 @@
             {% if app.user|instanceOf('App\\Entity\\User\\Professional') and app.user.stripeAccount.ready == false %}
                 <div class="col-12">
                     <div class="alert alert-warning">
-                        <p>{% trans %}Your account is not completed.{% endtrans %}</p>
+                        <h4>{% trans %}Your account is not completed.{% endtrans %}</h4>
                         <p>{% trans %}Complete it to have your products shown in shelves.{% endtrans %}</p>
-                        <a href="#account-complete-link" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{% trans %}Complete{% endtrans %}</a>
+                        <a href="#account-complete-link" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{% trans %}Complete my account{% endtrans %}</a>
                     </div>
                 </div>
             {% endif %}
