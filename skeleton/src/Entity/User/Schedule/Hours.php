@@ -60,6 +60,11 @@ class Hours
         return $this;
     }
 
+    public function getStartNumber(): int
+    {
+        return ($this->getStartHour() * 60) + $this->getStartMinutes();
+    }
+
     public function getEndHour(): int
     {
         return $this->endHour;
@@ -82,6 +87,11 @@ class Hours
         $this->endMinutes = $endMinutes;
 
         return $this;
+    }
+
+    public function getEndNumber(): int
+    {
+        return ($this->getEndHour() * 60) + $this->getEndMinutes();
     }
 
     public function getDay(): ?ScheduleDay

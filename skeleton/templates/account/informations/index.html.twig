@@ -140,6 +140,8 @@
         {{ user.companyName}}
     </h3>
 
+    <p><strong>{% trans %}Email{% endtrans %}</strong> : <small>{{ user.email }}</small></p>
+
     <p>
         <strong>{% trans %}Description{% endtrans %} :</strong><br>
         <small class="text-muted">{{ user.description ?: 'Empty description'|trans }}</small>

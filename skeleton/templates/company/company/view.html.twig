@@ -35,8 +35,6 @@
             {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
         </h1>
 
-        {{ dump(professional) }}
-
         <p class="text-muted">{{ professional.description }}</p>
         
         <div class="row mb-4">
@@ -47,9 +45,10 @@
             </p>
 
             <div class="col-lg-4">
-                <p class="fw-bold mb-0">
+                <p class="fw-bold mb-0 position-relative">
                     <strong class="text-primary">{{ ux_icon('ic:outline-view-agenda') }}</strong>
                     {% trans %}Opening schedules{% endtrans %} :
+                    <span class="position-absolute top-0 end-0 badge rounded-pill{% if professional.open %} bg-success{% else %} bg-danger{% endif %}">{{ professional.open ? 'Opened'|trans : 'Closed'|trans }}</span>
                 </p>
                 {% if professional.openingSchedule %}
                     {% set today = professional.openingSchedule.today %}

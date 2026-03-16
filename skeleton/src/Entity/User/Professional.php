@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User\AbstractUser;
+use App\Entity\User\Schedule\Hours;
 
 #[ORM\Entity]
 class Professional extends AbstractUser
@@ -185,5 +186,30 @@ class Professional extends AbstractUser
         $this->openingSchedule = $openingSchedule;
 
         return $this;
+    }
+
+    public function isOpen()
+    {
+        $open = false;
+
+        $schedule = $this->getOpeningSchedule();
+
+        if(!$schedule) {
+            return $open;
+        }
+
+        $currentDay = $schedule->getToday();
+
+        $today = new \Datetime();
+
+        $now = ($today->format('G') * 60) + $today->format('i');
+
+        $filtered = $currentDay->getHours()->filter(static fn (Hours $hours) => $hours->getStartNumber() < $now && $hours->getEndNumber() > $now);
+
+        if(count($filtered) > 0) {
+            return true;
+        }
+        
+        return false;
     }
 }

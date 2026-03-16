@@ -114,7 +114,7 @@
                             <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
                                 {{ product.company.companyName }}
                             </a>
-                            <div class="p-2 border-bottom map-product-card"
+                            <div class="p-2 border-bottom map-product-card position-relative"
                                 role="button"
                                 data-index="{{ loop.index0 }}"
                                 data-name="{{ product.name|lower }}"
@@ -132,6 +132,8 @@
                                         {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
                                     </p>
                                 {% endif %}
+
+                                <span class="position-absolute top-0 end-0 badge rounded-pill{% if product.company.open %} bg-success{% else %} bg-danger{% endif %}">{{ product.company.open ? 'Opened'|trans : 'Closed'|trans }}</span>
                             </div>
                         {% endif %}
                     {% endfor %}
