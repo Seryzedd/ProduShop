@@ -7,6 +7,9 @@ use App\Entity\User\Client;
 use App\Entity\User\Professional; 
 use App\Repository\Payment\StripeRepository;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\TokenGenerator;
+use App\Entity\User\Payment\Transfer;
+use App\Repository\User\Payment\TransferRepository;
 
 class StripeService extends AbstractApi
 {
@@ -18,7 +21,12 @@ class StripeService extends AbstractApi
 
     private ?Stripe $stripeConfig = null;
 
-    public function __construct(HttpClientInterface $client, private StripeRepository $stripeRepository) {
+    public function __construct(
+        HttpClientInterface $client,
+        private StripeRepository $stripeRepository,
+        private TokenGenerator $tokenGenerator,
+        private TransferRepository $transferRepository
+    ) {
         parent::__construct($client);
         $this->loadConfiguration();
     }
@@ -294,12 +302,6 @@ class StripeService extends AbstractApi
 
         $params['payment_method'] = $paymentMethodId;
 
-        if($merchantAccountId) {
-            // Connect: transfer 95% to the merchant, keep 5% as platform fee
-            $params['application_fee_amount']      = (int) round($total * $this->amountFees / 100);
-            $params['transfer_data[destination]']  = $merchantAccountId;
-        }
-
         $params['metadata[items]'] = json_encode(array_map(
             fn(array $item) => [
                 'name'  => $item['name'],
@@ -319,11 +321,19 @@ class StripeService extends AbstractApi
 
         $params['metadata[merchant_account]'] = $merchantAccountId;
 
-        return $this->sendRequest(
+        $paymentIntent =  $this->sendRequest(
             self::BASE_URL . '/payment_intents',
             'POST',
             $params
         )->toArray();
+
+        $this->sendRequest(
+            self::BASE_URL . '/payment_intents/' . $paymentIntent['id'],
+            'POST',
+            ['metadata' => ['webhook_token' => $this->tokenGenerator->generate($paymentIntent['id'])]]
+        );
+
+        return $paymentIntent;
     }
 
     public function getPaymentIntent(string $paymentIntentId): array
@@ -403,9 +413,13 @@ class StripeService extends AbstractApi
      *
      * @return array Liste des transfers créés
      */
-    public function distributePayment(string $paymentIntentId): array
+    public function distributePayment(string $paymentIntentId, string $webhookToken): array
     {
         $pi = $this->getPaymentIntent($paymentIntentId);
+
+        if (!$this->tokenGenerator->verify($webhookToken, $paymentIntentId)) {
+            throw new \RuntimeException('Invalid or expired webhook token.');
+        }
  
         if ($pi['status'] !== 'succeeded') {
             throw new \RuntimeException('PaymentIntent is not succeeded.');
@@ -420,22 +434,48 @@ class StripeService extends AbstractApi
         // Calculer le net par marchand après déduction des frais plateforme
         $byMerchant = [];
         foreach ($items as $item) {
-            $merchantId = $item['merchant'] ?? null;
-            if (!$merchantId) {
+            $merchant = $item['merchant'] ?? null;
+            
+            if (!$merchant) {
                 continue;
+            }
+
+            // Skip si déjà transféré (protection retry)
+            $existing = $this->transferRepository->findOneBy([
+                'chargeId'          => $chargeId,
+                'accountId' => $merchant['id'],
+            ]);
+
+            if ($existing) {
+                $transfers[] = $existing;
+                continue;
+            }
+
+            if(!isset($byMerchant[$merchant['id']])) {
+                $byMerchant[$merchant['id']] = 0;
             }
  
             $itemTotal = (int) round($item['price'] * $item['qty'] * 100);
             $fee       = (int) round($itemTotal * $this->amountFees / 100);
             $net       = $itemTotal - $fee;
  
-            $byMerchant[$merchantId] = ($byMerchant[$merchantId] ?? 0) + $net;
+            $byMerchant[$merchant['id']] = ($byMerchant[$merchant['id']] ?? 0) + $net;
         }
- 
+        
+
         // Créer un Transfer par marchand
         $transfers = [];
         foreach ($byMerchant as $merchantId => $amount) {
-            $transfers[] = $this->createTransfer($amount, $merchantId, $chargeId);
+            $result = $this->createTransfer($amount, $merchantId, $chargeId);
+
+            $transfer = new Transfer(
+                $result['id'],
+                $chargeId,
+                $merchantId,
+                $amount
+            );
+
+            $transfers[] = $transfer;
         }
  
         return $transfers;

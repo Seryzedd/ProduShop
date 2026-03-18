@@ -228,9 +228,10 @@ function scrollFunction() {
     $(mybutton).fadeOut();
   }
 }
-
-// When the user clicks on the button, scroll to the top of the document
-mybutton.addEventListener('click', function() {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-})
+if(mybutton) {
+  // When the user clicks on the button, scroll to the top of the document
+  mybutton.addEventListener('click', function() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  })
+}

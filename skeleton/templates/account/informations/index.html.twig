@@ -21,14 +21,16 @@
     <main class="container">
         <h1 class="">{% trans %}My account{% endtrans %}</h1>
         <div class='row'>
-            {% if app.user|instanceOf('App\\Entity\\User\\Professional') and app.user.stripeAccount.ready == false %}
-                <div class="col-12">
-                    <div class="alert alert-warning">
-                        <h4>{% trans %}Your account is not completed.{% endtrans %}</h4>
-                        <p>{% trans %}Complete it to have your products shown in shelves.{% endtrans %}</p>
-                        <a href="#account-complete-link" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{% trans %}Complete my account{% endtrans %}</a>
+            {% if app.user|instanceOf('App\\Entity\\User\\Professional') and app.user.stripeAccount %}
+                {% if app.user.stripeAccount.ready == false %}
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <h4>{% trans %}Your account is not completed.{% endtrans %}</h4>
+                            <p>{% trans %}Complete it to have your products shown in shelves.{% endtrans %}</p>
+                            <a href="#account-complete-link" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{% trans %}Complete my account{% endtrans %}</a>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% endif %}
             <div class="col-lg-4 col-md-6">
                 {{ block('base_details') }}
@@ -81,7 +83,7 @@
                         <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
                     </p>
                     
-                    {% if is_granted('ROLE_SELLER') and user.stripeAccount.ready == false %}
+                    {% if is_granted('ROLE_SELLER') and user.stripeAccount and user.stripeAccount.ready == false %}
                         <p class="mb-1">
                             <a  
                                 href="{{ path('app_professional_stripe_onboarding') }}"
@@ -174,38 +176,41 @@
         <h3 class="lined text-nowrap flex-row-reverse">
             {% trans %}Products{% endtrans %}
         </h3>
+        {% if user.products|length > 0 %}
+            <p class="text-end">
+                <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
+            </p>
 
-        <p class="text-end">
-            <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
-        </p>
+            {% for product in user.products %}
+                <div class="row position-relative align-items-center">
+                    <div class="col-md-2">
+                        {% if product.image %}
+                            <img class="img-fluid" src="{{ product.image.src }}" alt="{{ product.image.name }}">
+                        {% endif %}
+                    </div>
 
-        {% for product in user.products %}
-            <div class="row position-relative align-items-center">
-                <div class="col-md-2">
-                    {% if product.image %}
-                        <img class="img-fluid" src="{{ product.image.src }}" alt="{{ product.image.name }}">
-                    {% endif %}
+                    <div class="col-md-6">
+                        <p class="fw-light mb-0">
+                            <a class="stretched-link fw-bold fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
+                                {{ product.name }}</a>
+                                <small class="fst-italic">{{ product.shelf.name }}</small>
+                            </p>
+                        <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
+                    </div>
+
+                    <div class="col-md-4">
+                        {% for package in product.packages %}
+                            <p class="text-end">
+                                x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice }}€</strong><br>
+                                <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
+                            </p>
+                        {% endfor %}
+                    </div>
                 </div>
-
-                <div class="col-md-6">
-                    <p class="fw-light mb-0">
-                        <a class="stretched-link fw-bold fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
-                            {{ product.name }}</a>
-                            <small class="fst-italic">{{ product.shelf.name }}</small>
-                        </p>
-                    <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
-                </div>
-
-                <div class="col-md-4">
-                    {% for package in product.packages %}
-                        <p class="text-end">
-                            x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice }}€</strong><br>
-                            <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
-                        </p>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">{% trans %}No products configured{% endtrans %}</p>
+        {% endif %}
     </div>
 {% endblock %}
 
@@ -240,17 +245,28 @@
 
 {% block order_list %}
     <div class="list-group list-group-flush mb-4">
-        {% for order in user.orders %}
-            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action">
+        {% for order in orders %}
+            {{ dump(order.transfers|first) }}
+            {% for transfer in order.transfers %}
+                
+            {% endfor %}
+            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action"> 
 
                 <div class="row">
-                    <div class="col-md-4">{{ order.paidAt|date('d/m/Y H:i') }}</div>
-                    <div class="col-md-2 text-center {% if order.status == 'succeeded' %}text-success{% else %}text-warning{% endif %}">{{ order.status }}</div>
+                    <div class="col-md-6">
+                        {% trans with {'%date%': order.createdAt|date('d/m/Y')} %}Created at : %date%{% endtrans %}
+                        
+                        </div>
+                    <div class="col-md-2 text-center {% if order.status == 'paid' %}text-success{% elseif order.status == 'succedeed' %}text-info{% else %}text-warning{% endif %}">{{ order.status }}</div>
                     <div class="col-md-2 text-center">{% trans with {'%number%': order.orderItems|length} %}%number% products{% endtrans %}</div>
-                    <div class="col-md-4 text-secondary text-end"><p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
+                    <div class="col-md-2 text-secondary text-end"><p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
                 </div>
             </a>
         {% endfor %}
+
+        {% if orders|length == 0 %}
+            <p class="text-muted">{% trans %}No orders yet{% endtrans %}.</p>
+        {% endif %}
     </div>
 {% endblock %}
 

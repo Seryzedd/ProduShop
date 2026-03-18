@@ -1,0 +1,42 @@
+FROM php:8.4-apache
+
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
+RUN apt-get update && apt-get install -y \
+    git \
+    zip \
+    unzip \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libzip-dev \
+    libfontconfig1 \
+    libxrender1 \
+    libxext6 \
+    xfonts-75dpi \
+    xfonts-base \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    xml \
+    dom \
+    simplexml \
+    intl \
+    opcache \
+    zip
+
+RUN a2enmod rewrite
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!Directory /var/www/!Directory ${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
+
+RUN echo '<Directory ${APACHE_DOCUMENT_ROOT}>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' >> /etc/apache2/apache2.conf
+
+WORKDIR /var/www/html
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

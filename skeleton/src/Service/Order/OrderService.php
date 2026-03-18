@@ -7,10 +7,14 @@ use App\Entity\User\Order;
 use App\Entity\User\OrderItem;
 use App\Entity\User\Professional;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\User\OrderRepository;
 
 class OrderService
 {
-    public function __construct(private readonly EntityManagerInterface $em) {}
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly OrderRepository        $orderRepository,
+        ) {}
 
     /**
      * Persists two Order entries for a confirmed PaymentIntent:
@@ -31,13 +35,8 @@ class OrderService
 
         // Order for the buyer
         $buyerOrder = $this->buildOrder($buyer, $intent, $paidAt);
-        $this->addItems($buyerOrder, $items);
+        $this->addItems($buyerOrder, $items, $seller);
         $this->em->persist($buyerOrder);
-
-        // Order for the seller
-        $sellerOrder = $this->buildOrder($seller, $intent, $paidAt);
-        $this->addItems($sellerOrder, $items);
-        $this->em->persist($sellerOrder);
     }
 
     public function save(): void
@@ -45,7 +44,7 @@ class OrderService
         $this->em->flush();
     }
 
-    private function buildOrder(AbstractUser $user, array $intent, \DateTimeImmutable $paidAt): Order
+    private function buildOrder(AbstractUser $user, array $intent): Order
     {
         $order = new Order();
         $order->setUser($user);
@@ -53,12 +52,11 @@ class OrderService
         $order->setAmount($intent['amount']);
         $order->setCurrency($intent['currency']);
         $order->setStatus($intent['status']);
-        $order->setPaidAt($paidAt);
 
         return $order;
     }
 
-    private function addItems(Order $order, array $items): void
+    private function addItems(Order $order, array $items, Professional $merchant): void
     {
         foreach ($items as $item) {
             $orderItem = new OrderItem();
@@ -66,8 +64,43 @@ class OrderService
             $orderItem->setUnitPrice($item['price']);
             $orderItem->setPackage($item['package']);
             $orderItem->setPurchase($order);
+            $merchant->addOrderItem($orderItem);
 
             $this->em->persist($orderItem);
         }
+    }
+
+    public function orderPay(Order $order, array $transfers)
+    {
+        $order->setStatus('paid');
+        $order->paidAt(new \DateTime());
+
+        foreach ($transfers as $transfer) {
+            $transfer->setOrderClass($order);
+
+            $this->persist($order);
+        }
+
+        $this->em->flush();
+    }
+
+    public function persist(Order $order)
+    {
+        $this->em->persist($order);
+    }
+
+    public function updateStatusByIntentId(string $intentId, string $status): void
+    {
+        $this->orderRepository->updateStatusByIntentId($intentId, $status);
+    }
+
+    public function confirmByIntentId(string $intentId): void
+    {
+        $this->orderRepository->confirmByIntentId($intentId);
+    }
+
+    public function getOrderByIntentId(string $intentId)
+    {
+        return $this->orderRepository->getByIntent($intentId);
     }
 }

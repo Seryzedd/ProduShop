@@ -2,9 +2,11 @@
 
 namespace App\Entity\User;
 
+use App\Entity\User\Payment\Transfer;
 use App\Repository\User\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Entity\User\Client;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -28,11 +30,11 @@ class Order
     #[ORM\Column(length: 50)]
     private ?string $status = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    private ?AbstractUser $user = null;
+    private ?Client $user = null;
 
     /**
      * @var Collection<int, OrderItem>
@@ -40,9 +42,20 @@ class Order
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'purchase', orphanRemoval: true)]
     private Collection $orderItems;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    /**
+     * @var Collection<int, Transfer>
+     */
+    #[ORM\OneToMany(targetEntity: Transfer::class, mappedBy: 'orderClass', cascade: ['persist', 'remove'])]
+    private Collection $transfers;
+
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->transfers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -146,6 +159,61 @@ class Order
             // set the owning side to null (unless already changed)
             if ($orderItem->getPurchase() === $this) {
                 $orderItem->setPurchase(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getAmountByMerchant()
+    {
+        $merchants = [];
+        foreach($this->orderItems as $item) {
+            $merchants[$item->getMerchant()->getId()] = [
+                'quantity' => $item->getQuantity() + (isset($merchants[$item->getMerchant()->getId()]) ? $merchants[$item->getMerchant()->getId()]['quantity'] : 0),
+                'total' => $item->getUnitPrice() + (isset($merchants[$item->getMerchant()->getId()]) ? $merchants[$item->getMerchant()->getId()]['total'] : 0)
+            ];
+        }
+
+        return $merchants;
+    }
+
+    /**
+     * @return Collection<int, Transfer>
+     */
+    public function getTransfers(): Collection
+    {
+        return $this->transfers;
+    }
+
+    public function addTransfer(Transfer $transfer): static
+    {
+        if (!$this->transfers->contains($transfer)) {
+            $this->transfers->add($transfer);
+            $transfer->setOrderClass($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransfer(Transfer $transfer): static
+    {
+        if ($this->transfers->removeElement($transfer)) {
+            // set the owning side to null (unless already changed)
+            if ($transfer->getOrderClass() === $this) {
+                $transfer->setOrderClass(null);
             }
         }
 

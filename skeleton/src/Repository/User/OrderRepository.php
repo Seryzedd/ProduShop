@@ -5,6 +5,7 @@ namespace App\Repository\User;
 use App\Entity\User\Order;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User\Professional;
 
 /**
  * @extends ServiceEntityRepository<Order>
@@ -16,28 +17,51 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-    //    /**
-    //     * @return Order[] Returns an array of Order objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByMerchantWithItems(Professional $merchant): array
+    {
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.orderItems', 'oi')
+            ->leftJoin('oi.package', 'p')
+            ->leftJoin('o.user', 'u')
+            ->addSelect('oi', 'p', 'u')
+            ->where('oi.merchant = :merchant')
+            ->setParameter('merchant', $merchant)
+            ->orderBy('o.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Order
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function updateStatusByIntentId(string $intentId, string $status): void
+    {
+        $this->createQueryBuilder('o')
+            ->update()
+            ->set('o.status', ':status')
+            ->where('o.intentId = :intentId')
+            ->setParameter('status', $status)
+            ->setParameter('intentId', $intentId)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function getByIntent(string $intentId)
+    {
+        $this->findOneBy(['intentId' => $intentId]);
+    }
+ 
+    /**
+     * Met à jour le statut à 'paid' et renseigne paidAt en une seule requête.
+     */
+    public function confirmByIntentId(string $intentId): void
+    {
+        $this->createQueryBuilder('o')
+            ->update()
+            ->set('o.status', ':status')
+            ->set('o.paidAt', ':paidAt')
+            ->where('o.intentId = :intentId')
+            ->setParameter('status', 'paid')
+            ->setParameter('paidAt', new \DateTimeImmutable())
+            ->setParameter('intentId', $intentId)
+            ->getQuery()
+            ->execute();
+    }
 }

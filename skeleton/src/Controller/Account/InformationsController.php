@@ -15,6 +15,7 @@ use App\Form\User\ProfessionalType;
 use App\Form\User\ClientType;
 use App\Entity\User\Client;
 use App\Entity\User\Professional;
+use App\Repository\User\OrderRepository;
 
 #[Route('/account')]
 final class InformationsController extends AbstractController
@@ -22,18 +23,24 @@ final class InformationsController extends AbstractController
     public function __construct(private StripeService $stripeService) {}
     
     #[Route('/', name: 'app_account_informations')]
-    public function index(): Response
+    public function index(OrderRepository $orderRepository): Response
     {
         $user = $this->getUser();
         $paymentMethods = [];
+        $orders = [];
         if ($user instanceOf Client) {
             $stripeCustomerId = $this->getUser()->getStripe()->getCustomerId();
 
             $paymentMethods = $this->stripeService->getPaymentMethods($stripeCustomerId);
+
+            $orders = $user->getOrders();
+        } elseif ($user instanceOf Professional) {
+            $orders = $orderRepository->findByMerchantWithItems($user);
         }
 
         return $this->render('account/informations/index.html.twig', [
-            'paymentMethods' => $paymentMethods
+            'paymentMethods' => $paymentMethods,
+            'orders' => $orders
         ]);
     }
 

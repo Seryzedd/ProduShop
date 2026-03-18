@@ -28,6 +28,9 @@ class OrderItem
     #[ORM\JoinColumn(nullable: false)]
     private ?Order $purchase = null;
 
+    #[ORM\ManyToOne(inversedBy: 'orderItems')]
+    private ?Professional $merchant = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -77,6 +80,18 @@ class OrderItem
     public function setPurchase(?Order $purchase): static
     {
         $this->purchase = $purchase;
+
+        return $this;
+    }
+
+    public function getMerchant(): ?Professional
+    {
+        return $this->merchant;
+    }
+
+    public function setMerchant(?Professional $merchant): static
+    {
+        $this->merchant = $merchant;
 
         return $this;
     }

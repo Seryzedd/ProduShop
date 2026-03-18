@@ -37,7 +37,7 @@ class Professional extends AbstractUser
     private ?Picture $logo = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?StripeMerchant $stripeAccount = null;
@@ -45,11 +45,18 @@ class Professional extends AbstractUser
     #[ORM\OneToOne(mappedBy: 'User', cascade: ['persist', 'remove'])]
     private ?OpeningSchedule $openingSchedule = null;
 
+    /**
+     * @var Collection<int, OrderItem>
+     */
+    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'merchant')]
+    private Collection $orderItems;
+
     public function __construct()
     {
         $this->addRole('ROLE_SELLER');
         $this->adress = new Adress();
         $this->products = new ArrayCollection();
+        $this->orderItems = new ArrayCollection();
     }
 
     public function getSiret(): ?string
@@ -211,5 +218,35 @@ class Professional extends AbstractUser
         }
         
         return false;
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getOrderItems(): Collection
+    {
+        return $this->orderItems;
+    }
+
+    public function addOrderItem(OrderItem $orderItem): static
+    {
+        if (!$this->orderItems->contains($orderItem)) {
+            $this->orderItems->add($orderItem);
+            $orderItem->setMerchant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderItem(OrderItem $orderItem): static
+    {
+        if ($this->orderItems->removeElement($orderItem)) {
+            // set the owning side to null (unless already changed)
+            if ($orderItem->getMerchant() === $this) {
+                $orderItem->setMerchant(null);
+            }
+        }
+
+        return $this;
     }
 }
