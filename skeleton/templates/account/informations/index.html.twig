@@ -181,7 +181,7 @@
         </p>
         {% if user.products|length > 0 %}
             {% for product in user.products %}
-                <div class="row position-relative align-items-center">
+                <div class="row position-relative align-items-center pb-1 pt-1{% if not loop.last %} border-bottom{% endif %}">
                     <div class="col-md-2">
                         {% if product.image %}
                             <img class="img-fluid" src="{{ product.image.src }}" alt="{{ product.image.name }}">
@@ -190,9 +190,10 @@
 
                     <div class="col-md-6">
                         <p class="fw-light mb-0">
-                            <a class="stretched-link fw-bold fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
-                                {{ product.name }}</a>
-                                <small class="fst-italic">{{ product.shelf.name }}</small>
+                            <a class="stretched-link fw-bold me-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
+                                {{ product.name }}
+                            </a>
+                            <small class="fst-italic">{{ product.shelf.name }}</small>
                             </p>
                         <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
                     </div>
@@ -200,7 +201,7 @@
                     <div class="col-md-4">
                         {% for package in product.packages %}
                             <p class="text-end">
-                                x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice|number_format(2, ',', ' ') }}€</strong><br>
+                                <small class="text-muted">x{{ package.quantity }}</small> <strong class="text-secondary">{{ package.finalPrice|number_format(2, ',', ' ') }}€</strong><br>
                                 <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
                             </p>
                         {% endfor %}
@@ -250,7 +251,7 @@
                 
                 <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action"> 
 
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-md-6">
                             {% trans with {'%date%': order.createdAt|date('d/m/Y H:i')} %}Created at : %date%{% endtrans %}
                         </div>
@@ -260,9 +261,10 @@
                             {% if user|instanceOf('App\\Entity\\User\\Professional') %}
                                 {% set transfer = order.transferByAccount(user.stripeAccount.accountId) %}
                                 
-                                <p>{{ (transfer ? transfer.amount / 100 : 0)|number_format(2, ',', ' ') }}<small class="">{{ (transfer ? transfer.currency : 'eur')|upper }}</small></p>
+                                <p class="mb-0" title="{% trans %}Transfered amount on my account{% endtrans %}">{{ (transfer ? transfer.amount / 100 : 0)|number_format(2, ',', ' ') }}<small class="">{{ (transfer ? transfer.currency : 'eur')|upper }}</small></p>
+                                <p class="text-muted mb-0" title="{% trans %}Order amount{% endtrans %}"><small class="">{{ (order.amount / 100)|number_format(2, ',', ' ') }} {{ order.currency|upper }}</small></p>
                             {% else %}
-                                <p>{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p>
+                                <p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p>
                             {% endif %}
                         </div>
                     </div>

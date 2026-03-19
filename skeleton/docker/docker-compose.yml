@@ -20,25 +20,6 @@ services:
       dns:
         - 8.8.8.8
         - 1.1.1.1
-
-    messenger:
-        container_name: ProduShop-messenger
-        build:
-            context: .
-            dockerfile: dockerfile.messenger
-        command: php /var/www/html/bin/console messenger:consume async --time-limit=3600 -vv
-        environment:
-            - MYSQL_USER=admin
-            - MYSQL_PASSWORD=64ra97!
-            - MYSQL_DATABASE=ProduShop-db
-        volumes:
-            - ./../:/var/www/html
-        restart: unless-stopped
-        depends_on:
-            - mysql
-        dns:
-            - 8.8.8.8
-            - 1.1.1.1
     mysql:
       image: mysql:8
       container_name: ProduShop-database
