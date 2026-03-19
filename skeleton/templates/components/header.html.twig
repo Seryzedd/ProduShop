@@ -81,7 +81,7 @@
                                     {% trans %}My account{% endtrans %}
                                 </a>
                             </li>
-
+                            
                             {% if is_granted('ROLE_SELLER') %}
                                 <li>
                                     <a class="dropdown-item" href="{{ path('app_merchant_products') }}" title="{% trans %}My products{% endtrans %}">

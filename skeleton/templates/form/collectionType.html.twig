@@ -3,7 +3,9 @@
 </h4>
 
 <ul class="{{ collection.vars.name }}-collection list-group list-group"
-    
+    {% if collection.vars.prototype is defined %}
+        data-prototype="{{ form_widget(collection.vars.prototype)|e('html_attr') }}"
+    {% endif %}
     deletable="{{ collection.vars.allow_delete }}"
     data-index="{{ collection|length > 0 ? collection|last.vars.name + 1 : 0 }}"
     {% if formInline is defined %}

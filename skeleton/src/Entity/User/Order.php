@@ -190,6 +190,13 @@ class Order
         return $merchants;
     }
 
+    public function getTransferByAccount(string $accountId)
+    {
+        $filter = $this->transfers->filter(static fn (transfer $transfer) => $transfer->getAccountId() === $accountId);
+
+        return $filter->first();
+    }
+
     /**
      * @return Collection<int, Transfer>
      */

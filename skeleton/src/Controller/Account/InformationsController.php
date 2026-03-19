@@ -33,7 +33,7 @@ final class InformationsController extends AbstractController
 
             $paymentMethods = $this->stripeService->getPaymentMethods($stripeCustomerId);
 
-            $orders = $user->getOrders();
+            $orders = $user->getOrdersByDate();
         } elseif ($user instanceOf Professional) {
             $orders = $orderRepository->findByMerchantWithItems($user);
         }

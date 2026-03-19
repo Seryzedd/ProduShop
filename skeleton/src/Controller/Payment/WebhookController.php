@@ -27,50 +27,32 @@ final class WebhookController extends AbstractController
         if (!isset($payload['type'], $payload['data']['object'])) {
             return new Response('Bad payload', 400);
         }
- 
+
         $pi    = $payload['data']['object'];
         $piId  = $pi['id'];
- 
-        match ($payload['type']) {
- 
-            'payment_intent.succeeded' => (function() use ($pi, $piId, $stripeService, $orderService) {
+
+        switch($payload['type']) {
+            case 'payment_intent.succeeded':
                 $webhookToken = $pi['metadata']['webhook_token'] ?? null;
  
                 if (!$webhookToken) {
                     throw new \RuntimeException('Missing webhook token.');
                 }
 
-                $this->bus->dispatch(new DistributePaymentMessage($piId, $webhookToken));
-
                 $transfers = $stripeService->distributePayment($piId, $webhookToken);
 
                 $order = $orderService->getOrderByIntentId($piId);
 
                 $orderService->orderPay($order, $transfers);
-                //try{
-                //    // Distribuer les paiements aux marchands
-                //    
-                //} catch(\Exception $exception) {
-                //    $this->logger->error('Webhook distributePayment failed', [
-                //        'piId'      => $piId,
-                //        'message'   => $exception->getMessage(),
-                //        'trace'     => $exception->getTraceAsString(),
-                //    ]);
-                //}
-                
-            })(),
- 
-            'payment_intent.payment_failed' => (function() use ($piId, $orderService) {
+                break;
+            case 'payment_intent.payment_failed':
                 $orderService->updateStatusByIntentId($piId, 'failed');
-            })(),
- 
-            'payment_intent.canceled' => (function() use ($piId, $orderService) {
+                break;
+            case 'payment_intent.canceled':
                 $orderService->updateStatusByIntentId($piId, 'canceled');
-            })(),
- 
-            default => null,
-        };
- 
-        return new Response('', 200);
+                break;
+        }
+
+        return new Response('Order updated', 200);
     }
 }

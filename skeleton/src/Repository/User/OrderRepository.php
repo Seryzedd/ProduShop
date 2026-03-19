@@ -45,7 +45,7 @@ class OrderRepository extends ServiceEntityRepository
 
     public function getByIntent(string $intentId)
     {
-        $this->findOneBy(['intentId' => $intentId]);
+        return $this->findOneBy(['intentId' => $intentId]);
     }
  
     /**

@@ -112,7 +112,7 @@ class StripeMerchantService
     private function saveStripeMerchant(Professional $professional, string $accountId): StripeMerchant
     {
         $stripeMerchant = new StripeMerchant($professional, $accountId);
-        $stripeMerchant->setIsReady($this->stripeService->isConnectAccountReady($accountId));
+        $stripeMerchant->setReady($this->stripeService->isConnectAccountReady($accountId));
 
         $this->entityManager->persist($stripeMerchant);
         $this->entityManager->flush();

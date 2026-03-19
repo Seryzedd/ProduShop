@@ -83,15 +83,12 @@
                         <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_account_password_update') }}">{% trans %}Update my password{% endtrans %}</a>
                     </p>
                     
-                    {% if is_granted('ROLE_SELLER') and user.stripeAccount and user.stripeAccount.ready == false %}
+                    {% if is_granted('ROLE_SELLER') and (user.stripeAccount == null or user.stripeAccount.ready == false) %}
                         <p class="mb-1">
                             <a  
                                 href="{{ path('app_professional_stripe_onboarding') }}"
-                                class="link-offset-2 popover-danger link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-                                data-bs-toggle="popover"
+                                class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
                                 id="account-complete-link"
-                                data-bs-placement="right"
-                                data-bs-content="{% trans %}Complete your account{% endtrans %}"
                             >
                                 {% trans %}Complete my banking account{% endtrans %}</a>
                         </p>
@@ -113,7 +110,7 @@
 
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
-            <strong>{% trans %}Postale adress{% endtrans %}</strong>
+            <strong>{% trans %}Postal adress{% endtrans %}</strong>
             <a href="{{ path('app_account_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
         </p>
         {% if user.shippingAdress|length == 0 %}
@@ -176,11 +173,13 @@
         <h3 class="lined text-nowrap flex-row-reverse">
             {% trans %}Products{% endtrans %}
         </h3>
-        {% if user.products|length > 0 %}
-            <p class="text-end">
+        <p class="text-end">
+            <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_create') }}">{% trans %}Create{% endtrans %}</a>
+            {% if user.products|length > 0 %}
                 <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
-            </p>
-
+            {% endif %}
+        </p>
+        {% if user.products|length > 0 %}
             {% for product in user.products %}
                 <div class="row position-relative align-items-center">
                     <div class="col-md-2">
@@ -201,7 +200,7 @@
                     <div class="col-md-4">
                         {% for package in product.packages %}
                             <p class="text-end">
-                                x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice }}€</strong><br>
+                                x{{ package.quantity }} <strong class="text-secondary fs-5">{{ package.finalPrice|number_format(2, ',', ' ') }}€</strong><br>
                                 <small class="text-muted">{% trans with {'%quantity%': package.stock} %}x%quantity% in stock{% endtrans %}</small>
                             </p>
                         {% endfor %}
@@ -245,23 +244,31 @@
 
 {% block order_list %}
     <div class="list-group list-group-flush mb-4">
+        {% set limit = 0 %}
         {% for order in orders %}
-            {{ dump(order.transfers|first) }}
-            {% for transfer in order.transfers %}
+            {% if limit <= 5 %}
                 
-            {% endfor %}
-            <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action"> 
+                <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action"> 
 
-                <div class="row">
-                    <div class="col-md-6">
-                        {% trans with {'%date%': order.createdAt|date('d/m/Y')} %}Created at : %date%{% endtrans %}
-                        
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% trans with {'%date%': order.createdAt|date('d/m/Y H:i')} %}Created at : %date%{% endtrans %}
                         </div>
-                    <div class="col-md-2 text-center {% if order.status == 'paid' %}text-success{% elseif order.status == 'succedeed' %}text-info{% else %}text-warning{% endif %}">{{ order.status }}</div>
-                    <div class="col-md-2 text-center">{% trans with {'%number%': order.orderItems|length} %}%number% products{% endtrans %}</div>
-                    <div class="col-md-2 text-secondary text-end"><p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p></div>
-                </div>
-            </a>
+                        <div class="col-md-2 text-center {% if order.status == 'paid' %}text-success{% elseif order.status == 'succedeed' %}text-info{% else %}text-warning{% endif %}">{{ order.status }}</div>
+                        <div class="col-md-2 text-center">{% trans with {'%number%': order.orderItems|length} %}%number% products{% endtrans %}</div>
+                        <div class="col-md-2 text-secondary text-end"><p class="mb-0">
+                            {% if user|instanceOf('App\\Entity\\User\\Professional') %}
+                                {% set transfer = order.transferByAccount(user.stripeAccount.accountId) %}
+                                
+                                <p>{{ (transfer ? transfer.amount / 100 : 0)|number_format(2, ',', ' ') }}<small class="">{{ (transfer ? transfer.currency : 'eur')|upper }}</small></p>
+                            {% else %}
+                                <p>{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% set limit = limit + 1 %}
+            {% endif %}
         {% endfor %}
 
         {% if orders|length == 0 %}

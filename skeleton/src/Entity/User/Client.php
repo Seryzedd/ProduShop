@@ -149,6 +149,26 @@ class Client extends AbstractUser
         return $this->orders;
     }
 
+    public function getOrdersByDate()
+    {
+        $iterator = $this->orders->getIterator();
+
+        $iterator->uasort(
+            function ($first, $second) {
+                if ($first->getCreatedAt() >= $second->getCreatedAt()) {
+                    return -1;
+                }
+                if ($second->getCreatedAt() <= $second->getCreatedAt()) {
+                    return 1;
+                }
+                // if value is not found in $myCustomIdArray
+                return 0;
+            }
+        );
+
+        return $iterator;
+    }
+
     public function addOrder(Order $order): static
     {
         if (!$this->orders->contains($order)) {

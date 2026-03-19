@@ -73,18 +73,20 @@ class OrderService
     public function orderPay(Order $order, array $transfers)
     {
         $order->setStatus('paid');
-        $order->paidAt(new \DateTime());
+        $order->setPaidAt(new \DateTimeImmutable());
 
         foreach ($transfers as $transfer) {
             $transfer->setOrderClass($order);
 
-            $this->persist($order);
+            $this->persist($transfer);
         }
+
+        $this->persist($order);
 
         $this->em->flush();
     }
 
-    public function persist(Order $order)
+    public function persist(object $order)
     {
         $this->em->persist($order);
     }

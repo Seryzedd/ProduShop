@@ -455,8 +455,8 @@ class StripeService extends AbstractApi
                 $byMerchant[$merchant['id']] = 0;
             }
  
-            $itemTotal = (int) round($item['price'] * $item['qty'] * 100);
-            $fee       = (int) round($itemTotal * $this->amountFees / 100);
+            $itemTotal = (int) $item['price'] * $item['qty'] * 100;
+            $fee       = (int) $itemTotal * $this->amountFees / 100;
             $net       = $itemTotal - $fee;
  
             $byMerchant[$merchant['id']] = ($byMerchant[$merchant['id']] ?? 0) + $net;
