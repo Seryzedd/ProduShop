@@ -190,6 +190,31 @@ class Order
         return $merchants;
     }
 
+    public function getItemsByMerchant()
+    {
+        $items = [];
+
+        foreach ($this->orderItems as $item) {
+            $price = isset($items[$item->getMerchant()->getId()]) ? $items[$item->getMerchant()->getId()]['totalAmount'] : 0;
+            
+            if(!isset($items[$item->getMerchant()->getId()])) {
+                $items[$item->getMerchant()->getId()] = [
+                    'totalAmount' => 0,
+                    'items' => [],
+                    'merchant' => $item->getMerchant(),
+                ];
+            }
+
+            $items[$item->getMerchant()->getId()] = [
+                'totalAmount' => $item->getUnitPrice() + $price,
+                'merchant' => $item->getMerchant(),
+                'items' => array_merge($items[$item->getMerchant()->getId()]['items'], [$item])
+            ];
+        }
+
+        return $items;
+    }
+
     public function getTransferByAccount(string $accountId)
     {
         $filter = $this->transfers->filter(static fn (transfer $transfer) => $transfer->getAccountId() === $accountId);

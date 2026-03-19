@@ -52,10 +52,10 @@
         <div class="card p-4">
             <div class="row align-items-center">
                 <div class="col-12">
-                    {% if payment.status == "succeeded" %}
-                        <p class="text-end text-success">{{ payment.status }}</p>
-                    {% elseif payment.status == "requires_confirmation" %}
-                        <p class="text-end text-info">{{ payment.status }}</p>
+                    {% if order.status == "succeeded" %}
+                        <p class="text-end text-success">{{ order.status|upper }}</p>
+                    {% else %}
+                        <p class="text-end text-info">{{ order.status|upper }}</p>
                     {% endif %}
                 </div>
 
@@ -87,27 +87,19 @@
                 </div>
 
                 <div class="col-lg-5 card position-relative p-3">
-                    <h5 class="text-muted">{% trans %}Merchant{% endtrans %} :</h5>
-
-                    {% if payment.transfer_data %}
-                        <p>{% trans %}Received{% endtrans %} : <strong>{{ ((payment.amount - payment.application_fee_amount) / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}</p>
-                        <p class="mb-0">
-                            <strong class="text-primary">{{ payment.transfer_data.destination.individual.first_name }} {{ payment.transfer_data.destination.individual.last_name }}</strong>
-                        </p>
-                        <p class="mb-0">{{ payment.transfer_data.destination.email }}</p>
-                        <code class="">{{ payment.transfer_data.destination.id }}</code>
-
-                        {% for bank in payment.transfer_data.destination.external_accounts.data %}
-                            <p class="text-muted mt-2">
-                                <small>
-                                    {{ bank.bank_name }}<br>
-                                    xxxx xxxx xxxx {{ bank.last4 }}
-                                </small>
-                            </p>
+                    <h5 class="">{% trans %}Merchants{% endtrans %} :</h5>
+                    <ul class="list-group">
+                        {% for transfer in order.transfers %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                <p class="mb-0">
+                                    {{ transfer.accountId }}<br>
+                                    <small class="text-muted">{{ transfer.createdAt|date('d/m/Y H:i') }}</small>
+                                </p>
+                                <p class="mb-0"><strong>{{ (transfer.amount / 100)|number_format(2, ',', ' ') }}</strong> {{ transfer.currency }}</p>
+                            </li>
                         {% endfor %}
-                    {% else %}
-                        {% trans %}Account is not ready{% endtrans %}
-                    {% endif %}
+                    </ul>
+                    
                 </div>
             </div>
         </div>

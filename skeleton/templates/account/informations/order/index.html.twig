@@ -38,27 +38,37 @@
             <h4 class="mb-0 text-secondary">{{ (order.amount / 100)|number_format(2, ',', ' ') }}</h4>
             <p class="mb-0 text-secondary"><small>{{ order.currency }}</small></p>
         </div>
+
         <p class='text-muted text-end'>{% trans with {'%paidAt%': order.paidAt|date('d/m/Y H:i')} %}Paid at : %paidAt%{% endtrans %}</p>
-        {{ dump(order) }}
+        
         <ul class="list-group">
-            {% for item in order.orderItems %}
+            {% for command in order.itemsByMerchant %}
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col-md-6">
-                            {{ item.package.product.name }}
+                        <div class='col-md-12'>
+                            <p class="mb-0 d-flex justify-content-between">
+                                <a href='{{ path("app_company", {id: command.merchant.id}) }}' class="link-offset-2 lined link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ command.merchant.companyName }}</a>
+                                <strong class="fs-6">{{ command.totalAmount|number_format(2, ',', ' ') }} EUR</strong>
+                            </p>
                         </div>
 
-                        <div class="col-md-2">
-                            x{{ item.quantity }}
-                        </div>
+                        {% for item in command.items %}
+                            <div class="col-md-6 ps-4">
+                                {{ item.package.product.name }}
+                            </div>
 
-                        <div class="col-md-2 text-end">
-                            <strong class="me-2">{{ item.unitPrice|number_format(2, ',', ' ') }}</strong>{{ order.currency }}
-                        </div>
+                            <div class="col-md-2">
+                                x{{ item.quantity }}
+                            </div>
 
-                        <div class="col-md-2 text-end">
-                            <strong class="me-2">{{ (item.unitPrice * item.quantity)|number_format(2, ',', ' ') }}</strong>{{ order.currency }}
-                        </div>
+                            <div class="col-md-2 text-end">
+                                <small class="me-2">{{ item.unitPrice|number_format(2, ',', ' ') }}</small>{{ order.currency }}
+                            </div>
+
+                            <div class="col-md-2 text-end">
+                                <small class="me-2">{{ (item.unitPrice * item.quantity)|number_format(2, ',', ' ') }}</small>{{ order.currency }}
+                            </div>
+                        {% endfor %}
                     </div>
                 </li>
             {% endfor %}

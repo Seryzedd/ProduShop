@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\Payment\StripeType;
 use App\Repository\Payment\StripeRepository;
 use App\Service\Api\StripeService;
+use App\Repository\User\OrderRepository;
 
 #[Route('/admin/payment/stripe')]
 final class StripeController extends AbstractController
@@ -62,10 +63,12 @@ final class StripeController extends AbstractController
     }
 
     #[Route('/payment/{id}', name: 'app_admin_payment_stripe')]
-    public function payment(string $id): Response
-    {
+    public function payment(string $id, OrderRepository $orderRepository): Response
+    {   
+
         return $this->render('admin/payment/stripe/payment.html.twig', [
-            'payment' => $this->stripe->getPaymentIntent($id)
+            'payment' => $this->stripe->getPaymentIntent($id),
+            'order' => $orderRepository->getByIntent($id)
         ]);
     }
 }

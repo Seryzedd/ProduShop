@@ -342,7 +342,13 @@ class StripeService extends AbstractApi
             self::BASE_URL . '/payment_intents/' . $paymentIntentId,
             'GET',
             [
-                'expand' => ['customer', 'payment_method', 'transfer_data.destination']
+                'expand' => [
+                    'customer',
+                    'payment_method',
+                    'transfer_data.destination',
+                    'latest_charge',
+                    'latest_charge.transfer_data.destination'
+                ]
             ]
         )->toArray();
     }
