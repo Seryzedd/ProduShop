@@ -46,10 +46,10 @@ class Professional extends AbstractUser
     private ?OpeningSchedule $openingSchedule = null;
 
     /**
-     * @var Collection<int, OrderItem>
+     * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'merchant')]
-    private Collection $orderItems;
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'merchant')]
+    private Collection $orders;
 
     public function __construct()
     {
@@ -57,6 +57,7 @@ class Professional extends AbstractUser
         $this->adress = new Adress();
         $this->products = new ArrayCollection();
         $this->orderItems = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getSiret(): ?string
@@ -244,6 +245,36 @@ class Professional extends AbstractUser
             // set the owning side to null (unless already changed)
             if ($orderItem->getMerchant() === $this) {
                 $orderItem->setMerchant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setMerchant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            // set the owning side to null (unless already changed)
+            if ($order->getMerchant() === $this) {
+                $order->setMerchant(null);
             }
         }
 

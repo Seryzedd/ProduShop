@@ -27,6 +27,8 @@ services:
           - "8039:3306"
       working_dir: /application
       platform: linux/amd64
+      volumes:
+          - ./../sql:/var/lib/mysql
       environment:
           - MYSQL_USER=admin
           - MYSQL_PASSWORD=64ra97!

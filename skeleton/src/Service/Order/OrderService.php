@@ -8,6 +8,7 @@ use App\Entity\User\OrderItem;
 use App\Entity\User\Professional;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\User\OrderRepository;
+use App\Entity\User\Payment\Payment;
 
 class OrderService
 {
@@ -26,6 +27,7 @@ class OrderService
      * @param array        $items   [['name', 'quantity', 'price', 'package' => Package], ...]
      */
     public function persistFromIntent(
+        Payment $payment,
         AbstractUser $buyer,
         Professional $seller,
         array        $intent,
@@ -34,8 +36,12 @@ class OrderService
         $paidAt = new \DateTimeImmutable();
 
         // Order for the buyer
-        $buyerOrder = $this->buildOrder($buyer, $intent, $paidAt);
+        $buyerOrder = $this->buildOrder($seller, $intent, $paidAt);
         $this->addItems($buyerOrder, $items, $seller);
+        $payment->addOrder($buyerOrder);
+        $payment->setAmount($buyerOrder->getAmount() + $payment->getAmount());
+
+        $this->em->persist($payment);
         $this->em->persist($buyerOrder);
     }
 
@@ -46,8 +52,9 @@ class OrderService
 
     private function buildOrder(AbstractUser $user, array $intent): Order
     {
+        
         $order = new Order();
-        $order->setUser($user);
+        $order->setMerchant($user);
         $order->setIntentId($intent['id']);
         $order->setAmount($intent['amount']);
         $order->setCurrency($intent['currency']);
@@ -64,26 +71,38 @@ class OrderService
             $orderItem->setUnitPrice($item['price']);
             $orderItem->setPackage($item['package']);
             $orderItem->setPurchase($order);
-            $merchant->addOrderItem($orderItem);
 
             $this->em->persist($orderItem);
         }
     }
 
-    public function orderPay(Order $order, array $transfers)
+    public function orderPay(Order $order)
     {
         $order->setStatus('paid');
         $order->setPaidAt(new \DateTimeImmutable());
 
-        foreach ($transfers as $transfer) {
-            $transfer->setOrderClass($order);
 
-            $this->persist($transfer);
-        }
 
         $this->persist($order);
 
         $this->em->flush();
+    }
+
+    public function validatePayment(Payment $payment)
+    {
+        $isTransfered = true;
+        foreach($payment->getOrders() as $order) {
+            if($order->getStatus() !== 'Paid') {
+                $isTransfered = false;
+            }
+        }
+
+        if($isTransfered) {
+            $payment->setStatus('Treated');
+            $this->em->persist($payment);
+
+            $this->em->flush();
+        }
     }
 
     public function persist(object $order)

@@ -278,6 +278,10 @@ class StripeService extends AbstractApi
             throw new \RuntimeException('Payment method not found');
         }
 
+        if (!$merchantAccountId) {
+            throw new \RuntimeException('Merchant id is needed to transfer');
+        }
+
         array_walk($items, fn(array &$item) => $this->validateItem($item));
 
         $total   = $this->calculateTotal($items);
@@ -299,6 +303,11 @@ class StripeService extends AbstractApi
             'automatic_payment_methods[allow_redirects]'      => 'never',
             'automatic_payment_methods[enabled]'              => 'true',
         ];
+
+        $params['application_fee_amount']     = (int) round($total * $this->amountFees / 100);
+        $params['transfer_data[destination]'] = $merchantAccountId;
+
+        
 
         $params['payment_method'] = $paymentMethodId;
 

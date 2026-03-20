@@ -1,5 +1,6 @@
 
 ###> symfony/framework-bundle ###
+/sql
 /.env.local
 /.env.local.php
 /.env.*.local

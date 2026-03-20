@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\User\Payment\Payment;
 use App\Entity\User\Payment\StripeCustomer;
 use App\Entity\User\PostalAdress\Adress;
 use App\Repository\User\ClientRepository;
@@ -33,19 +34,20 @@ class Client extends AbstractUser
     #[ORM\OneToMany(targetEntity: Adress::class, mappedBy: 'user', cascade: ['persist'])]
     private Collection $shippingAdresses;
 
-    /**
-     * @var Collection<int, Order>
-     */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
-    private Collection $orders;
-
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?StripeCustomer $stripe = null;
+
+    /**
+     * @var Collection<int, Payment>
+     */
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'customer', orphanRemoval: true)]
+    private Collection $payments;
 
     public function __construct()
     {
         $this->addRole('ROLE_USER');
         $this->shippingAdresses = new ArrayCollection();
+        $this->payments = new ArrayCollection();
     }
 
     public function getGender():string
@@ -142,49 +144,44 @@ class Client extends AbstractUser
     }
 
     /**
-     * @return Collection<int, Order>
+     * @return Collection<int, Payment>
      */
-    public function getOrders(): Collection
+    public function getPayments(): Collection
     {
-        return $this->orders;
+        return $this->payments;
     }
 
-    public function getOrdersByDate()
+    public function addPayment(Payment $payment): static
     {
-        $iterator = $this->orders->getIterator();
-
-        $iterator->uasort(
-            function ($first, $second) {
-                if ($first->getCreatedAt() >= $second->getCreatedAt()) {
-                    return -1;
-                }
-                if ($second->getCreatedAt() <= $second->getCreatedAt()) {
-                    return 1;
-                }
-                // if value is not found in $myCustomIdArray
-                return 0;
-            }
-        );
-
-        return $iterator;
-    }
-
-    public function addOrder(Order $order): static
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->setUser($this);
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setCustomer($this);
         }
 
         return $this;
     }
 
-    public function removeOrder(Order $order): static
+    public function getPaymentsByDate()
     {
-        if ($this->orders->removeElement($order)) {
+        $iterator = $this->payments->getIterator();
+
+        $iterator->uasort(function ($first, $second) {
+            if ($first === $second) {
+                return 0;
+            }
+
+            return (float) $first->getCreatedAt()->format("U.u") < (float) $second->getCreatedAt()->format("U.u") ? -1 : 1;
+        });
+
+        return $iterator;
+    }
+
+    public function removePayment(Payment $payment): static
+    {
+        if ($this->payments->removeElement($payment)) {
             // set the owning side to null (unless already changed)
-            if ($order->getUser() === $this) {
-                $order->setUser(null);
+            if ($payment->getCustomer() === $this) {
+                $payment->setCustomer(null);
             }
         }
 

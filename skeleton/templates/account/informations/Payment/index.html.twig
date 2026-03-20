@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%date%': payment.createdAt|date('d/m/Y H:i')} %}Payment "%date%"{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        },
+        {
+            label: 'Payment "%date%"'|trans({'%date%': payment.createdAt|date('d/m/Y H:i')}),
+            route: 'app_account_adress',
+            parameters: {'payment': payment.id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-baseline mb-3">
+            <h1 class="mb-0">{% trans with {'%date%': payment.createdAt|date('d/m/Y H:i')} %}Payment "%date%"{% endtrans %}</h1>
+
+            <h4 class="text-end text-secondary mb-0">{{ (payment.amount / 100)|number_format(2, ',', ' ') }}<small class="fs-6">EUR</small></h4>
+        </div>
+
+        <div class="row">
+            {% for order in payment.orders %}
+                
+                <div class="col-4">
+                    <a href="">{{ order.merchant.companyName }}</a>
+                </div>
+                <div class="col-4 text-end text-muted">
+                    {{ order.merchant.adress.fullAddress }}
+                </div>
+
+                <div class="col-2 text-end text-muted">
+                    {{ order.status }}
+                </div>
+
+                <div class="col-2 text-end text-muted">
+                    <h5 class="text-end">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">EUR</small></h5>
+                </div>
+
+                <div class="col-12 border-top">
+                    <ul class="list-group list-group-flush">
+                        {% for item in order.orderItems %}
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {{ item.package.product.name }}
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        x{{ item.quantity }}
+                                    </div>
+
+                                    <div class="col-md-4 text-end">
+                                        {{ item.unitPrice|number_format(2, ',', ' ') }}<small>EUR</small>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}

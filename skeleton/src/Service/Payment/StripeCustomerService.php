@@ -9,6 +9,8 @@ use App\Service\Api\StripeService;
 use App\Service\Payment\StripeMerchantService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\Cart\CartService;
+use App\Entity\User\Payment;
+use App\Entity\Order;
 
 /**
  * Responsability : Link Customer and update it with Doctrine to API Stripe Service

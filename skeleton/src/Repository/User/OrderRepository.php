@@ -20,11 +20,7 @@ class OrderRepository extends ServiceEntityRepository
     public function findByMerchantWithItems(Professional $merchant): array
     {
         return $this->createQueryBuilder('o')
-            ->leftJoin('o.orderItems', 'oi')
-            ->leftJoin('oi.package', 'p')
-            ->leftJoin('o.user', 'u')
-            ->addSelect('oi', 'p', 'u')
-            ->where('oi.merchant = :merchant')
+            ->where('o.merchant = :merchant')
             ->setParameter('merchant', $merchant)
             ->orderBy('o.createdAt', 'DESC')
             ->getQuery()

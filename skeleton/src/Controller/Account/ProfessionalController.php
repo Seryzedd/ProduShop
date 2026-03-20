@@ -26,21 +26,28 @@ final class ProfessionalController extends AbstractController
         /** @var \App\Entity\User\Professional $professional */
         $professional = $this->getUser();
 
-        $merchant  = $this->stripeMerchantService->resolveAccount($professional);
-        $accountId = $merchant->getAccountId();
+        $merchant = null;
+        try {
+            $merchant  = $this->stripeMerchantService->resolveAccount($professional);
+            $accountId = $merchant->getAccountId();
 
-        if ($merchant->isReady()) {
+            if ($merchant && $merchant->isReady()) {
             $this->addFlash('info', 'Stripe account already completed.');
             return $this->redirectToRoute('app_professional_stripe_return');
         }
 
-        $link = $this->stripeService->createAccountLink(
-            $accountId,
-            $this->generateUrl('app_professional_stripe_refresh', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            $this->generateUrl('app_professional_stripe_return',  [], UrlGeneratorInterface::ABSOLUTE_URL),
-        );
+            $link = $this->stripeService->createAccountLink(
+                $accountId,
+                $this->generateUrl('app_professional_stripe_refresh', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                $this->generateUrl('app_professional_stripe_return',  [], UrlGeneratorInterface::ABSOLUTE_URL),
+            );
 
-        return $this->redirect($link['url']);
+            return $this->redirect($link['url']);
+        } catch(\Exception $exception) {
+            $this->addFlash('danger', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_account_informations');
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Service\Api\StripeService;
 use App\Service\Payment\StripeCustomerService;
 use App\Service\Cart\CartService;
 use App\Service\Order\OrderService;
+use App\Entity\User\Payment\Payment;
 
 #[Route('/cart/payment')]
 final class PaymentController extends AbstractController
@@ -70,6 +71,8 @@ final class PaymentController extends AbstractController
                 }
 
                 $confirmed = [];
+
+                $payment = new Payment($client);
                 foreach ($result['succeeded'] as $entry) {
                     $intent = $entry['intent'];
                     $professional = $entry['professional'];
@@ -86,7 +89,7 @@ final class PaymentController extends AbstractController
                         throw new \RuntimeException('payment.card_requires_3ds');
                     }
 
-                    $this->orderService->persistFromIntent($client, $professional, $intent, $entry['items']);
+                    $this->orderService->persistFromIntent($payment, $client, $professional, $intent, $entry['items']);
 
                     $confirmed[] = [
                         'intent'   => $intent,
@@ -100,7 +103,7 @@ final class PaymentController extends AbstractController
 
                 $this->savePaymentSummary($request, $confirmed, $result['failed']);
 
-                return $this->redirectToRoute('app_payment_success');
+                return $this->redirectToRoute('app_payment_success', ['payment' => $payment->getId()]);
 
             } catch (\Exception $e) {
                 $this->addFlash('danger', $e->getMessage());
@@ -114,8 +117,8 @@ final class PaymentController extends AbstractController
         ]);
     }
 
-    #[Route('/success', name: 'app_payment_success')]
-    public function paymentSuccess(Request $request): Response
+    #[Route('/success/{payment}', name: 'app_payment_success')]
+    public function paymentSuccess(Request $request, Payment $payment): Response
     {
         $summary = $request->getSession()->get('payment_summary');
 
@@ -127,7 +130,7 @@ final class PaymentController extends AbstractController
         $this->cart->clear();
 
         return $this->render('cart/payment/success.html.twig', [
-            'summary' => $summary,
+            'payment' => $payment,
         ]);
     }
 
@@ -149,32 +152,8 @@ final class PaymentController extends AbstractController
      */
     private function savePaymentSummary(Request $request, array $confirmed, array $failed): void
     {
-        $orders = array_map(function (array $entry) {
-            /** @var \App\Entity\User\Professional $professional */
-            $professional = $entry['professional'];
-            $adress       = $professional->getAdress();
-
-            return [
-                'intent_id' => $entry['intent']['id'],
-                'merchant'  => [
-                    'account_id'   => $entry['merchant'],
-                    'company_name' => $professional->getCompanyName(),
-                    'street'       => $adress->getStreet(),
-                    'zip_code'     => $adress->getZipCode(),
-                    'country'      => $adress->getCountry(),
-                    'complement'   => $adress->getComplement(),
-                ],
-                'items'    => $entry['items'],
-                'amount'   => $entry['intent']['amount'],
-                'currency' => $entry['intent']['currency'],
-            ];
-        }, $confirmed);
-
         $request->getSession()->set('payment_summary', [
-            'paid_at' => (new \DateTimeImmutable())->format('d/m/Y H:i'),
-            'orders'  => $orders,
-            'total'   => array_sum(array_column(array_column($confirmed, 'intent'), 'amount')),
-            'failed'  => $failed,
+            'paid_at' => (new \DateTimeImmutable())->format('d/m/Y H:i')
         ]);
     }
 }

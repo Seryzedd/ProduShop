@@ -9,14 +9,11 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Service\Api\StripeService;
 use App\Service\Order\OrderService;
 use Psr\Log\LoggerInterface;
-use App\Message\Payment\DistributePaymentMessage;
-use Symfony\Component\Messenger\MessageBusInterface;
 
 final class WebhookController extends AbstractController
 {
     public function __construct(
-        private readonly LoggerInterface $logger,
-        private readonly MessageBusInterface $bus,
+        private readonly LoggerInterface $logger
     ) {}
 
     #[Route('/payment/Stripe/webhook', name: 'app_payment_webhook')]
@@ -39,11 +36,9 @@ final class WebhookController extends AbstractController
                     throw new \RuntimeException('Missing webhook token.');
                 }
 
-                $transfers = $stripeService->distributePayment($piId, $webhookToken);
-
                 $order = $orderService->getOrderByIntentId($piId);
 
-                $orderService->orderPay($order, $transfers);
+                $orderService->orderPay($order);
                 break;
             case 'payment_intent.payment_failed':
                 $orderService->updateStatusByIntentId($piId, 'failed');

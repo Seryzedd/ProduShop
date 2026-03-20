@@ -14,6 +14,7 @@ use App\Entity\User\PostalAdress\Adress;
 use App\Form\User\ProfessionalType;
 use App\Form\User\ClientType;
 use App\Entity\User\Client;
+use App\Entity\User\Payment\Payment;
 use App\Entity\User\Professional;
 use App\Repository\User\OrderRepository;
 
@@ -27,20 +28,14 @@ final class InformationsController extends AbstractController
     {
         $user = $this->getUser();
         $paymentMethods = [];
-        $orders = [];
-        if ($user instanceOf Client) {
+        if ($user instanceOf Client && $this->getUser()->getStripe()) {
             $stripeCustomerId = $this->getUser()->getStripe()->getCustomerId();
 
             $paymentMethods = $this->stripeService->getPaymentMethods($stripeCustomerId);
-
-            $orders = $user->getOrdersByDate();
-        } elseif ($user instanceOf Professional) {
-            $orders = $orderRepository->findByMerchantWithItems($user);
         }
 
         return $this->render('account/informations/index.html.twig', [
-            'paymentMethods' => $paymentMethods,
-            'orders' => $orders
+            'paymentMethods' => $paymentMethods
         ]);
     }
 
@@ -93,6 +88,14 @@ final class InformationsController extends AbstractController
         }
         return $this->render('account/informations/adress.html.twig', [
             'form' => $form
+        ]);
+    }
+
+    #[Route('/payment/{payment}', name: 'app_account_payment')]
+    public function accountPayment(Payment $payment): Response
+    {
+        return $this->render('account/informations/Payment/index.html.twig', [
+            'payment' => $payment
         ]);
     }
 

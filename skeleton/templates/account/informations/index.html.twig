@@ -54,7 +54,7 @@
                     {{ block('products') }}
                     {{ block('orders') }}
                 {% else %}
-                    {{ block('orders') }}
+                    {{ block('payments') }}
                     {{ block('payment_methods') }}
                 {% endif %}
             </div>
@@ -237,6 +237,31 @@
     </ul>
 {% endblock %}
 
+{% block payments %}
+    <h3 class="lined flex-row-reverse">{% trans %}Payments{% endtrans %}</h3>
+
+    {% set limit = 0 %}
+
+    <ul class="list-group list-group-flush">
+        {% for payment in user.paymentsByDate %}
+            <a href="{{ path('app_account_payment', {payment: payment.id}) }}" class="list-group-item list-group-item-action">
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ payment.createdAt|date('d/m/Y H:i') }}
+                    </div>
+
+                    <div class="col-md-4{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Paid' %} text-success{% endif %}">
+                        {{ payment.status|trans }}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
 {% block orders %}
     <h3 class="lined flex-row-reverse">{% trans %}Orders{% endtrans %}</h3>
 
@@ -244,38 +269,28 @@
 {% endblock %}
 
 {% block order_list %}
-    <div class="list-group list-group-flush mb-4">
+    <div class="">
         {% set limit = 0 %}
-        {% for order in orders %}
-            {% if limit <= 5 %}
-                
-                <a href="{{ path('app_account_order', {id: order.id}) }}" class="list-group-item list-group-item-action"> 
-
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            {% trans with {'%date%': order.createdAt|date('d/m/Y H:i')} %}Created at : %date%{% endtrans %}
+        
+        <ul class="list-group list-group-flush">
+            {% for order in user.orders %}
+                <a href="" class="list-group-item list-group-item-action">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ order.paidAt|date('d/m/Y H:i') }}
                         </div>
-                        <div class="col-md-2 text-center {% if order.status == 'paid' %}text-success{% elseif order.status == 'succedeed' %}text-info{% else %}text-warning{% endif %}">{{ order.status }}</div>
-                        <div class="col-md-2 text-center">{% trans with {'%number%': order.orderItems|length} %}%number% products{% endtrans %}</div>
-                        <div class="col-md-2 text-secondary text-end"><p class="mb-0">
-                            {% if user|instanceOf('App\\Entity\\User\\Professional') %}
-                                {% set transfer = order.transferByAccount(user.stripeAccount.accountId) %}
-                                
-                                <p class="mb-0" title="{% trans %}Transfered amount on my account{% endtrans %}">{{ (transfer ? transfer.amount / 100 : 0)|number_format(2, ',', ' ') }}<small class="">{{ (transfer ? transfer.currency : 'eur')|upper }}</small></p>
-                                <p class="text-muted mb-0" title="{% trans %}Order amount{% endtrans %}"><small class="">{{ (order.amount / 100)|number_format(2, ',', ' ') }} {{ order.currency|upper }}</small></p>
-                            {% else %}
-                                <p class="mb-0">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">{{ order.currency|upper }}</small></p>
-                            {% endif %}
+
+                        <div class="col-md-4{% if order.status == 'succeeded' %} text-info{% elseif order.status == 'paid' %} text-success{% endif %}">
+                            {{ order.status }}
+                        </div>
+
+                        <div class="col-md-4 text-end">
+                            {{ (order.amount / 100)|number_format(2, ',', ' ') }}<small>{{ order.currency }}</small>
                         </div>
                     </div>
                 </a>
-                {% set limit = limit + 1 %}
-            {% endif %}
-        {% endfor %}
-
-        {% if orders|length == 0 %}
-            <p class="text-muted">{% trans %}No orders yet{% endtrans %}.</p>
-        {% endif %}
+            {% endfor %}
+        </ul>
     </div>
 {% endblock %}
 

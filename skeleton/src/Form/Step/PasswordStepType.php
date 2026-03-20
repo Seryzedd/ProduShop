@@ -16,17 +16,16 @@ class PasswordStepType extends AbstractType
         $builder->add('password', RepeatedType::class, [
             'type' => PasswordType::class,
             'invalid_message' => 'The password fields must match.',
-            'options' => ['attr' => ['class' => 'password-field']],
+            'options' => ['attr' => ['class' => 'password-field passwordValidator']],
             'required' => true,
-            
             'first_options'  => [
                 'label' => 'Password',
-                'empty_data' => '',
-                ],
+                'empty_data' => ''
+            ],
             'second_options' => [
                 'empty_data' => '',
                 'label' => 'Repeat Password'
-                ],
+            ],
         ]);
     }
 

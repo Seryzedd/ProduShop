@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\User\Payment\Payment;
 use App\Entity\User\Payment\Transfer;
 use App\Repository\User\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -33,9 +34,6 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'orders')]
-    private ?Client $user = null;
-
     /**
      * @var Collection<int, OrderItem>
      */
@@ -45,17 +43,16 @@ class Order
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    /**
-     * @var Collection<int, Transfer>
-     */
-    #[ORM\OneToMany(targetEntity: Transfer::class, mappedBy: 'orderClass', cascade: ['persist', 'remove'])]
-    private Collection $transfers;
+    #[ORM\ManyToOne(inversedBy: 'orders', cascade: ['persist', 'remove'])]
+    private ?Payment $payment = null;
+
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    private ?Professional $merchant = null;
 
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
-        $this->transfers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,18 +120,6 @@ class Order
         return $this;
     }
 
-    public function getUser(): ?AbstractUser
-    {
-        return $this->user;
-    }
-
-    public function setUser(?AbstractUser $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, OrderItem>
      */
@@ -177,19 +162,6 @@ class Order
         return $this;
     }
 
-    public function getAmountByMerchant()
-    {
-        $merchants = [];
-        foreach($this->orderItems as $item) {
-            $merchants[$item->getMerchant()->getId()] = [
-                'quantity' => $item->getQuantity() + (isset($merchants[$item->getMerchant()->getId()]) ? $merchants[$item->getMerchant()->getId()]['quantity'] : 0),
-                'total' => $item->getUnitPrice() + (isset($merchants[$item->getMerchant()->getId()]) ? $merchants[$item->getMerchant()->getId()]['total'] : 0)
-            ];
-        }
-
-        return $merchants;
-    }
-
     public function getItemsByMerchant()
     {
         $items = [];
@@ -215,39 +187,26 @@ class Order
         return $items;
     }
 
-    public function getTransferByAccount(string $accountId)
+    public function getPayment(): ?Payment
     {
-        $filter = $this->transfers->filter(static fn (transfer $transfer) => $transfer->getAccountId() === $accountId);
-
-        return $filter->first();
+        return $this->payment;
     }
 
-    /**
-     * @return Collection<int, Transfer>
-     */
-    public function getTransfers(): Collection
+    public function setPayment(?Payment $payment): static
     {
-        return $this->transfers;
-    }
-
-    public function addTransfer(Transfer $transfer): static
-    {
-        if (!$this->transfers->contains($transfer)) {
-            $this->transfers->add($transfer);
-            $transfer->setOrderClass($this);
-        }
+        $this->payment = $payment;
 
         return $this;
     }
 
-    public function removeTransfer(Transfer $transfer): static
+    public function getMerchant(): ?Professional
     {
-        if ($this->transfers->removeElement($transfer)) {
-            // set the owning side to null (unless already changed)
-            if ($transfer->getOrderClass() === $this) {
-                $transfer->setOrderClass(null);
-            }
-        }
+        return $this->merchant;
+    }
+
+    public function setMerchant(?Professional $merchant): static
+    {
+        $this->merchant = $merchant;
 
         return $this;
     }
