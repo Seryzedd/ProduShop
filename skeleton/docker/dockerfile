@@ -3,11 +3,13 @@ FROM php:8.4-apache
 # Définir le document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# Installer les dépendances système
+# Installer les dépendances système + Chromium
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
+    curl \
+    xz-utils \
     libxml2-dev \
     libcurl4-openssl-dev \
     libicu-dev \
@@ -17,9 +19,29 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     xfonts-75dpi \
     xfonts-base \
+    chromium \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libgbm1 \
+    libxkbcommon0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les extensions PHP (en une seule commande)
+# Installer Node.js via binaire officiel (contourne les problèmes de dépendances apt)
+RUN curl -fsSL https://nodejs.org/dist/v20.19.0/node-v20.19.0-linux-x64.tar.xz -o /tmp/node.tar.xz \
+    && tar -xf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
+    && rm /tmp/node.tar.xz
+
+# Installer Puppeteer sans télécharger Chromium (on utilise celui du système)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NODE_PATH=/usr/local/lib/node_modules_custom/node_modules
+
+RUN mkdir -p /usr/local/lib/node_modules_custom \
+    && cd /usr/local/lib/node_modules_custom \
+    && PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install puppeteer
+
+# Installer les extensions PHP
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -49,6 +71,8 @@ WORKDIR /var/www/html
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY /var/www/html/assets/scripts/html-to-pdf.js /usr/local/bin/html-to-pdf.js
+# Copier le script de génération PDF
+COPY html-to-pdf.js /usr/local/bin/html-to-pdf.js
+RUN chmod +x /usr/local/bin/html-to-pdf.js
 
 EXPOSE 80

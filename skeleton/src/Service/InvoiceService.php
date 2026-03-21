@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\User\Order;
+use App\Entity\User\Payment\Payment;
 use App\Service\Api\StripeService;
 use Twig\Environment;
 
@@ -17,90 +19,282 @@ class InvoiceService
     // =========================================================================
 
     /**
-     * Returns the rendered HTML invoice for a given PaymentIntent.
+     * Génère la facture HTML depuis un Order (BDD) enrichi des données Stripe.
      */
-    public function generateHtml(string $paymentIntentId): string
+    public function generateHtmlFromOrder(Order $order): string
     {
-        $data = $this->buildInvoiceData($paymentIntentId);
-
+        $data = $this->buildInvoiceDataFromOrder($order);
         return $this->renderTemplate($data);
     }
 
     /**
-     * Returns the raw PDF binary for a given PaymentIntent.
-     * Uses wkhtmltopdf under the hood — must be installed on the server.
+     * Génère le PDF depuis un Order.
      */
-    public function generatePdf(string $paymentIntentId): string
+    public function generatePdfFromOrder(Order $order): string
     {
-        $html = $this->generateHtml($paymentIntentId);
-
-        return $this->htmlToPdf($html);
+        return $this->htmlToPdf($this->generateHtmlFromOrder($order));
     }
 
     /**
-     * Streams the PDF as a download response.
-     * Use in a Symfony controller:
-     *
-     *   return new Response(
-     *       $invoiceService->generatePdf($id),
-     *       200,
-     *       $invoiceService->pdfHeaders($id)
-     *   );
+     * Génère la facture HTML depuis un Payment (point d'entrée recommandé).
      */
-    public function pdfHeaders(string $paymentIntentId): array
+    public function generateHtmlFromPayment(Payment $payment): string
+    {
+        $data = $this->buildInvoiceDataFromPayment($payment);
+        return $this->renderTemplate($data);
+    }
+
+    /**
+     * Génère le PDF depuis un Payment.
+     */
+    public function generatePdfFromPayment(Payment $payment): string
+    {
+        return $this->htmlToPdf($this->generateHtmlFromPayment($payment));
+    }
+
+    /**
+     * Génère la facture HTML depuis un PaymentIntent Stripe (fallback).
+     */
+    public function generateHtml(string $paymentIntentId): string
+    {
+        $data = $this->buildInvoiceData($paymentIntentId);
+        return $this->renderTemplate($data);
+    }
+
+    /**
+     * Génère le PDF depuis un PaymentIntent Stripe (fallback).
+     */
+    public function generatePdf(string $paymentIntentId): string
+    {
+        return $this->htmlToPdf($this->generateHtml($paymentIntentId));
+    }
+
+    public function pdfHeaders(string $ref): array
     {
         return [
             'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => sprintf('attachment; filename="facture-%s.pdf"', $paymentIntentId),
+            'Content-Disposition' => sprintf('attachment; filename="facture-%s.pdf"', $ref),
         ];
     }
 
     // =========================================================================
-    // Data building
+    // Data building — depuis Payment (point d'entrée recommandé)
+    // =========================================================================
+
+    private function buildInvoiceDataFromPayment(Payment $payment): array
+    {
+        $client = null;
+        if ($payment->getCustomer()) {
+            $c      = $payment->getCustomer();
+            $client = [
+                'name'  => $c->getFirstname() . ' ' . $c->getLastname(),
+                'email' => $c->getEmail(),
+                'phone' => $c->getPhone(),
+            ];
+        }
+
+        $items     = [];
+        $merchants = [];
+        $totalHT   = 0.0;
+        $tvaAmount = 0.0;
+        $currency  = 'EUR';
+        $paidAt    = null;
+        $intentId  = '';
+
+        foreach ($payment->getOrders() as $order) {
+            $currency = strtoupper($order->getCurrency());
+            $intentId = $order->getIntentId() ?? $intentId;
+
+            if ($order->getPaidAt()) {
+                $paidAt = $order->getPaidAt()->format('d/m/Y H:i');
+            }
+
+            // Merchant directement sur Order — pas besoin de passer par OrderItem
+            $merchant   = $order->getMerchant();
+            $merchantId = $merchant?->getId();
+
+            if ($merchant && !isset($merchants[$merchantId])) {
+                $merchants[$merchantId] = [
+                    'name'    => $merchant->getCompanyName(),
+                    'email'   => $merchant->getEmail(),
+                    'phone'   => $merchant->getPhone(),
+                    'address' => $merchant->getAdress()->getFullAddress(),
+                    'siret'   => $merchant->getSiret(),
+                ];
+            }
+
+            foreach ($order->getOrderItems() as $orderItem) {
+                $package    = $orderItem->getPackage();
+                $qty        = $orderItem->getQuantity();
+                $priceTTC   = $orderItem->getUnitPrice();
+                $tvaRate    = ($package->getTaxe() * 100) ?? 0.0;
+                $priceHT    = $tvaRate > 0 ? $priceTTC / (1 + $tvaRate / 100) : $priceTTC;
+                $subtotalHT = $priceHT * $qty;
+                $tvaSub     = ($priceTTC - $priceHT) * $qty;
+                $totalHT   += $subtotalHT;
+                $tvaAmount += $tvaSub;
+
+                $items[] = [
+                    'name'          => $package->getName(),
+                    'quantity'      => $qty,
+                    'tva_rate'      => $tvaRate,
+                    'merchant_name' => $merchant?->getCompanyName() ?? '—',
+                    'merchant_id'   => $merchantId,
+                    'unit_price'    => number_format($priceHT,    2, ',', ' '),
+                    'subtotal'      => number_format($subtotalHT, 2, ',', ' '),
+                ];
+            }
+        }
+
+        $totalTTC = $this->centsToEuros($payment->getAmount());
+
+        return [
+            'invoice_number'    => sprintf('INV-%s-%05d', $payment->getCreatedAt()->format('Ymd'), $payment->getId()),
+            'invoice_date'      => $payment->getCreatedAt()->format('d/m/Y'),
+            'paid_at'           => $paidAt,
+            'status'            => $payment->getStatus(),
+            'currency'          => $currency,
+            'client'            => $client,
+            'merchants'         => array_values($merchants),
+            'items'             => $items,
+            'amounts'           => [
+                'total_ht'   => number_format($totalHT,   2, ',', ' '),
+                'tva_amount' => number_format($tvaAmount, 2, ',', ' '),
+                'total_ttc'  => number_format($totalTTC,  2, ',', ' '),
+            ],
+            'payment_intent_id' => $intentId,
+        ];
+    }
+
+    // =========================================================================
+    // Data building — depuis Order (BDD)
+    // =========================================================================
+
+    private function buildInvoiceDataFromOrder(Order $order): array
+    {
+        // Client depuis Payment → Customer
+        $client = null;
+        if ($order->getPayment()?->getCustomer()) {
+            $c      = $order->getPayment()->getCustomer();
+            $client = [
+                'name'  => $c->getFirstname() . ' ' . $c->getLastname(),
+                'email' => $c->getEmail(),
+                'phone' => $c->getPhone(),
+            ];
+        }
+
+        // Items groupés par marchand via Order::getItemsByMerchant()
+        $groupedByMerchant = $order->getItemsByMerchant();
+        $items             = [];
+        $merchants         = [];
+        $totalHT           = 0.0;
+        $tvaAmount         = 0.0;
+
+        foreach ($groupedByMerchant as $merchantId => $group) {
+            $merchant = $group['merchant'];
+
+            $merchants[$merchantId] = [
+                'name'    => $merchant->getCompanyName(),
+                'email'   => $merchant->getEmail(),
+                'phone'   => $merchant->getPhone(),
+                'address' => $merchant->getAdress()->getFullAddress(),
+                'siret'   => $merchant->getSiret(),
+            ];
+
+            foreach ($group['items'] as $orderItem) {
+                $package  = $orderItem->getPackage();
+                $qty      = $orderItem->getQuantity();
+                $priceTTC = $orderItem->getUnitPrice();
+                $tvaRate  = $package->getTaxe() ?? 0.0;
+
+                $priceHT    = $tvaRate > 0 ? $priceTTC / (1 + $tvaRate / 100) : $priceTTC;
+                $subtotalHT = $priceHT * $qty;
+                $tvaSub     = ($priceTTC - $priceHT) * $qty;
+
+                $totalHT   += $subtotalHT;
+                $tvaAmount += $tvaSub;
+
+                $items[] = [
+                    'name'          => $package->getName(),
+                    'quantity'      => $qty,
+                    'tva_rate'      => $tvaRate,
+                    'merchant_name' => $merchant->getCompanyName(),
+                    'merchant_id'   => $merchantId,
+                    'unit_price'    => number_format($priceHT,    2, ',', ' '),
+                    'subtotal'      => number_format($subtotalHT, 2, ',', ' '),
+                ];
+            }
+        }
+
+        $totalTTC = $this->centsToEuros($order->getAmount());
+
+        return [
+            'invoice_number'    => $this->buildInvoiceNumberFromOrder($order),
+            'invoice_date'      => $order->getCreatedAt()->format('d/m/Y'),
+            'paid_at'           => $order->getPaidAt()?->format('d/m/Y H:i'),
+            'status'            => $order->getStatus(),
+            'currency'          => strtoupper($order->getCurrency()),
+            'client'            => $client,
+            'merchants'         => array_values($merchants),
+            'items'             => $items,
+            'amounts'           => [
+                'total_ht'   => number_format($totalHT,   2, ',', ' '),
+                'tva_amount' => number_format($tvaAmount, 2, ',', ' '),
+                'total_ttc'  => number_format($totalTTC,  2, ',', ' '),
+            ],
+            'payment_intent_id' => $order->getIntentId(),
+        ];
+    }
+
+    private function buildInvoiceNumberFromOrder(Order $order): string
+    {
+        return sprintf(
+            'INV-%s-%05d',
+            $order->getCreatedAt()->format('Ymd'),
+            $order->getId()
+        );
+    }
+
+    // =========================================================================
+    // Data building — depuis Stripe (fallback)
     // =========================================================================
 
     private function buildInvoiceData(string $paymentIntentId): array
     {
         $pi = $this->stripeService->getPaymentIntent($paymentIntentId);
 
-        // --- Client ---
         $customer = is_array($pi['customer']) ? $pi['customer'] : [];
-        $client = [
+        $client   = [
             'name'  => $customer['name']  ?? 'N/A',
             'email' => $customer['email'] ?? 'N/A',
+            'phone' => null,
         ];
 
-        // --- Merchants --- (extraits depuis les items metadata, multi-marchand)
+        dump($pi);
+
         $merchants = $this->extractMerchants($pi['metadata'] ?? []);
+        $items     = $this->extractItems($pi['metadata'] ?? []);
 
-        // --- Items from metadata ---
-        $items = $this->extractItems($pi['metadata'] ?? []);
+        $totalCents = (int) ($pi['amount'] ?? 0);
+        $totalHT    = array_sum(array_column($items, '_subtotal_ht'));
+        $tvaAmount  = array_sum(array_column($items, '_tva_amount'));
+        $totalTTC   = $this->centsToEuros($totalCents);
 
-        // --- Amounts ---
-        $totalCents    = (int) ($pi['amount'] ?? 0);
-        $feeCents      = (int) ($pi['application_fee_amount'] ?? 0);
-        $merchantCents = $totalCents - $feeCents;
-
-        // TVA calculée à partir des items (taux par ligne)
-        $totalHT   = array_sum(array_column($items, '_subtotal_ht'));
-        $tvaAmount = array_sum(array_column($items, '_tva_amount'));
-        $totalTTC  = $this->centsToEuros($totalCents);
-
-        // Nettoyer les clés internes avant d'envoyer au template
         $items = array_map(static function (array $item): array {
             unset($item['_subtotal_ht'], $item['_tva_amount']);
             return $item;
         }, $items);
 
         return [
-            'invoice_number' => $this->buildInvoiceNumber($pi),
-            'invoice_date'   => date('d/m/Y', $pi['created']),
-            'status'         => $pi['status'],
-            'currency'       => strtoupper($pi['currency'] ?? 'EUR'),
-            'client'         => $client,
-            'merchants'      => $merchants,
-            'items'          => $items,
-            'amounts'        => [
+            'invoice_number'    => $this->buildInvoiceNumber($pi),
+            'invoice_date'      => date('d/m/Y', $pi['created']),
+            'paid_at'           => null,
+            'status'            => $pi['status'],
+            'currency'          => strtoupper($pi['currency'] ?? 'EUR'),
+            'client'            => $client,
+            'merchants'         => $merchants,
+            'items'             => $items,
+            'amounts'           => [
                 'total_ht'   => number_format($totalHT,   2, ',', ' '),
                 'tva_amount' => number_format($tvaAmount, 2, ',', ' '),
                 'total_ttc'  => number_format($totalTTC,  2, ',', ' '),
@@ -109,18 +303,12 @@ class InvoiceService
         ];
     }
 
-    /**
-     * Parses items from PaymentIntent metadata.
-     * Format: metadata[items] = JSON array of {name, qty, price, tva}
-     */
     private function extractItems(array $metadata): array
     {
         $raw     = $metadata['items'] ?? null;
         $decoded = $raw ? json_decode($raw, true) : [];
 
-        if (!is_array($decoded)) {
-            return [];
-        }
+        if (!is_array($decoded)) return [];
 
         return array_map(function (array $item): array {
             $qty      = (int)   ($item['qty']   ?? 1);
@@ -136,8 +324,7 @@ class InvoiceService
                 'quantity'      => $qty,
                 'tva_rate'      => $tvaRate,
                 'merchant_name' => $item['merchant']['name'] ?? '—',
-                'merchant_id'   => $item['merchant']['id']   ?? null,
-                'merchant_adress' => $item['merchant']['adress'] ?? null,
+                'merchant'   => ['id' => $item['merchant']['id']   ?? null, ],
                 'unit_price'    => number_format($priceHT,    2, ',', ' '),
                 'subtotal'      => number_format($subtotalHT, 2, ',', ' '),
                 '_subtotal_ht'  => $subtotalHT,
@@ -146,10 +333,6 @@ class InvoiceService
         }, $decoded);
     }
 
-    /**
-     * Extrait la liste unique des marchands depuis les items metadata.
-     * Retourne un tableau indexé par merchant_id.
-     */
     private function extractMerchants(array $metadata): array
     {
         $raw     = $metadata['items'] ?? null;
@@ -159,9 +342,8 @@ class InvoiceService
         foreach ($decoded as $item) {
             $id   = $item['merchant']['id']   ?? null;
             $name = $item['merchant']['name'] ?? null;
-            $adress = $item['merchant']['adress'] ?? null;
             if ($id && !isset($merchants[$id])) {
-                $merchants[$id] = ['id' => $id, 'name' => $name ?? '—'];
+                $merchants[$id] = ['name' => $name ?? '—', 'email' => null, 'phone' => null, 'address' => null, 'siret' => null];
             }
         }
 
@@ -170,11 +352,7 @@ class InvoiceService
 
     private function buildInvoiceNumber(array $pi): string
     {
-        // Format: INV-YYYYMMDD-XXXXX (last 5 chars of PI id)
-        $date   = date('Ymd', $pi['created']);
-        $suffix = strtoupper(substr($pi['id'], -5));
-
-        return sprintf('INV-%s-%s', $date, $suffix);
+        return sprintf('INV-%s-%s', date('Ymd', $pi['created']), strtoupper(substr($pi['id'], -5)));
     }
 
     // =========================================================================
@@ -192,16 +370,15 @@ class InvoiceService
 
     private function htmlToPdf(string $html): string
     {
-        $tmpHtml = tempnam(sys_get_temp_dir(), 'invoice_') . '.html';
-        $tmpPdf  = tempnam(sys_get_temp_dir(), 'invoice_') . '.pdf';
+        $tmpDir  = sys_get_temp_dir();
+        $tmpHtml = $tmpDir . '/invoice_' . uniqid() . '.html';
+        $tmpPdf  = $tmpDir . '/invoice_' . uniqid() . '.pdf';
 
         file_put_contents($tmpHtml, $html);
 
-        $script = '/usr/local/bin/html-to-pdf.js';
-
         $cmd = sprintf(
-            'node %s %s %s 2>/dev/null',
-            escapeshellarg($script),
+            'NODE_PATH=/usr/local/lib/node_modules /usr/local/bin/node %s %s %s 2>&1',
+            escapeshellarg('/usr/local/bin/html-to-pdf.js'),
             escapeshellarg($tmpHtml),
             escapeshellarg($tmpPdf)
         );
@@ -210,13 +387,10 @@ class InvoiceService
 
         if ($returnCode !== 0 || !file_exists($tmpPdf)) {
             @unlink($tmpHtml);
-            throw new \RuntimeException(
-                'Puppeteer PDF generation failed. Check that Node, Puppeteer and Chromium are installed.'
-            );
+            throw new \RuntimeException('Puppeteer PDF generation failed: ' . implode("\n", $output));
         }
 
         $pdf = file_get_contents($tmpPdf);
-
         @unlink($tmpHtml);
         @unlink($tmpPdf);
 

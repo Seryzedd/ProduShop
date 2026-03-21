@@ -81,7 +81,7 @@ class OrderService
         $order->setStatus('paid');
         $order->setPaidAt(new \DateTimeImmutable());
 
-
+        $this->validatePayment($order->getPayment());
 
         $this->persist($order);
 
@@ -92,7 +92,7 @@ class OrderService
     {
         $isTransfered = true;
         foreach($payment->getOrders() as $order) {
-            if($order->getStatus() !== 'Paid') {
+            if($order->getStatus() !== 'paid') {
                 $isTransfered = false;
             }
         }
@@ -100,8 +100,6 @@ class OrderService
         if($isTransfered) {
             $payment->setStatus('Treated');
             $this->em->persist($payment);
-
-            $this->em->flush();
         }
     }
 

@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Service\InvoiceService;
+use App\Entity\User\Payment\Payment;
 
 #[Route('/invoice')]
 final class InvoiceController extends AbstractController
@@ -20,10 +21,10 @@ final class InvoiceController extends AbstractController
 
     // Route qui retourne le HTML brut de la facture
     #[Route('/invoice/{id}/preview', name: 'invoice_preview')]
-    public function preview(string $id, InvoiceService $invoiceService): Response
+    public function preview(Payment $payment, InvoiceService $invoiceService): Response
     {
         return new Response(
-            $invoiceService->generateHtml($id),
+            $invoiceService->generateHtmlFromPayment($payment),
             200,
             ['Content-Type' => 'text/html']
         );
@@ -31,12 +32,12 @@ final class InvoiceController extends AbstractController
 
     // Route PDF — déclenche le téléchargement
     #[Route('/{id}/pdf', name: 'invoice_pdf')]
-    public function pdf(string $id, InvoiceService $invoiceService): Response
+    public function pdf(Payment $id, InvoiceService $invoiceService): Response
     {
         return new Response(
-            $invoiceService->generatePdf($id),
+            $invoiceService->generatePdfFromPayment($id),
             200,
-            $invoiceService->pdfHeaders($id)
+            $invoiceService->pdfHeaders($id->getCreatedAt()->format('d-m-Y'))
         );
     }
 }

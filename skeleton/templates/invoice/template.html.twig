@@ -2,259 +2,217 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Facture {{ invoice_number }}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --ink:      #0f0f0f;
+    --green:    #75D947;
+    --green-l:  #e8f5e1;
+    --ink:      #1a1a1a;
     --muted:    #6b7280;
     --line:     #e5e7eb;
-    --accent:   #1a1a2e;
-    --accent2:  #4f46e5;
     --bg:       #ffffff;
     --surface:  #f9fafb;
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
     color: var(--ink);
     background: var(--bg);
     line-height: 1.6;
   }
 
-  .page {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 56px 60px;
-  }
+  .page { max-width: 800px; margin: 0 auto; padding: 48px 56px; }
 
   /* ── Header ── */
   .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding-bottom: 36px;
-    
-    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 3px solid var(--green);
+    margin-bottom: 36px;
   }
 
-  .brand {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-  }
-
-  .brand span { color: var(--accent2); }
+  .logo img { height: 48px; }
 
   .invoice-meta { text-align: right; }
 
-  .invoice-meta .invoice-label {
-    font-size: 11px;
+  .invoice-meta .label {
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 4px;
   }
 
-  .invoice-meta .invoice-number {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    color: var(--accent);
+  .invoice-meta .number {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    margin: 2px 0;
   }
 
-  .invoice-meta .invoice-date {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+  .invoice-meta .date { font-size: 12px; color: var(--muted); }
 
-  /* ── Status badge ── */
-  .status-badge {
+  /* ── Badge ── */
+  .badge {
     display: inline-block;
     margin-top: 8px;
-    padding: 3px 10px;
+    padding: 3px 12px;
     border-radius: 20px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
   }
-  .status-succeeded { background: #d1fae5; color: #065f46; }
-  .status-pending   { background: #fef3c7; color: #92400e; }
-  .status-failed    { background: #fee2e2; color: #991b1b; }
+  .badge-paid     { background: var(--green-l); color: var(--green); }
+  .badge-pending  { background: #fef3c7; color: #92400e; }
+  .badge-failed   { background: #fee2e2; color: #991b1b; }
+  .badge-canceled { background: #f3f4f6; color: #6b7280; }
 
   /* ── Parties ── */
   .parties {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 44px;
-  }
-
-  .party-block .party-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent2);
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .party-block .party-name {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 3px;
-  }
-
-  .party-block .party-detail {
-    color: var(--muted);
-    font-size: 12px;
-  }
-
-  /* ── Items table ── */
-  .section-title {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  table.items {
-    width: 100%;
-    border-collapse: collapse;
+    gap: 32px;
     margin-bottom: 36px;
   }
 
-  table.items thead tr {
-    background: var(--accent);
-    color: white;
-  }
+  .party-block { }
 
-  table.items thead th {
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+  .party-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    color: var(--green);
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--green-l);
+    margin-bottom: 10px;
   }
 
-  table.items thead th:not(:first-child) { text-align: center; }
+  .party-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .party-detail { color: var(--muted); font-size: 11px; line-height: 1.8; }
+  .party-siret { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-  table.items tbody tr { border-bottom: 1px solid var(--line); }
-  table.items tbody tr:nth-child(even) { background: var(--surface); }
+  /* ── Marchands ── */
+  .merchants-section { margin-bottom: 36px; }
 
-  table.items tbody td { padding: 11px 14px; font-size: 13px; }
-  table.items tbody td:not(:first-child):not(:last-child) { text-align: center; }
-  table.items tbody td:last-child { text-align: right; }
-  table.items tbody tr { border-bottom: solid 1px var(--line) }
-
-  /* ── Totals ── */
-  .totals-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 44px;
-  }
-
-  .totals { width: 320px; }
-
-  .totals-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-  }
-
-  .totals-row:last-child { border-bottom: none; }
-  .totals-row .label { color: var(--muted); }
-  .totals-row .value { font-weight: 500; }
-
-  .totals-row.total-ttc {
-    background: var(--accent);
-    color: white;
-    padding: 12px 14px;
-    border-radius: 6px;
-    margin-top: 4px;
-    border-bottom: none;
-  }
-
-  .totals-row.total-ttc .label { color: rgba(255,255,255,0.75); font-weight: 600; }
-  .totals-row.total-ttc .value { font-size: 16px; font-weight: 700; }
-
-  /* ── Merchants ── */
-  .merchants {
-    margin-bottom: 44px;
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
   }
 
   .merchants-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
   }
 
   .merchant-card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px 14px;
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+
+  .merchant-card .m-name { font-weight: 600; font-size: 12px; margin-bottom: 3px; }
+  .merchant-card .m-detail { color: var(--muted); font-size: 10px; line-height: 1.7; }
+  .merchant-card .m-siret { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 3px; }
+
+  /* ── Table ── */
+  table.items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 28px;
     font-size: 12px;
   }
 
-  .merchant-card .merchant-name {
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 3px;
-  }
+  table.items thead tr { background: var(--green); color: white; }
 
-  .merchant-card .merchant-id {
-    font-family: monospace;
+  table.items thead th {
+    padding: 9px 12px;
+    text-align: left;
     font-size: 10px;
-    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
 
-  /* ── Platform note ── */
-  .platform-note {
-    background: var(--surface);
-    border-left: 3px solid var(--accent2);
-    padding: 12px 16px;
-    border-radius: 0 6px 6px 0;
-    margin-bottom: 40px;
+  table.items thead th:not(:first-child):not(:nth-child(2)) { text-align: right; }
+
+  table.items tbody tr { border-bottom: 1px solid var(--line); }
+  table.items tbody tr:last-child { border-bottom: none; }
+  table.items tbody tr:nth-child(even) { background: var(--surface); }
+  table.items tbody td { padding: 10px 12px; }
+  table.items tbody td:not(:first-child):not(:nth-child(2)) { text-align: right; }
+
+  .merchant-tag {
+    display: inline-block;
+    background: var(--green-l);
+    color: var(--green);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1em;
+    border-radius: 10px;
+  }
+
+  /* ── Totals ── */
+  .totals-wrapper { display: flex; justify-content: flex-end; margin-bottom: 36px; }
+  .totals { width: 280px; }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
     font-size: 12px;
-    color: var(--muted);
   }
 
-  .platform-note strong { color: var(--ink); }
+  .totals-row:last-child { border-bottom: none; }
+  .totals-row .t-label { color: var(--muted); }
+  .totals-row .t-value { font-weight: 500; }
+
+  .totals-row.ttc {
+    background: var(--green);
+    color: white;
+    padding: 11px 14px;
+    border-radius: 4px;
+    margin-top: 4px;
+    border-bottom: none;
+  }
+
+  .totals-row.ttc .t-label { color: rgba(255,255,255,0.8); font-weight: 600; }
+  .totals-row.ttc .t-value { font-size: 15px; font-weight: 700; }
 
   /* ── Footer ── */
   .footer {
-    padding-top: 24px;
+    padding-top: 20px;
     border-top: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
   }
 
-  .footer .pi-id {
-    font-family: monospace;
-    font-size: 10px;
+  .pi-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
     background: var(--surface);
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 3px;
     border: 1px solid var(--line);
   }
 </style>
@@ -264,37 +222,78 @@
 
   {# ── Header ── #}
   <div class="header">
-    <div class="brand">
-      <img src="{{ imgToBase64(asset('icons/logo.png')) }}">
+    <div class="logo">
+      <img src="{{ imgToBase64(asset('icons/logo.png')) }}" alt="Lancana">
     </div>
     <div class="invoice-meta">
-      <div class="invoice-label">Facture</div>
-      <div class="invoice-number">{{ invoice_number }}</div>
-      <div class="invoice-date">Émise le {{ invoice_date }}</div>
+      <div class="label">Facture</div>
+      <div class="number">{{ invoice_number }}</div>
+      <div class="date">Émise le {{ invoice_date }}</div>
+      {% if paid_at %}
+        <div class="date">Payée le {{ paid_at }}</div>
+      {% endif %}
       <div>
-        <span class="status-badge status-{{ status }}">
-          {{ status == 'succeeded' ? 'Payé' : status }}
+        <span class="badge badge-{{ status }}">
+          {% if status == 'paid' %}Payé
+          {% elseif status == 'pending' %}En attente
+          {% elseif status == 'failed' %}Échoué
+          {% elseif status == 'canceled' %}Annulé
+          {% else %}{{ status }}{% endif %}
         </span>
       </div>
     </div>
   </div>
 
-  {# ── Client ── #}
+  {# ── Parties ── #}
   <div class="parties">
+
+    {# Client #}
+    {% if client %}
     <div class="party-block">
       <div class="party-label">Client</div>
       <div class="party-name">{{ client.name }}</div>
-      <div class="party-detail">{{ client.email }}</div>
+      <div class="party-detail">
+        {{ client.email }}<br>
+        {% if client.phone %}{{ client.phone }}{% endif %}
+      </div>
     </div>
+    {% endif %}
+
+    {# Plateforme #}
+    <div class="party-block">
+      <div class="party-label">Plateforme</div>
+      <div class="party-name">Lancana</div>
+      <div class="party-detail">contact@lancana.fr</div>
+    </div>
+
   </div>
 
+  {# ── Marchands ── #}
+  {% if merchants is not empty %}
+  <div class="merchants-section">
+    <div class="section-label">Vendeurs</div>
+    <div class="merchants-grid">
+      {% for merchant in merchants %}
+        <div class="merchant-card">
+          <div class="m-name">{{ merchant.name }}</div>
+          <div class="m-detail">
+            {% if merchant.email %}{{ merchant.email }}<br>{% endif %}
+            {% if merchant.phone %}{{ merchant.phone }}<br>{% endif %}
+            {% if merchant.address %}{{ merchant.address }}{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {# ── Items ── #}
-  <div class="section-title">Détail de la commande</div>
+  <div class="section-label">Détail de la commande</div>
   <table class="items">
     <thead>
       <tr>
         <th>Désignation</th>
-        <th>Marchand</th>
+        <th>Vendeur</th>
         <th>Qté</th>
         <th>Prix unitaire HT</th>
         <th>TVA</th>
@@ -305,15 +304,8 @@
       {% for item in items %}
       <tr>
         <td>{{ item.name }}</td>
-        <td style="font-size:11px; color:var(--muted);">
-          {{ item.merchant_name }}
-          {% if item.merchant_adress %}
-            <br>
-            {{ ux_icon('ic:outline-location-on') }}
-            {{ item.merchant_adress }}
-          {% endif %}
-        </td>
-        <td>{{ item.quantity }}</td>
+        <td><span class="merchant-tag">{{ item.merchant_name }}</span></td>
+        <td>x{{ item.quantity }}</td>
         <td>{{ item.unit_price }} {{ currency }}</td>
         <td>{{ item.tva_rate }}%</td>
         <td>{{ item.subtotal }} {{ currency }}</td>
@@ -326,23 +318,23 @@
   <div class="totals-wrapper">
     <div class="totals">
       <div class="totals-row">
-        <span class="label">Sous-total HT</span>
-        <span class="value">{{ amounts.total_ht }} {{ currency }}</span>
+        <span class="t-label">Sous-total HT</span>
+        <span class="t-value">{{ amounts.total_ht }} {{ currency }}</span>
       </div>
       <div class="totals-row">
-        <span class="label">TVA</span>
-        <span class="value">{{ amounts.tva_amount }} {{ currency }}</span>
+        <span class="t-label">TVA</span>
+        <span class="t-value">{{ amounts.tva_amount }} {{ currency }}</span>
       </div>
-      <div class="totals-row total-ttc">
-        <span class="label">Total TTC</span>
-        <span class="value">{{ amounts.total_ttc }} {{ currency }}</span>
+      <div class="totals-row ttc">
+        <span class="t-label">Total TTC</span>
+        <span class="t-value">{{ amounts.total_ttc }} {{ currency }}</span>
       </div>
     </div>
   </div>
 
   {# ── Footer ── #}
   <div class="footer">
-    <div>Document généré automatiquement — non soumis à TVA si auto-entrepreneur</div>
+    <div>Document généré automatiquement par Lancana</div>
     <div class="pi-id">{{ payment_intent_id }}</div>
   </div>
 

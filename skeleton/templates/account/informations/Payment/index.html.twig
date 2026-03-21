@@ -13,7 +13,7 @@
         },
         {
             label: 'Payment "%date%"'|trans({'%date%': payment.createdAt|date('d/m/Y H:i')}),
-            route: 'app_account_adress',
+            route: 'app_account_payment',
             parameters: {'payment': payment.id}
         }
     ] %}
@@ -24,52 +24,67 @@
 {% block body %}
     <main class="container">
         <div class="d-flex justify-content-between align-items-baseline mb-3">
-            <h1 class="mb-0">{% trans with {'%date%': payment.createdAt|date('d/m/Y H:i')} %}Payment "%date%"{% endtrans %}</h1>
+            <h1 class="mb-0">{% trans %}Payment{% endtrans %}</h1>
+            <p class="text-end fw-bold mb-0{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Treated' %} text-success{% endif %}">
+                {{ payment.status }}
+            </p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-baseline mb-3">
+            <p class="mb-0 text-muted">
+                {% trans with {'%date%': payment.createdAt|date('d/m/Y H:i')} %}At : %date%{% endtrans %}
+                <a href="{{ path('app_invoice_show', {id: payment.id}) }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover ms-3">
+                    {% trans %}Invoice{% endtrans %}
+                    {{ ux_icon('line-md:file')}}
+                </a>
+            </p>
 
             <h4 class="text-end text-secondary mb-0">{{ (payment.amount / 100)|number_format(2, ',', ' ') }}<small class="fs-6">EUR</small></h4>
         </div>
 
-        <div class="row">
-            {% for order in payment.orders %}
-                
-                <div class="col-4">
-                    <a href="">{{ order.merchant.companyName }}</a>
-                </div>
-                <div class="col-4 text-end text-muted">
-                    {{ order.merchant.adress.fullAddress }}
-                </div>
-
-                <div class="col-2 text-end text-muted">
-                    {{ order.status }}
-                </div>
-
-                <div class="col-2 text-end text-muted">
-                    <h5 class="text-end">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">EUR</small></h5>
-                </div>
-
-                <div class="col-12 border-top">
-                    <ul class="list-group list-group-flush">
-                        {% for item in order.orderItems %}
-                            <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        {{ item.package.product.name }}
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        x{{ item.quantity }}
-                                    </div>
-
-                                    <div class="col-md-4 text-end">
-                                        {{ item.unitPrice|number_format(2, ',', ' ') }}<small>EUR</small>
-                                    </div>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+        <div class="card p-4">
+            <div class="row">
+                {% for order in payment.orders %}
                     
-                </div>
-            {% endfor %}
+                    <div class="col-4">
+                        <a href="">{{ order.merchant.companyName }}</a>
+                    </div>
+                    <div class="col-4 text-end text-muted">
+                        {{ order.merchant.adress.fullAddress }}
+                    </div>
+
+                    <div class="col-2 text-end text-muted">
+                        {{ order.status }}
+                    </div>
+
+                    <div class="col-2 text-end text-muted">
+                        <h5 class="text-end">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small class="">EUR</small></h5>
+                    </div>
+
+                    <div class="col-12 border-top">
+                        <ul class="list-group list-group-flush">
+                            {% for item in order.orderItems %}
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            {{ item.package.product.name }}
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            x{{ item.quantity }}
+                                        </div>
+
+                                        <div class="col-md-4 text-end">
+                                            {{ item.unitPrice|number_format(2, ',', ' ') }}<small>EUR</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </main>
 {% endblock %}

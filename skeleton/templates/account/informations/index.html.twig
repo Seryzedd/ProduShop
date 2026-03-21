@@ -250,7 +250,7 @@
                         {{ payment.createdAt|date('d/m/Y H:i') }}
                     </div>
 
-                    <div class="col-md-4{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Paid' %} text-success{% endif %}">
+                    <div class="col-md-4{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Treated' %} text-success{% endif %}">
                         {{ payment.status|trans }}
                     </div>
                     <div class="col-md-4 text-end">
