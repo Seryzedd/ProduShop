@@ -37,7 +37,9 @@
                 </button>
                 <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                     {% for language in languages %}
-                        <li><a class="dropdown-item py-2" href="{{ path('app_admin_translations_manager_extract', {locale: language}) }}">{{ language|name }}</a></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{{ path('app_admin_translations_manager_extract', {locale: language}) }}">{{ language|name }} {{ language|region }}</a>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -57,13 +59,13 @@
                    
                         <nav class="nav flex-column">
                             {% for file in languagefiles %}
-                                <div class="d-flex border-bottom justify-content-between mb-1">
+                                <div class="d-flex border-bottom align-items-center justify-content-between mb-1">
                                     <a class="nav-link" href="{{ path('app_admin_translations_file_download', {'filename': file.filename}) }}">
                                         {{ ux_icon('line-md:file-download', {width: '24px', height: '24px'}) }}
                                         {{ file.filename }}
                                     </a>
 
-                                    <div>
+                                    <div class="text-end">
                                         <a class="btn btn-outline-dark btn-sm" href="{{ path('app_admin_translations_file_manager_edit', {'locale': language, 'filename': file.filename}) }}">
                                             {{ ux_icon('line-md:pencil-alt-twotone' )}}
                                         </a>

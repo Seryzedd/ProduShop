@@ -53,25 +53,102 @@ class TranslationUpdateCommand extends Command
         $locale = $input->getArgument('locale');
         $projectDir = $this->kernel->getProjectDir();
 
+        /* =============================
+        * 1. Extract keys from the app
+        * ============================= */
+
         $extractedCatalogue = new MessageCatalogue($locale);
-
-        $this->extractor->extract($projectDir.'/src', $extractedCatalogue);
-        $this->extractor->extract($projectDir.'/templates', $extractedCatalogue);
-
-        $bundleCatalogue = new MessageCatalogue($locale);
+        $this->extractor->extract($projectDir . '/src', $extractedCatalogue);
+        $this->extractor->extract($projectDir . '/templates', $extractedCatalogue);
 
         /* =============================
-         * 2. Lecture catalogue existant
-         * ============================= */
+        * 2. Extract keys from each registered bundle
+        * ============================= */
+
+        foreach ($this->kernel->getBundles() as $bundle) {
+            $bundlePath = $bundle->getPath();
+
+            // Extract from PHP and Twig source files within the bundle
+            foreach (['/src', '/templates'] as $subDir) {
+                $dir = $bundlePath . $subDir;
+                if (is_dir($dir)) {
+                    $this->extractor->extract($dir, $extractedCatalogue);
+                }
+            }
+
+            // Merge any existing translations shipped with the bundle
+            $bundleTranslationPath = $bundlePath . '/translations';
+            if (is_dir($bundleTranslationPath)) {
+                $bundleCatalogue = new MessageCatalogue($locale);
+                $this->reader->read($bundleTranslationPath, $bundleCatalogue);
+
+                // Fall back to base language if no translations found for the full locale
+                if (count($bundleCatalogue->all()) === 0) {
+                    $baseLocale = explode('_', $locale)[0];
+                    if ($baseLocale !== $locale) {
+                        $fallbackCatalogue = new MessageCatalogue($baseLocale);
+                        $this->reader->read($bundleTranslationPath, $fallbackCatalogue);
+
+                        foreach ($fallbackCatalogue->getDomains() as $domain) {
+                            foreach ($fallbackCatalogue->all($domain) as $id => $message) {
+                                $bundleCatalogue->set($id, $message, $domain);
+                            }
+                        }
+                    }
+                }
+
+                $extractedCatalogue->addCatalogue($bundleCatalogue);
+            }
+        }
+
+        /* =============================
+        * 3. Extract keys from Symfony components
+        * ============================= */
+
+        $componentsBasePath = $projectDir . '/vendor/symfony';
+        if (is_dir($componentsBasePath)) {
+            foreach (new \DirectoryIterator($componentsBasePath) as $componentDir) {
+                if ($componentDir->isDot() || !$componentDir->isDir()) {
+                    continue;
+                }
+
+                $componentTranslationPath = $componentDir->getPathname() . '/Resources/translations';
+                if (is_dir($componentTranslationPath)) {
+                    $componentCatalogue = new MessageCatalogue($locale);
+                    $this->reader->read($componentTranslationPath, $componentCatalogue);
+
+                    // Fall back to base language if no translations found for the full locale
+                    if (count($componentCatalogue->all()) === 0) {
+                        $baseLocale = explode('_', $locale)[0];
+                        if ($baseLocale !== $locale) {
+                            $fallbackCatalogue = new MessageCatalogue($baseLocale);
+                            $this->reader->read($componentTranslationPath, $fallbackCatalogue);
+
+                            foreach ($fallbackCatalogue->getDomains() as $domain) {
+                                foreach ($fallbackCatalogue->all($domain) as $id => $message) {
+                                    $componentCatalogue->set($id, $message, $domain);
+                                }
+                            }
+                        }
+                    }
+
+                    $extractedCatalogue->addCatalogue($componentCatalogue);
+                }
+            }
+        }
+
+        /* =============================
+        * 4. Load the existing app catalogue
+        * ============================= */
 
         $existingCatalogue = new MessageCatalogue($locale);
-        $this->reader->read($this->translationPath, $bundleCatalogue);
-
-        $existingCatalogue->addCatalogue($bundleCatalogue);
+        $appCatalogue = new MessageCatalogue($locale);
+        $this->reader->read($this->translationPath, $appCatalogue);
+        $existingCatalogue->addCatalogue($appCatalogue);
 
         /* =============================
-         * 3. Diff par domaine
-         * ============================= */
+        * 5. Diff and merge keys per domain
+        * ============================= */
 
         $domains = array_unique(array_merge(
             $extractedCatalogue->getDomains(),
@@ -79,37 +156,42 @@ class TranslationUpdateCommand extends Command
         ));
 
         foreach ($domains as $domain) {
-
             $output->writeln("\n<comment>Domain: $domain</comment>");
 
             $newMessages = $extractedCatalogue->all($domain);
             $oldMessages = $existingCatalogue->all($domain);
 
-            // Ajouts
+            // Add new keys — use the key itself as the default value if no translation is available
             foreach ($newMessages as $id => $message) {
                 if (!isset($oldMessages[$id])) {
                     $output->writeln("<info>+ $id</info>");
-                    $existingCatalogue->set($id, $message, $domain);
+                    $existingCatalogue->set($id, $message ?: $id, $domain);
                 }
             }
 
-            // Suppressions
+            // Report unused keys — displayed only, not removed
             foreach ($oldMessages as $id => $message) {
                 if (!isset($newMessages[$id])) {
                     $output->writeln("<error>- $id (unused)</error>");
                 }
             }
+
+            // Ensure a file is created even if the domain has no keys yet
+            if (empty($newMessages) && empty($oldMessages)) {
+                $existingCatalogue->set('__placeholder__', '', $domain);
+            }
         }
 
         /* =============================
-         * 4. Écriture
-         * ============================= */
+        * 6. Write one file per domain
+        * ============================= */
 
         $this->writer->write($existingCatalogue, 'yml', [
             'path' => $this->translationPath,
+            'default_locale' => $locale,
         ]);
 
-        $output->writeln("\n<info>Sync completed.</info>");
+        $io->success('Sync completed for locale: ' . $locale);
 
         return Command::SUCCESS;
     }

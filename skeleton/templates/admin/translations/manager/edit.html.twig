@@ -27,7 +27,11 @@
 {% block body %}
     <main class="container">
         <div class="row align-items-center">
-            <h1 class="col-sm-10">{% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}</h1>
+            <h1 class="col-sm-10">
+                {% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}
+                <small class="fs-4">{{ locale|region }}</small>
+                <small class="fs-6 fw-lighter">({{ locale }})</small>
+            </h1>
             <div class="col-sm-2 text-end">
                 <a class="btn btn-primary btn-sm spin-hover" href="{{ path('app_admin_translations_manager_reload', {'locale': locale}) }}">
                     {{ ux_icon('ic:twotone-autorenew', {height: '26px', width: '26px'}) }}
