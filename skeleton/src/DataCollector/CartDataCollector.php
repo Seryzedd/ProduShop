@@ -14,16 +14,43 @@ class CartDataCollector extends DataCollector
 
     public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
-        $items = [];
+        if (!$request->hasSession() || !$request->getSession()->isStarted()) {
+            $this->data = [
+                'items'                   => [],
+                'item_count'              => 0,
+                'total_quantity'          => 0,
+                'total_price'             => 0.0,
+                'has_availability_issues' => false,
+            ];
+            return;
+        }
 
-        foreach ($this->cartService->getItems() as $item) {
+        $cartItems = $this->cartService->getItems();
+
+        $items = [];
+        $totalQuantity = 0;
+        $totalPrice = 0.0;
+        $hasIssues = false;
+
+        foreach ($cartItems as $item) {
             $pkg = $item->getPackage();
+
+            $quantity  = $item->getQuantity();
+            $lineTotal = $item->getLineTotal();
+
+            $totalQuantity += $quantity;
+            $totalPrice    += $lineTotal;
+
+            if (!$item->isAvailable()) {
+                $hasIssues = true;
+            }
+
             $items[] = [
                 'package_id'   => $pkg->getId(),
                 'product_name' => $pkg->getProduct()?->getName() ?? 'N/A',
-                'quantity'     => $item->getQuantity(),
+                'quantity'     => $quantity,
                 'unit_price'   => $pkg->getFinalPrice(),
-                'line_total'   => $item->getLineTotal(),
+                'line_total'   => $lineTotal,
                 'stock'        => $pkg->getStock(),
                 'available'    => $item->isAvailable(),
                 'status'       => $item->getStatus(),
@@ -32,11 +59,11 @@ class CartDataCollector extends DataCollector
         }
 
         $this->data = [
-            'items'             => $items,
-            'item_count'        => $this->cartService->getItemCount(),
-            'total_quantity'    => $this->cartService->getTotalQuantity(),
-            'total_price'       => $this->cartService->getTotal(),
-            'has_availability_issues' => $this->cartService->hasAvailabilityIssues(),
+            'items'                   => $this->cloneVar($items),
+            'item_count'              => count($cartItems),
+            'total_quantity'          => $totalQuantity,
+            'total_price'             => $totalPrice,
+            'has_availability_issues' => $hasIssues,
         ];
     }
 

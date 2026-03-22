@@ -21,7 +21,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Extractor\ExtractorInterface;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 use Symfony\Component\Translation\Writer\TranslationWriterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsCommand(
     name: 'app:translation:update',
@@ -35,8 +34,7 @@ class TranslationUpdateCommand extends Command
         private readonly KernelInterface $kernel,
         private readonly ExtractorInterface $extractor,
         private readonly TranslationReaderInterface $reader,
-        private readonly TranslationWriterInterface $writer,
-        private readonly TranslatorInterface $translator
+        private readonly TranslationWriterInterface $writer
     )
     {
         parent::__construct();
@@ -60,14 +58,14 @@ class TranslationUpdateCommand extends Command
         $this->extractor->extract($projectDir.'/src', $extractedCatalogue);
         $this->extractor->extract($projectDir.'/templates', $extractedCatalogue);
 
-        $bundleCatalogue = $this->translator->getCatalogue($locale);
+        $bundleCatalogue = new MessageCatalogue($locale);
 
         /* =============================
          * 2. Lecture catalogue existant
          * ============================= */
 
         $existingCatalogue = new MessageCatalogue($locale);
-        $this->reader->read($this->translationPath, $existingCatalogue);
+        $this->reader->read($this->translationPath, $bundleCatalogue);
 
         $existingCatalogue->addCatalogue($bundleCatalogue);
 

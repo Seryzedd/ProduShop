@@ -85,11 +85,11 @@ final class ManagerController extends AbstractController
                     $translations = $file->getTranslationsToArray();
 
                     $translationFileReader->updateFile($filename, $translations);
+
+                    $this->addFlash('success', new TranslatableMessage('Translation file "%filename%" updated successfully.', ['%filename%' => $filename]));
                 } catch (\Exception $e) {
                     $this->addFlash('danger', $e->getMessage());
                 }
-                
-                $this->addFlash('success', new TranslatableMessage('Translation file "%filename%" updated successfully.', ['%filename%' => $filename]));
             }
         }
 

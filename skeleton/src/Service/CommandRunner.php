@@ -14,22 +14,22 @@ class CommandRunner
     public function run(string $commandName, ?array $arguments = [])
     {
         $originalDir = getcwd();
-
-        $application = new Application($this->kernel);
-        $application->setAutoExit(false);
-
         chdir($this->kernel->getProjectDir());
 
+        // ✅ Kernel isolé au lieu de réutiliser le kernel HTTP
+        $kernelClass = get_class($this->kernel);
+        $isolatedKernel = new $kernelClass(
+            $this->kernel->getEnvironment(),
+            $this->kernel->isDebug()
+        );
+
+        $application = new Application($isolatedKernel);
+        $application->setAutoExit(false);
+
         try {
-            $arguments = array_merge(['command' => $commandName], $arguments);
-
-            $input = new ArrayInput($arguments);
-
-            // You can use NullOutput() if you don't need the output
+            $input = new ArrayInput(array_merge(['command' => $commandName], $arguments ?? []));
             $output = new BufferedOutput();
             $exitCode = $application->run($input, $output);
-
-            // return the output, don't use if you used NullOutput()
             $content = $output->fetch();
 
             if ($exitCode !== 0) {
@@ -43,11 +43,8 @@ class CommandRunner
 
             return $content;
         } finally {
+            $isolatedKernel->shutdown(); // ✅ Nettoyage propre
             chdir($originalDir);
         }
-
-        
-
-        
     }
 }

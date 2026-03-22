@@ -135,12 +135,14 @@ class InvoiceService
                 $tvaAmount += $tvaSub;
 
                 $items[] = [
-                    'name'          => $package->getName(),
+                    'packageName'   => $package->getName(),
+                    'productName'   => $package->getProduct()->getName(),
                     'quantity'      => $qty,
                     'tva_rate'      => $tvaRate,
                     'merchant_name' => $merchant?->getCompanyName() ?? '—',
                     'merchant_id'   => $merchantId,
-                    'unit_price'    => number_format($priceHT,    2, ',', ' '),
+                    'TTC_price'     => number_format($priceTTC, 2, ',', ' '),
+                    'unit_price'    => number_format($priceHT, 2, ',', ' '),
                     'subtotal'      => number_format($subtotalHT, 2, ',', ' '),
                 ];
             }
@@ -150,7 +152,7 @@ class InvoiceService
 
         return [
             'invoice_number'    => sprintf('INV-%s-%05d', $payment->getCreatedAt()->format('Ymd'), $payment->getId()),
-            'invoice_date'      => $payment->getCreatedAt()->format('d/m/Y'),
+            'invoice_date'      => $payment->getCreatedAt()->format('d/m/Y H:i'),
             'paid_at'           => $paidAt,
             'status'            => $payment->getStatus(),
             'currency'          => $currency,
