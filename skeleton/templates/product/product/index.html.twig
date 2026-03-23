@@ -21,9 +21,20 @@
     {% set radius = app.request.query.get('radius') ?: 20 %}
     <main class="container">
         <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
-        {{ block("radius_form") }}
+        <div class="row align-items-center">
+            <div class="col-lg-11 col-10">
+                {{ block("radius_form") }}
+            </div>
+            <div class="col-lg-1 col-2 text-end">
+                <button class="btn btn-primary" title="{% trans %}Show map{% endtrans %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMap" aria-expanded="false" aria-controls="collapseMap">
+                    {{ ux_icon('line-md:map-marker') }}
+                </button>
+            </div>
+        </div>
 
-        {{ block('map') }}
+        <div id="collapseMap" class="collapse">
+            {{ block('map') }}
+        </div>
 
         {% block product_list %}
             <div class="card-group row-cols-1 row-cols-lg-6">

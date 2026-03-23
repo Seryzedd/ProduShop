@@ -50,6 +50,8 @@
             </div>
         {% endif %}
 
+        {{ block('stripe_navigation') }}
+
         {{ form_start(form) }}
             {{ form_row(form.active) }}
             {{ form_row(form.feesAmount) }}
@@ -66,6 +68,12 @@
 
 {% block stripe_navigation %}
     <ul class="nav justify-content-end">
+        <li class="nav-item">
+            <a class="nav-link{% if app.request.attributes.get('_route') == 'app_admin_config_stripe' %} disabled{% endif %}" aria-current="page" href="{{ path('app_admin_config_stripe') }}">
+                {% trans %}Configuration{% endtrans %}
+            </a>
+        </li>
+
         <li class="nav-item">
             <a class="nav-link{% if app.request.attributes.get('_route') == 'app_admin_payments_stripe' %} disabled{% endif %}" aria-current="page" href="{{ path('app_admin_payments_stripe') }}">
                 {% trans %}Payments{% endtrans %}

@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin payment{% endtrans %}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+
+        <h1>{% trans %}Payment details{% endtrans %}</h1>
+
+        <div class="d-flex justify-content-between">
+            <p class="">{% trans %}Payment created at{% endtrans %} : <strong class='text-muted'>{{ payment.createdAt|date('d/m/Y H:i') }}</strong></p>
+
+            {% if payment.status == "Pending" %}
+                <p class="link-info mb-0">{{ payment.status }}</p>
+            {% elseif payment.status == "Treated" %}
+                <p class="link-success mb-0">{{ payment.status }}</p>
+            {% else %}
+                <p class="link-warning mb-0">{{ payment.status }}</p>
+            {% endif %}
+        </div>
+
+        <h4 class="mb-0 text-end">
+            {{ (payment.amount / 100)|number_format(2, ',', ' ') }}<small class="fs-6 fw-lighter">EUR</small>
+        </h4>
+        
+        <div class="list-group">
+            {% for order in payment.orders %}
+                <a href="{{ path('app_admin_payment_stripe', {id: order.intentId}) }}" class="list-group-item list-group-item-action">
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <p class="mb-0">{{ order.intentId }}</p>
+                        </div>
+
+                        <div class="col-4">
+                            <p class="mb-0">
+                                {% trans %}Created at{% endtrans %} :
+                                {{ order.createdAt|date('d/m/Y H:i') }}
+                            </p>
+
+                            <p class="mb-0">
+                                {% trans %}Paid at{% endtrans %} :
+                                {{ order.paidAt ? order.paidAt|date('d/m/Y H:i') : 'Not paid'|trans }}
+                            </p>
+                        </div>
+
+                        <div class="col-2">
+                            {% if order.status == "paid" %}
+                                <p class="link-success mb-0">{{ order.status }}</p>
+                            {% else %}
+                                <p class="link-warning mb-0">{{ order.status }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-2">
+                            <p class="mb-0 text-end">{{ (order.amount / 100)|number_format(2, ',', ' ') }}<small>{{ order.currency }}</small></p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        
+    </main>
+{% endblock %}

@@ -16,6 +16,25 @@ class PaymentRepository extends ServiceEntityRepository
         parent::__construct($registry, Payment::class);
     }
 
+    /**
+     * @return Payment[] Returns an array of Payment objects
+     */
+    public function findByOrdered(array $params = [], string $order = 'DESC'): array
+    {
+        $query = $this->createQueryBuilder('p');
+
+        foreach($params as $param => $value) {
+            $query->andWhere('p.' . $param . ' = :val')
+                ->setParameter('val', $value)
+            ;
+        }
+            
+        return $query->orderBy('p.createdAt', $order)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Payment[] Returns an array of Payment objects
     //     */

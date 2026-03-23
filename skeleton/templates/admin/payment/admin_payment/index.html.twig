@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin payments list{% endtrans %}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+
+        <h1>{% trans %}Payment list{% endtrans %}</h1>
+
+        <div class="list-group">
+            {% for payment in payments %}
+                <a href="{{ path('app_admin_payment', {id: payment.id}) }}" class="list-group-item list-group-item-action" aria-current="true">
+                    <div class="row">
+                        <div class="col-4">
+                            {{ payment.customer.email }}
+                        </div>
+
+                        <div class="col-4">
+                            {{ payment.createdAt|date('d/m/Y H:i') }}
+                        </div>
+
+                        <div class="col-2">
+                            {% if payment.status == "Pending" %}
+                                <p class="link-info mb-0">{{ payment.status }}</p>
+                            {% elseif payment.status == "Treated" %}
+                                <p class="link-success mb-0">{{ payment.status }}</p>
+                            {% else %}
+                                <p class="link-warning mb-0">{{ payment.status }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-2 text-end">
+                            <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}

@@ -30,10 +30,6 @@
     <main class="container mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <h1>{% trans %}Payment details{% endtrans %}</h1>
-            <a href="{{ path('app_invoice_show', {id: payment.id}) }}" class="text-end link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                {% trans %}Invoice{% endtrans %}
-                {{ ux_icon('line-md:file') }}
-            </a>
         </div>
         
         <div class="d-flex justify-content-between">
@@ -52,17 +48,24 @@
         <div class="card p-4">
             <div class="row align-items-center">
                 <div class="col-12">
-                    {% if order.status == "succeeded" %}
-                        <p class="text-end text-success">{{ order.status|upper }}</p>
+                    {% if payment.status == "succeeded" %}
+                        <p class="text-end text-success">{{ payment.status|upper }}</p>
                     {% else %}
-                        <p class="text-end text-info">{{ order.status|upper }}</p>
+                        <p class="text-end text-info">{{ payment.status|upper }}</p>
                     {% endif %}
+                    
+                    <h5 class="lined text-dark flex-row-reverse">
+                        {% trans %}Description{% endtrans %}
+                    </h5>
+                    <p class="ps-4">
+                        {{ payment.description }}
+                    </p>
                 </div>
 
                 <div class="col-lg-5 position-relative card p-3">
                     <h5 class="text-muted">{% trans %}Customer{% endtrans %} :</h5>
 
-                    <p>{% trans %}Paid{% endtrans %} : <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong>{{ payment.currency }}<br>
+                    <p>
                         <a href="{{ path('app_admin_email_user', {email: payment.customer.email}) }}" class="link-offset-2 stretched-link link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
                             <strong class="text-primary">{{ payment.customer.name }}</strong><br>
                             {{ payment.customer.email }}
@@ -87,19 +90,35 @@
                 </div>
 
                 <div class="col-lg-5 card position-relative p-3">
-                    <h5 class="">{% trans %}Merchants{% endtrans %} :</h5>
-                    <ul class="list-group">
-                        {% for transfer in order.transfers %}
-                            <li class="list-group-item d-flex justify-content-between">
-                                <p class="mb-0">
-                                    {{ transfer.accountId }}<br>
-                                    <small class="text-muted">{{ transfer.createdAt|date('d/m/Y H:i') }}</small>
-                                </p>
-                                <p class="mb-0"><strong>{{ (transfer.amount / 100)|number_format(2, ',', ' ') }}</strong> {{ transfer.currency }}</p>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <h5 class="text-muted">{% trans %}Merchants{% endtrans %} :</h5>
                     
+                    {% set account = payment.transfer_data.destination %}
+                    <div>
+                        <p class="">
+                            <strong>{% trans %}Created at{% endtrans %} :</strong>
+                            {{ account.created|date('d/m/Y') }}
+                        </p>
+                        <p class=""><strong>{% trans %}Account id{% endtrans %} : </strong><code>{{ account.id }}</code></p>
+                        <p class="mb-0"><strong>{% trans %}Name{% endtrans %} : </strong>{{ account.name ?? 'No name'|trans }}</p>
+                        <p class="mb-0"><strong>{% trans %}Email{% endtrans %} : </strong>{{ account.email }}</p>
+                        <p class="mb-0"><strong>{% trans %}Phone{% endtrans %} : </strong>{{ account.company.phone }}</p>
+
+                        <div>
+                            <p>
+                                <strong>{% trans %}Adress{% endtrans %} :</strong>
+                                {{ account.company.address.line1 }},
+                                {{ account.company.address.postal_code }} {{ account.company.address.city }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <strong>{% trans %}Bank{% endtrans %} :</strong>
+                            {% for bank in account.external_accounts.data %}
+                                <p class="mb-0">{{ bank.bank_name|capitalize }}</p>
+                                <p class="text-muted">xxxx xxxx xxxx{{ bank.last4 }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

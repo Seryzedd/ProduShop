@@ -59,7 +59,7 @@
                                     <a title="{% trans %}Stripe configuration{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_config_stripe' %} active disabled{% endif %}" href="{{ path('app_admin_config_stripe') }}">
                                         {% trans %}Stripe{% endtrans %}
                                     </a>
-                                    <a title="{% trans %}Payments list{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_payments_stripe' %} active disabled{% endif %}" href="{{ path('app_admin_payments_stripe') }}">
+                                    <a title="{% trans %}Payments list{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_payments' %} active disabled{% endif %}" href="{{ path('app_admin_payments') }}">
                                         {% trans %}Payments{% endtrans %}
                                     </a>
                                 </li>
