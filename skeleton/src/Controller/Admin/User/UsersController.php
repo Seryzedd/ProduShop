@@ -37,9 +37,23 @@ final class UsersController extends AbstractController
     {
         if ($id) {
             $user = $entityManager->getRepository(AbstractUser::class)->findOneBy(['id' => $id]);
+
+            if(!$user) {
+                $this->addFlash('danger', new TranslatableMessage('User with id "%id%" does not exist in database.', ['%id%' => $id]));
+
+                return $this->redirectToRoute('app_admin_users');
+            }
         } else {
             $user = $entityManager->getRepository(AbstractUser::class)->findOneBy(['email' => $email]);
+
+            if(!$user) {
+                $this->addFlash('danger', new TranslatableMessage('User with email "%email%" does not exist in database.', ['%email%' => $email]));
+
+                return $this->redirectToRoute('app_admin_users');
+            }
         }
+
+        
 
         $paymentMethods = [];
 

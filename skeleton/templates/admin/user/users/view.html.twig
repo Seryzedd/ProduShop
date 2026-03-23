@@ -20,7 +20,7 @@
             }
         %}
     {% endif %}
-    
+
     {% set breadcrumb = [
         {
             label: 'Admin Dashboard',
@@ -58,7 +58,7 @@
                     <div class="position-relative">
                         <h3 class="lined mb-0 mt-2 flex-row-reverse justify-content-between">
                             <a href="{{ path('app_merchant_schedule') }}" class="btn btn-light">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
-                            <strong>{% trans %}Schedules{% endtrans %}</strong>
+                            {% trans %}Schedules{% endtrans %}
                         </h3>
                         {% if user.openingSchedule %}
                             {{ block('pro_schedules') }}

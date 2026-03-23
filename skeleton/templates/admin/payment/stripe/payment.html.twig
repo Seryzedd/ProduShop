@@ -100,7 +100,10 @@
                         </p>
                         <p class=""><strong>{% trans %}Account id{% endtrans %} : </strong><code>{{ account.id }}</code></p>
                         <p class="mb-0"><strong>{% trans %}Name{% endtrans %} : </strong>{{ account.name ?? 'No name'|trans }}</p>
-                        <p class="mb-0"><strong>{% trans %}Email{% endtrans %} : </strong>{{ account.email }}</p>
+                        <p class="mb-0">
+                            <strong>{% trans %}Email{% endtrans %} : </strong>
+                            <a class="link-offset-2 link-offset-3-hover stretched-link link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_admin_email_user', {email: account.email}) }}">{{ account.email }}</a>
+                        </p>
                         <p class="mb-0"><strong>{% trans %}Phone{% endtrans %} : </strong>{{ account.company.phone }}</p>
 
                         <div>
