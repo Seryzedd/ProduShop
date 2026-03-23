@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block header %}{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block admin_menu %}{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block cart_content %}{% endblock %}
+
+{% block flash_messages %}{% endblock %}
+
+{% block title %}
+    {% trans with {'%code%': status_code} %}Error %code%{% endtrans %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            height: 100vh;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <main class="container h-100 d-flex align-items-center justify-content-center p-4">
+        <div>
+            <h1 class="text-center text-muted">
+                {{ ux_icon('ic:twotone-error', {width: '70px', height: '70px'}) }}<br>
+                {% trans with {'%code%': status_code} %}Error %code%{% endtrans %}
+            </h1>
+            <h3 class="text-center">{{ status_text }}</h3>
+
+            <p class="text-center">{{ exception.message }}</p>
+        </div>
+    </main>
+{% endblock %}
