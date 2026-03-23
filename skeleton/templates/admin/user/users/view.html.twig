@@ -5,6 +5,22 @@
 {% endblock %}
 
 {% block breadcrumb %}
+    {% if app.request.attributes.get('_route') == 'app_admin_user' %}
+        {% set currentRoute = {
+                label: '"%email%" view'|trans({'%email%' : user.email}),
+                route: 'app_admin_user',
+                parameters: {id: user.id}
+            }
+        %}
+    {% else %}
+        {% set currentRoute = {
+                label: '"%email%" view'|trans({'%email%' : user.email}),
+                route: 'app_admin_email_user',
+                parameters: {email: user.email}
+            }
+        %}
+    {% endif %}
+    
     {% set breadcrumb = [
         {
             label: 'Admin Dashboard',
@@ -14,11 +30,7 @@
             label: 'users',
             route: 'app_admin_users'
         },
-        {
-            label: '"%email%" view'|trans({'%email%' : user.email}),
-            route: 'app_admin_user',
-            parameters: {id: user.id}
-        }
+        currentRoute
     ] %}
 
     {{ parent() }}
@@ -42,10 +54,25 @@
                     </button>
                 {{ form_end(form) }}
 
-                {{ block('orders', 'account/informations/index.html.twig') }}
-
                 {% if user|instanceOf('App\\Entity\\User\\Professional') %}
+                    <div class="position-relative">
+                        <h3 class="lined mb-0 mt-2 flex-row-reverse justify-content-between">
+                            <a href="{{ path('app_merchant_schedule') }}" class="btn btn-light">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+                            <strong>{% trans %}Schedules{% endtrans %}</strong>
+                        </h3>
+                        {% if user.openingSchedule %}
+                            {{ block('pro_schedules') }}
+                        {% else %}
+                            <p class="ms-2 text-muted">
+                                {% trans %}No Schedules{% endtrans %}
+                            </p>
+                        {% endif %}
+                    </div>
                     {{ block('products', 'account/informations/index.html.twig') }}
+                    {{ block('orders', 'account/informations/index.html.twig') }}
+                {% else %}
+                    {{ block('payments', 'account/informations/index.html.twig') }}
+                    {{ block('payment_methods', 'account/informations/index.html.twig') }}
                 {% endif %}
             </div>
         </div>

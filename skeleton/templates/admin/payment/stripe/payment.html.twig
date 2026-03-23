@@ -28,8 +28,14 @@
 
 {% block body %}
     <main class="container mb-3">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-end">
             <h1>{% trans %}Payment details{% endtrans %}</h1>
+
+            {% if payment.status == "succeeded" %}
+                <p class="text-end text-success">{{ payment.status|upper }}</p>
+            {% else %}
+                <p class="text-end text-info">{{ payment.status|upper }}</p>
+            {% endif %}
         </div>
         
         <div class="d-flex justify-content-between">
@@ -47,17 +53,11 @@
 
         <div class="card p-4">
             <div class="row align-items-center">
-                <div class="col-12">
-                    {% if payment.status == "succeeded" %}
-                        <p class="text-end text-success">{{ payment.status|upper }}</p>
-                    {% else %}
-                        <p class="text-end text-info">{{ payment.status|upper }}</p>
-                    {% endif %}
-                    
+                <div class="col-12 card mb-2 p-4">
                     <h5 class="lined text-dark flex-row-reverse">
                         {% trans %}Description{% endtrans %}
                     </h5>
-                    <p class="ps-4">
+                    <p class="ps-4 text-muted fst-italic">
                         {{ payment.description }}
                     </p>
                 </div>
@@ -76,7 +76,7 @@
 
                     <p class="mb-0">
                         {{ payment.payment_method.card.brand }}<br>
-                        <small class="text-muted">
+                        <small class="text-muted ps-4">
                             xxxx xxxx xxxx {{ payment.payment_method.card.last4 }}
                             {% trans with {'%month%': payment.payment_method.card.exp_month, '%year%': payment.payment_method.card.exp_year} %}Expire at %month%/%year%{% endtrans %}
                         </small>
@@ -114,8 +114,8 @@
                         <div>
                             <strong>{% trans %}Bank{% endtrans %} :</strong>
                             {% for bank in account.external_accounts.data %}
-                                <p class="mb-0">{{ bank.bank_name|capitalize }}</p>
-                                <p class="text-muted">xxxx xxxx xxxx{{ bank.last4 }}</p>
+                                <p class="mb-0 ps-4">{{ bank.bank_name|capitalize }}</p>
+                                <p class="text-muted ps-4">xxxx xxxx xxxx{{ bank.last4 }}</p>
                             {% endfor %}
                         </div>
                     </div>

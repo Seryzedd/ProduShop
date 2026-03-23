@@ -297,6 +297,10 @@
 {% block payment_methods %}
     <div class="mb-4">
         <h3 class="lined flex-row-reverse text-nowrap">{% trans %}Payment methods{% endtrans %}</h3>
+        
+        {% if paymentMethods|length == 0 %}
+            <p class="text-muted">{% trans %}No Payment method{% endtrans %}</p>
+        {% endif %}
 
         {% for method in paymentMethods %}
             <div class="row align-items-center">

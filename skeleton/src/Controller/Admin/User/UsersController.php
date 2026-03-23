@@ -13,6 +13,7 @@ use App\Form\Admin\User\RolesManagerType;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\Api\StripeService;
 use App\Entity\User\Professional;
+use App\Entity\User\Client;
 
 #[Route('/admin/users')]
 final class UsersController extends AbstractController
@@ -40,18 +41,11 @@ final class UsersController extends AbstractController
             $user = $entityManager->getRepository(AbstractUser::class)->findOneBy(['email' => $email]);
         }
 
-        /**
-        * $payments = [];
-        * if($user instanceof Professional) {
-        *     if($user->getStripeAccount()) {
-        *         $payments = $this->stripe->getPaymentIntentsByMerchant($user->getStripeAccount()->getAccountId());
-        *     }
-        * } else {
-        *     if ($user->getStripe()) {
-        *         $payments = $this->stripe->getPaymentIntentsByCustomer($user->getStripeAccount()->getCustomerId());
-        *     }
-        * }
-        */
+        $paymentMethods = [];
+
+        if($user instanceof Client) {
+            $paymentMethods = $this->stripe->getPaymentMethods($user->getStripe()->getCustomerId());
+        }
 
         $form = $this
             ->createForm(RolesManagerType::class, $user)
@@ -69,7 +63,7 @@ final class UsersController extends AbstractController
         return $this->render('admin/user/users/view.html.twig', [
             'user' => $user,
             'form' => $form,
-            'payments' => $payments
+            'paymentMethods' => $paymentMethods
         ]);
     }
 }
