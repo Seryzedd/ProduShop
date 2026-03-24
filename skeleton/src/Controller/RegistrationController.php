@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Entity\User\AbstractUser;
 use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
 use App\Security\EmailVerifier;
@@ -18,6 +18,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use App\DTO\User\UserSignUp;
 use App\Form\Step\RegistrationStepType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 
 class RegistrationController extends AbstractController
 {
@@ -39,13 +40,7 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
             // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
-                (new TemplatedEmail())
-                    ->from(new Address('contact@producterShop.fr', 'Producter shop'))
-                    ->to((string) $user->getEmail())
-                    ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+            $this->sendEmailCheck($user);
 
             $this->addFlash('success', 'Account created. An email has been sent to your email adress');
 
@@ -78,12 +73,52 @@ class RegistrationController extends AbstractController
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', $translator->trans($exception->getReason(), [], 'VerifyEmailBundle'));
 
-            return $this->redirectToRoute('app_register');
+            return $this->redirectToRoute('app_login');
         }
 
         // @TODO Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_register');
+    }
+
+    #[Route('/request/verification/email', name: 'app_request_email_confirmation')]
+    public function requestSecurityEmail(Request $request, UserRepository $userRepository)
+    {
+        $form = $this->createFormBuilder()
+            ->add('email', EmailType::class, [
+                'help' => 'Enter your Lancana\'s account email address'
+            ])
+            ->getForm()
+        ;
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $user = $userRepository->findOneBy(['email' => $form->get('email')->getData()]);
+
+            if($user) {
+                $this->sendEmailCheck($user);
+            }
+
+            $this->addFlash('info', 'Email sent if user exist. Check your mailbox.');
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('registration/request_confirmation.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    private function sendEmailCheck(AbstractUser $user)
+    {
+        $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
+            (new TemplatedEmail())
+                ->from(new Address('contact@producterShop.fr', 'Producter shop'))
+                ->to((string) $user->getEmail())
+                ->subject('Please Confirm your Email')
+                ->htmlTemplate('registration/confirmation_email.html.twig')
+        );
     }
 }

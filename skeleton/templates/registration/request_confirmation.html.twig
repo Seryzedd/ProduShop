@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bs-border-color);
+        }
+    </style>
+{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block footer %}{% endblock %}
+{% block breadcrumb %}{% endblock %}
+
+{% block flash_messages %}{% endblock %}
+
+{% block body %}
+    <div class="row w-100 p-3 mx-auto align-items-center justify-content-center">
+        <div class="col-lg-8 card p-4">
+            <a class='text-center' href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
+
+            <h1 class="text-center">{% trans %}Request new confirmation email{% endtrans %}</h1>
+
+            {{ form_start(form) }}
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2 text-center">
+                        {{ form_row(form.email, {attr: {placeholder: 'example@contact.com'|trans, class: 'text-center'}}) }}
+
+                        <p class="text-end">
+                            <a href="{{ path('app_login') }}">{% trans %}return to login{% endtrans %}</a>
+                        </p>
+
+                        <button type="submit" class="btn btn-primary">
+                            {% trans %}Send email{% endtrans %}
+                        </button>
+                    </div>
+                </div>
+                
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
