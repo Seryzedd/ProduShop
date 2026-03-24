@@ -28,14 +28,15 @@
 
 {% block body %}
     <main class="container h-100 d-flex align-items-center justify-content-center p-4">
-        <div>
-            <h1 class="text-center text-muted">
+        <div class="text-center">
+            <h1 class="text-muted">
                 {{ ux_icon('ic:twotone-error', {width: '70px', height: '70px'}) }}<br>
                 {% trans with {'%code%': status_code} %}Error %code%{% endtrans %}
             </h1>
-            <h3 class="text-center">{{ status_text }}</h3>
+            <h3>{{ status_text }}</h3>
 
-            <p class="text-center">{{ exception.message }}</p>
+            <p >{{ exception.message }}</p>
+            <p><a href="{{ path('app_home_index')}}" class="">{% trans %}Return homepage{% endtrans %}</a></p>
         </div>
     </main>
 {% endblock %}
