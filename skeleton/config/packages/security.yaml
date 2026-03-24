@@ -21,6 +21,11 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800  # 7 jours en secondes
+                path: /
+                always_remember_me: false
             logout:
                 path: app_logout
                 # where to redirect after logout
