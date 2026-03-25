@@ -49,8 +49,7 @@ class BlockRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('b');
 
         foreach ($params as $key => $value) {
-            $query->andWhere('b.' . $key . ' = :'. $value)
-                ->setParameter(':' . $value, $value)
+            $query->andWhere('b.' . $key . ' = '. $value)
             ;
         }
 
