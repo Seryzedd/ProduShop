@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin homepage block configuration{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set params = [] %}
+    {% if app.request.attributes.get('_route') == 'app_admin_configuration_homepage_update' %}
+        {% set label = 'Update homepage block "%id%"'|trans({'%id%': form.vars.data.id}) %}
+        {% set params = {'block': form.vars.data.id} %}
+    {% else %}
+        {% set label = 'app_admin_configuration_homepage_new'|trans %}
+    {% endif %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Homepage configuration',
+            route: 'app_admin_configuration_homepage'
+        },
+        {
+            label: label,
+            route: app.request.attributes.get('_route'),
+            parameters: params
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-end">
+            <h1>{% trans %}Block manager{% endtrans %}</h1>
+        </div>
+        {{ form_start(form) }}
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    {{ form_row(form.type) }}
+                </div>
+                <div class="col-lg-6 text-end">
+                    {{ form_row(form.active) }}
+                </div>
+                
+                <div class="col-lg-4">
+                    {{ form_row(form.backgroundColor) }}
+                </div>
+                <div class="col-lg-4">
+                    {{ form_row(form.textColor) }}
+                </div>
+                <div class="col-lg-4">
+                    {{ form_row(form.backgroundImage) }}
+                </div>
+            </div>
+            
+            {{ form_row(form.text) }}
+            
+
+            <button type="submit" class="btn btn-primary">
+                {% trans %}Update{% endtrans %}
+            </button>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}

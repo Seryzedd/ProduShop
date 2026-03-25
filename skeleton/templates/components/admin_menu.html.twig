@@ -66,6 +66,22 @@
                             </ul>
                         </div>
                     </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link text-start" title="{% trans %}Admin configrations{% endtrans %}" type="button" data-bs-toggle="collapse" data-bs-target="#admin_configurations" aria-expanded="false" aria-controls="admin_configurations">
+                            {{ ux_icon('ic:round-build' )}}
+                            <span>{% trans %}Configurations{% endtrans %}</span>
+                        </button>
+                        <div class="collapse" id="admin_configurations">
+                            <ul class="nav flex-column ps-3">
+                                <li class="nav-item">
+                                    <a title="{% trans %}Homepage configuration{% endtrans %}" class="nav-link text-start{% if app.request.attributes.get('_route') == 'app_admin_configuration_homepage' %} active disabled{% endif %}" href="{{ path('app_admin_configuration_homepage') }}">
+                                        {% trans %}Homepage{% endtrans %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

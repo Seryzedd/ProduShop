@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin homepage configuration{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Homepage Blocks',
+            route: 'app_admin_configuration_homepage'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{% trans %}Admin homepage configuration{% endtrans %}</h1>
+
+            <a href="{{ path('app_admin_configuration_homepage_new') }}" class="link-offset-2 link-underline link-underline-opacity-0">
+                {{ ux_icon('line-md:plus', {width: '30px', height: '30px'}) }}
+            </a>
+        </div>
+
+        
+        {{ form_start(form) }}
+            <ul id="list-group">
+                <div class="d-flex justify-content-end align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        {% trans %}Update{% endtrans %}
+                    </button>
+                </div>
+                {% for itemForm in form.items %}
+                    {% set item = itemForm.vars.data %}
+                    
+                    <li class="list-group-item position-relative sortable-item">
+                        <div class="row py-2 align-items-center border-bottom">
+                            <div class="col-lg-2 py-lg-0 py-2 text-center order-lg-1 order-1">
+                                {% if item.active %}
+                                    <p class="mb-0 text-success">
+                                        {{ ux_icon('ic:twotone-toggle-on') }}
+                                        {% trans %}Active{% endtrans %}
+                                    </p>
+                                {% else %}
+                                    <p class="mb-0 text-danger">
+                                        {{ ux_icon('ic:twotone-toggle-off') }}
+                                        {% trans %}Inactive{% endtrans %}
+                                    </p>
+                                {% endif %}
+                                
+                            </div>
+
+                            <div class="col-lg-2 py-lg-0 py-2 text-center order-lg-2 order-2">
+                                <p class="mb-0">
+                                    {% if item.backgroundColor %}
+                                        <span class="p-2 rounded" style="background-color: {{ item.backgroundColor }}">&nbsp</span>
+                                    {% endif %}
+                                    {{ item.backgroundColor ?? 'No color'|trans }}
+                                </p>
+                            </div>
+
+                            <div class="col-lg-4 py-lg-0 text-center py-2 order-lg-3 order-3">
+                                {{ item.text ?? 'No text'|trans }}
+                                {% if item.backgroundImage %}
+                                    <br>
+                                    <img class="img-fluid" style="max-width: 100px;" src="{{ item.backgroundImage.src }}">
+                                {% endif %}
+                            </div>
+
+                            <div class="col-lg-2 py-lg-0 py-2 text-center order-lg-4 order-4">
+                                {{ item.type }}
+                            </div>
+
+                            <div class="col-lg-2 text-end order-0 order-lg-5">
+                                <p class="mb-0">
+                                    <a class="btn btn-outline-dark" href="{{ path('app_admin_configuration_homepage_update', {block: item.id}) }}">
+                                        {{ ux_icon('ic:outline-edit') }}
+                                    </a>
+                                    <button type="button" class="drag-handle btn btn-light">
+                                        {{ ux_icon('ic:round-drag-handle') }}
+                                    </button>
+                                </p>
+                            </div>
+                            {# Inputs générés par Symfony #}
+                            {{ form_widget(itemForm.position, { attr: { class: 'input-position' } }) }}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex justify-content-end align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    {% trans %}Update{% endtrans %}
+                </button>
+            </div>
+        {{ form_end(form) }}
+        {% if form.items|length > 0 %}
+            
+        {% else %}
+            <h3 class="text-muted text-center mt-4">
+                {% trans %}No block available{% endtrans %}
+            </h3>
+        {% endif %}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        const list = document.getElementById('list-group');
+
+        function refreshPositions() {
+            // ✅ Met à jour chaque input position selon l'ordre visuel actuel
+            list.querySelectorAll('.sortable-item').forEach((el, index) => {
+                el.querySelector('.input-position').value = index;
+            });
+        }
+
+        refreshPositions();
+
+        Sortable.create(list, {
+            animation: 150,
+            handle: '.drag-handle',
+            onEnd: refreshPositions   // recalcule les positions après chaque drop
+        });
+    </script>
+{% endblock %}

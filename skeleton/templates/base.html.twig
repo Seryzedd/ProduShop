@@ -38,7 +38,7 @@
                         {% for label, messages in app.session.flashbag.all() %}
                             {% for message in messages %}
                                 <div class="alert alert-{{ label }} row align-items-center">
-                                    <div class="col-md-1">
+                                    <div class="col-md-2">
                                         {% set size = {width: '30px', height: '30px'} %}
                                         {% if label == 'danger' %}
                                             {{ ux_icon('ic:outline-report-problem', size) }}
@@ -51,11 +51,11 @@
                                         {% endif %}
                                     </div>
 
-                                    <p class="col-md-10 mb-0 px-4">
+                                    <p class="col-md-10 text-wrap mb-0 px-4">
                                         {{ message|trans }}
                                     </p>
 
-                                    <p class="mb-0 col-md-1 text-end">
+                                    <p class="mb-0 position-absolute top-1 end-0 text-end">
                                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                     </p>
                                 </div>
