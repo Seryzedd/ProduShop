@@ -2,10 +2,14 @@
 
 namespace App\Entity\Configuration\Homepage;
 
+use App\Entity\Configuration\AbstractText;
 use App\Repository\Configuration\Homepage\BlockRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Picture;
+use App\Entity\Configuration\Paragraph;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
 class Block
@@ -15,17 +19,11 @@ class Block
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $text = null;
-
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?Picture $backgroundImage = null;
 
     #[ORM\Column(nullable: true, type: Types::TEXT)]
     private ?string $backgroundColor = null;
-
-    #[ORM\Column(length: 50, nullable: false)]
-    private string $textColor = '#000';
 
     #[ORM\Column]
     private int $position = 0;
@@ -40,21 +38,17 @@ class Block
     #[ORM\Column]
     private bool $active = false;
 
+    #[ORM\OneToMany(targetEntity: AbstractText::class, mappedBy: 'block', cascade: ['persist', 'remove'])]
+    private Collection $htmlElement;
+
+    public function __construct()
+    {
+        $this->htmlElement = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getText(): ?string
-    {
-        return $this->text;
-    }
-
-    public function setText(?string $text): static
-    {
-        $this->text = $text;
-
-        return $this;
     }
 
     public function getBackgroundColor(): ?string
@@ -126,6 +120,30 @@ class Block
     {
         $this->active = $active;
 
+        return $this;
+    }
+
+    public function getHtmlElement(): Collection
+    {
+        return $this->htmlElement;
+    }
+
+    public function addHtmlElement(AbstractText $element): static  // ✅ gestion Collection
+    {
+        if (!$this->htmlElement->contains($element)) {
+            $this->htmlElement->add($element);
+            $element->setBlock($this);
+        }
+        return $this;
+    }
+
+    public function removeHtmlElement(AbstractText $element): static
+    {
+        if ($this->htmlElement->removeElement($element)) {
+            if ($element->getBlock() === $this) {
+                $element->setBlock(null);
+            }
+        }
         return $this;
     }
 }

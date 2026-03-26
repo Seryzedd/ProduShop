@@ -1,8 +1,16 @@
-<div class="position-relative" style="color: {{ block.textColor }}; background-color: {{ block.backgroundColor }};">
+<div class="position-relative" style="background-color: {{ block.backgroundColor }};">
     {% if block.backgroundImage != null and block.backgroundImage.src|length > 0 %}
-        <img src="{{ block.backgroundImage.src }}" style="object-fit: cover; width: 100%; height: 100%" class="">
-        <p class='position-absolute mb-0 top-0 p-2'>{{ block.text }}</p>
+        <img src="{{ block.backgroundImage.src }}" style="object-fit: cover; width: 100%; height: 100%" class="z-1">
+        <div class="position-absolute z-2 p-2">
+            {% for element in block.htmlElement %}
+                {{ element.html|raw }}
+            {% endfor %}
+        </div>
     {% else %}
-        <p class="p-2 mb-0">{{ block.text }}</p>
+        <div class="p-2">
+            {% for element in block.htmlElement %}
+                {{ element.html|raw }}
+            {% endfor %}
+        </div>
     {% endif %}
 </div>

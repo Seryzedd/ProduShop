@@ -38,25 +38,27 @@
         </div>
         {{ form_start(form) }}
             <div class="row align-items-center">
-                <div class="col-lg-6">
-                    {{ form_row(form.type) }}
-                </div>
-                <div class="col-lg-6 text-end">
+                <div class="col-12 text-end">
                     {{ form_row(form.active) }}
                 </div>
-                
+
+                <div class="col-lg-4">
+                    {{ form_row(form.type) }}
+                </div>
+
                 <div class="col-lg-4">
                     {{ form_row(form.backgroundColor) }}
                 </div>
-                <div class="col-lg-4">
-                    {{ form_row(form.textColor) }}
-                </div>
-                <div class="col-lg-4">
+                
+                
+                <div class="col-lg-4 text-center">
                     {{ form_row(form.backgroundImage) }}
                 </div>
+
+                <div class="col-12">
+                    {% include 'form/collectionType.html.twig' with {collection: form.htmlElement} %}
+                </div>
             </div>
-            
-            {{ form_row(form.text) }}
             
 
             <button type="submit" class="btn btn-primary">
@@ -64,4 +66,9 @@
             </button>
         {{ form_end(form) }}
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
 {% endblock %}
