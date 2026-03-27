@@ -39,6 +39,7 @@ class AdressGeocoderListener
         if (empty($full)) return;
 
         $coords = $this->geocoder->geocode($full);
+        
         if ($coords === null) return;
 
         [$lat, $lng] = $coords;

@@ -91,6 +91,13 @@ class Client extends AbstractUser
         return $this;
     }
 
+    public function getAdressById(int $id)
+    {
+        $filter = $this->shippingAdresses->filter(static fn (Adress $adress) => $adress->getId() === $id);
+
+        return $filter->first();
+    }
+
     /**
      * @return Collection<int, Adress>
      */

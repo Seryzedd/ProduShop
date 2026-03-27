@@ -24,13 +24,22 @@
 {% block body %}
     <main class="container">
         <div class='row'>
+            <div class="col-12">
+                <h1>{% trans %}My account{% endtrans %}</h1>
+            </div>
+            
             <div class="col-lg-4">
                 {{ block('base_details', "account/informations/index.html.twig") }}
-
             </div>
 
             <div class="col-lg-8">
-                <h1 class="text-end text-secondary">{% trans %}My adress{% endtrans %}</h1>
+                <h2 class="text-end text-secondary">
+                    {% if app.request.attributes.get('_route') == "app_account_new_adress" %}
+                        {% trans %}Create adress{% endtrans %}
+                    {% else %}
+                        {% trans %}My adress{% endtrans %}
+                    {% endif %}
+                </h2>
 
                 {{ form_start(form, {attr: {class: 'row'}}) }}
                     <div class="col-12">

@@ -66,22 +66,15 @@
 
                     {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
                         <form method="POST" class="d-flex mx-auto justify-content-center">
-                            <select class="form-select" name="adressId" aria-label="Default select example">
+                            <select class="form-select" name="adressId" aria-label="" data-url="{{ path(app.request.attributes.get('_route'), { adressId: '__ID__' }) }}">
                                 {% for shippingAdress in app.user.shippingAdress %}
-                                    {% if app.request.request.get('adressId') %}
-                                        {% set adress = shippingAdress %}
-                                    {% endif %}
 
-                                    <option value="{{ shippingAdress.id }}" {% if app.request.request.get('adressId') == shippingAdress.id %}selected{% endif %}>
+                                    <option value="{{ shippingAdress.id }}" {% if adress == shippingAdress %}selected{% endif %}>
                                         {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
                                     </option>
                                     
                                 {% endfor %}
                             </select>
-
-                            <button type="submit" class="btn btn-secondary ms-2">
-                                {{ ux_icon('ic:round-send') }}
-                            </button>
                         </form>
                     {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
                         {% set adress = app.user.adress %}
@@ -184,6 +177,7 @@
 
     <ul class="list-unstyled p-3 mb-0" id="routeStepsList"></ul>
 </div>
+
 {# ── Données JSON injectées depuis PHP (coordonnées déjà en base) ── #}
 <script>
     window._mapData = {
@@ -216,6 +210,17 @@
             {% endfor %}
         ]
     };
+
+    var addressForm = document.querySelector("select[name='adressId']");
+
+    addressForm.addEventListener('change', function (event) {
+        const id = event.target.value;
+        console.log(event.target);
+
+        const url = event.currentTarget.dataset.url.replace('__ID__', id);
+
+        window.location.href = url;
+    })
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -224,6 +229,8 @@
 (function () {
     const data    = window._mapData;
     const markers = [];
+
+    console.log(data);
 
     // ── Product icon (inline SVG) ─────────────────────────────
     const productIcon = L.divIcon({
@@ -444,5 +451,18 @@
             map.invalidateSize();
         });
     }
+
+    collapseEl.addEventListener('shown.bs.collapse', function () {
+        map.invalidateSize();
+
+        if (clientLatLng && data.radiusKm !== null) {
+            const center = L.latLng(clientLatLng[0], clientLatLng[1]);
+            // toBounds(metres) calcule un rectangle englobant sans avoir besoin de la carte
+            const bounds = center.toBounds(data.radiusKm * 1000 * 2);
+            map.fitBounds(bounds, { padding: [20, 20] });
+        } else if (clientLatLng) {
+            map.setView(clientLatLng, 12);
+        }
+    });
 })();
 </script>

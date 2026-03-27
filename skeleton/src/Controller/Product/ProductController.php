@@ -16,14 +16,23 @@ use App\Entity\Product\Shelf;
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
-    #[Route('/shelf/{shelf}', name: 'app_shelf_product', defaults: ['shelf' => 'All', 'radius' => 20])]
-    public function index(?string $shelf, ProductRepository $productRepository, Request $request): Response
+    #[Route('/shelf/{shelf}/adress/{adressId}', name: 'app_shelf_product', defaults: ['shelf' => 'All', 'radius' => 20, 'adressId' => null])]
+    public function index(?string $shelf, ?int $adressId, ProductRepository $productRepository, Request $request): Response
     {
-        
-        $adress = $this->getAdress();
+        $user = $this->getUser();
+        $adress = $this->getUser()->getPostalAdress();
 
         $radius = $request->query->get('radius') ?? 20;
         if($adress) {
+            $adress = $user->getPostalAdress();
+            
+            if($user instanceof Client && $adressId) {
+                $foundAdress = $user->getAdressById($adressId);
+                if ($foundAdress) {
+                    $adress = $foundAdress;
+                }
+            }
+
             if($shelf === "All") {
                 $products = $productRepository->findWithinRadius($adress, $radius);
             } else {
@@ -36,11 +45,12 @@ final class ProductController extends AbstractController
                 $products = $productRepository->findByShelf($shelf);
             }
         }
-        
 
         return $this->render('product/product/index.html.twig', [
             'products' => $products,
-            'shelf' => $shelf
+            'shelf' => $shelf,
+            'adress' => $adress,
+            'radius' => (int) $radius
         ]);
     }
 

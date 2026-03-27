@@ -9,16 +9,27 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Repository\User\ProfessionalRepository;
 use App\Repository\Product\ProductRepository;
 use App\Entity\User\Professional;
+use App\Entity\User\Client;
 
 #[Route('/company')]
 final class CompanyController extends AbstractController
 {
-    #[Route('/', name: 'app_companies')]
-    public function index(ProductRepository $productRepository, Request $request): Response
+    #[Route('/adress/{adressId}', name: 'app_companies', defaults: ['adressId' => null])]
+    public function index(ProductRepository $productRepository, Request $request, ?int $adressId): Response
     {
         $radius = $request->query->get('radius') ?? 20;
-        if($this->getUser()) {
+        $user = $this->getUser();
+
+        if($user) {
             $adress = $this->getUser()->getPostalAdress();
+            
+            if($user instanceof Client && $adressId) {
+                $foundAdress = $user->getAdressById($adressId);
+                if ($foundAdress) {
+                    $adress = $foundAdress;
+                }
+            }
+
             if($adress) {
                 $products = $productRepository->findWithinRadius($adress, $radius);
             } else {
@@ -30,7 +41,8 @@ final class CompanyController extends AbstractController
 
         return $this->render('company/company/index.html.twig', [
             'products' => $products,
-            'radius' => $radius
+            'radius' => $radius,
+            'adress' => $adress
         ]);
     }
 
