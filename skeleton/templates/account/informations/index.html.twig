@@ -100,7 +100,7 @@
 {% endblock %}
 
 {% block user_details %}
-    <h3 class="text-center">
+    <h3 class="text-center text-primary">
         {{ user.cleanGender }} {{ user.firstName }} {{ user.lastName }}
     </h3>
 
@@ -109,9 +109,9 @@
     <p class=""><strong class="me-2">{% trans %}Phone{% endtrans %} :</strong>{{ user.phone ?: 'Not registered' }}</p>
 
     <div class="position-relative">
-        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
+        <p class="mb-0 mt-2 d-flex align-items-center justify-content-between border-bottom border-dark mb-0">
             <strong>{% trans %}Postal adress{% endtrans %}</strong>
-            <a href="{{ path('app_account_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+            <a href="{{ path('app_account_new_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:plus') }}</a>
         </p>
         {% if user.shippingAdress|length == 0 %}
             <p class="ms-2 text-muted">
@@ -120,10 +120,16 @@
         {% endif %}
 
         {% for adress in user.shippingAdress %}
-            <p class="ms-2">
-                {{ adress.street }}<br>
-                {{ adress.zipCode }} {{ adress.country }}
-            </p>
+            <div class="d-flex justify-content-between border-bottom align-items-start mb-2">
+                <p class="p-2">
+                    {{ adress.street }}<br>
+                    {{ adress.zipCode }} {{ adress.country }}
+                </p>
+                <div class=" d-flex">
+                    <a href="{{ path('app_account_adress', {adress: adress.id}) }}" class="nav-link">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+                    <a href="{{ path('app_account_remove_adress', {adress: adress.id}) }}" class="nav-link text-danger">{{ ux_icon('line-md:trash') }}</a>
+                </div>
+            </div>
         {% endfor %}
     </div>
 {% endblock %}
@@ -153,7 +159,7 @@
     <div class="position-relative">
         <p class="mb-0 mt-2 d-flex align-items-center justify-content-between">
             <strong>{% trans %}Postale adress{% endtrans %}</strong>
-            <a href="{{ path('app_account_adress') }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
+            <a href="{{ path('app_account_adress', {adress: user.adress.id}) }}" class="nav-link w-auto">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
         </p>
         {% if user.adress %}
             <p class="ms-2">

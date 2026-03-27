@@ -13,11 +13,11 @@
         },
         {
             label: 'My adress',
-            route: 'app_account_adress',
-            parameters: []
+            route: app.request.attributes.get('_route'),
+            parameters: {adress: form.vars.data.id}
         }
     ] %}
-
+    
     {{ parent() }}
 {% endblock %}
 

@@ -21,7 +21,7 @@ use App\Repository\User\OrderRepository;
 #[Route('/account')]
 final class InformationsController extends AbstractController
 {
-    public function __construct(private StripeService $stripeService) {}
+    public function __construct(private StripeService $stripeService, private EntityManagerInterface $entityManager) {}
     
     #[Route('/', name: 'app_account_informations')]
     public function index(OrderRepository $orderRepository): Response
@@ -40,7 +40,7 @@ final class InformationsController extends AbstractController
     }
 
     #[Route('/update', name: 'app_account_update')]
-    public function UpdateInformations(Request $request, EntityManagerInterface $entityManager)
+    public function UpdateInformations(Request $request)
     {
         $user = $this->getUser();
         $proClass = Professional::class;
@@ -53,8 +53,8 @@ final class InformationsController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             $this->addFlash('success', 'Your account is updated.');
 
@@ -66,14 +66,35 @@ final class InformationsController extends AbstractController
         ]);
     }
 
-    #[Route('/adress', name: 'app_account_adress')]
-    public function updateAdress(EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('/adress/update/{adress}', name: 'app_account_adress')]
+    public function updateAdress(EntityManagerInterface $entityManager, Request $request, Adress $adress): Response
+    {
+        return $this->adressForm($adress, $request);
+    }
+
+    #[Route('/adress/new', name: 'app_account_new_adress')]
+    public function addAdress(Request $request): Response
     {
         $adress = new Adress();
-        if($this->getUser()->getAdress()) {
-            $adress = $this->getUser()->getAdress();
-        }
 
+        $adress->setUser($this->getUser());
+
+        return $this->adressForm($adress, $request);
+    }
+
+    #[Route('/adress/delete/{adress}', name: 'app_account_remove_adress')]
+    public function removeAdress(Adress $adress): Response
+    {
+        $this->entityManager->remove($adress);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Postal adress deleted from account');
+        
+        return $this->redirectToRoute('app_account_informations');
+    }
+
+    private function adressForm(Adress $adress, Request $request): Response
+    {
         $form = $this->createForm(AdressType::class, $adress);
 
         $form->handleRequest($request);
@@ -81,8 +102,8 @@ final class InformationsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $adress = $form->getData();
 
-            $entityManager->persist($adress);
-            $entityManager->flush();
+            $this->entityManager->persist($adress);
+            $this->entityManager->flush();
 
             $this->addFlash('info', 'Postal adress updated.');
         }
