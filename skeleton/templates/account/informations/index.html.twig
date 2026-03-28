@@ -40,9 +40,9 @@
                 {% if is_granted('ROLE_SELLER') %}
                     <div class="position-relative">
                         <h3 class="lined mb-0 mt-2 flex-row-reverse justify-content-between">
-                            <a href="{{ path('app_merchant_schedule') }}" class="btn btn-light">{{ ux_icon('line-md:pencil-alt-twotone') }}</a>
                             {% trans %}Schedules{% endtrans %}
                         </h3>
+                        <p class="text-end"><a href="{{ path('app_merchant_schedule') }}" class="btn btn-outline-primary btn-sm">{{ ux_icon('line-md:pencil-alt-twotone') }}</a></p>
                         {% if user.openingSchedule %}
                             {{ block('pro_schedules') }}
                         {% else %}
@@ -181,9 +181,9 @@
         </h3>
         {% if is_granted('ROLE_SELLER') %}
             <p class="text-end">
-                <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_create') }}">{% trans %}Create{% endtrans %}</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_merchant_product_create') }}">{% trans %}Create{% endtrans %}</a>
                 {% if user.products|length > 0 %}
-                    <a class="link-offset-2 fw-bold link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
+                    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_merchant_stocks') }}">{% trans %}My stocks{% endtrans %}</a>
                 {% endif %}
             </p>
         {% endif %}

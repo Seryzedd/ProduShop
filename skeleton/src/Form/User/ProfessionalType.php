@@ -47,6 +47,8 @@ class ProfessionalType extends AbstractType
                 ]
             ])
             ->add('description', TextareaType::class, [
+                'required' => false,
+                'empty_data' => '',
                 'attr' => [
                     'rows' => 6,
                     'placeholder' => 'Introduce your company with 160 characters maximum',
