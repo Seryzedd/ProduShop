@@ -35,6 +35,8 @@ function addImgEvent(input) {
             const existingImg = previewContainer.querySelector('img');
             if (existingImg) {
                 existingImg.replaceWith(img);
+                existingImg.style.display = 'unset';
+
             } else {
                 previewContainer.prepend(img);
             }
@@ -91,6 +93,11 @@ var addImgLabel = function() {
 function createImg(src) {
     const img = document.createElement('img');
     img.src = src;
+
+    if (src.length === 0) {
+        img.style.display = 'none';
+    }
+
     img.classList.add('img-thumbnail', 'mt-2', 'me-2');
     img.style.maxWidth = '100px';
 

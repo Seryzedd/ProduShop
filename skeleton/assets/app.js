@@ -6,6 +6,8 @@
  */
 import $ from 'jquery';
 
+import { addImgEvent,  addimgEvents, addImgLabel} from './script/imageEvent.js';
+
 import 'bootstrap';
 import * as bootstrap from 'bootstrap';
 

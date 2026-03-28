@@ -226,243 +226,243 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
-(function () {
-    const data    = window._mapData;
-    const markers = [];
+    (function () {
+        const data    = window._mapData;
+        const markers = [];
 
-    console.log(data);
+        console.log(data);
 
-    // ── Product icon (inline SVG) ─────────────────────────────
-    const productIcon = L.divIcon({
-        className: '',
-        html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-                 <path d="M14 0C6.27 0 0 6.27 0 14c0 9.625 14 22 14 22S28 23.625 28 14C28 6.27 21.73 0 14 0z"
-                       fill="#212529" stroke="#0d6efd" stroke-width="2"/>
-                 <circle cx="14" cy="14" r="5" fill="#0d6efd"/>
-               </svg>`,
-        iconSize:   [28, 36],
-        iconAnchor: [14, 36],
-        popupAnchor:[0, -38],
-    });
-
-    // ── Client icon (pulsing dot) ─────────────────────────────
-    const clientIcon = L.divIcon({
-        className: '',
-        html: `<div class="user-marker-dot"></div>`,
-        iconSize:   [16, 16],
-        iconAnchor: [8, 8],
-        popupAnchor:[0, -12],
-    });
-
-    // ── Map initialisation — synchronous, no network call ────────
-    // Declared at IIFE scope so drawRoute() and mapFocusMarker() can access it
-    const clientLatLng = data.client.lat !== null
-        ? [data.client.lat, data.client.lng]
-        : null;
-
-    let routingControl = null; // holds the active route, replaced on each click
-
-    const map = L.map('map').setView(
-        clientLatLng ?? [46.603354, 1.888334],
-        clientLatLng ? 12 : 6
-    );
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom:     19,
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-
-    // ── Client marker + radius circle ─────────────────────────
-    if (clientLatLng) {
-        L.marker(clientLatLng, { icon: clientIcon })
-            .addTo(map)
-            .bindPopup('<strong>' + "{{ 'Calculating'|trans }}" + '...</strong>');
-
-        if (data.radiusKm !== null) {
-            const circle = L.circle(clientLatLng, {
-                radius:      data.radiusKm * 1000,
-                color:       '#a3c8ff',
-                fillColor:   '#84b5ff',
-                fillOpacity: 0.05,
-                weight:      2,
-            }).addTo(map);
-
-            // Auto-zoom: fit the map to the circle's bounding box
-            map.fitBounds(circle.getBounds(), { padding: [20, 20] });
-        }
-    }
-
-    // ── Product markers ───────────────────────────────────────
-    data.products.forEach((p, i) => {
-        const latlng = [p.lat, p.lng];
-
-        const marker = L.marker(latlng, { icon: productIcon })
-            .addTo(map)
-            .bindPopup(buildPopup(p));
-
-        marker.on('click', () => {
-            setActive(i);
-            drawRoute(marker.getLatLng());
+        // ── Product icon (inline SVG) ─────────────────────────────
+        const productIcon = L.divIcon({
+            className: '',
+            html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+                    <path d="M14 0C6.27 0 0 6.27 0 14c0 9.625 14 22 14 22S28 23.625 28 14C28 6.27 21.73 0 14 0z"
+                        fill="#212529" stroke="#0d6efd" stroke-width="2"/>
+                    <circle cx="14" cy="14" r="5" fill="#0d6efd"/>
+                </svg>`,
+            iconSize:   [28, 36],
+            iconAnchor: [14, 36],
+            popupAnchor:[0, -38],
         });
-        markers.push(marker);
-    });
 
-    console.log(clientLatLng)
-    if (clientLatLng && markers.length === 1) {
-        drawRoute(markers[0].getLatLng());
-    }
+        // ── Client icon (pulsing dot) ─────────────────────────────
+        const clientIcon = L.divIcon({
+            className: '',
+            html: `<div class="user-marker-dot"></div>`,
+            iconSize:   [16, 16],
+            iconAnchor: [8, 8],
+            popupAnchor:[0, -12],
+        });
 
-    // ── Popup content ─────────────────────────────────────────
-    function buildPopup(p) {
-        return `
-            <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
-                <a href="${p.companyLink}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover fw-semibold">${esc(p.company)}</a>
-                <p class="mb-0">${p.phone}</p>
-                <hr class="my-2">
-                <p class="mb-0 text-muted small">
-                    <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
-                </p>
-            </div>`;
-    }
+        // ── Map initialisation — synchronous, no network call ────────
+        // Declared at IIFE scope so drawRoute() and mapFocusMarker() can access it
+        const clientLatLng = data.client.lat !== null
+            ? [data.client.lat, data.client.lng]
+            : null;
 
-    // ── Focus from sidebar → map + draw route ────────────────
-    window.mapFocusMarker = function (index) {
-        const marker = markers[index];
-        if (!marker) return;
-        map.setView(marker.getLatLng(), 14, { animate: true });
-        marker.openPopup();
-        setActive(index);
-        drawRoute(marker.getLatLng());
-    };
+        let routingControl = null; // holds the active route, replaced on each click
 
-    // ── Routing via OSRM (free, no API key) ───────────────────
-    function drawRoute(destination) {
-        if (!clientLatLng) return;
+        const map = L.map('map').setView(
+            clientLatLng ?? [46.603354, 1.888334],
+            clientLatLng ? 12 : 6
+        );
 
-        // Remove the previous route if any
-        if (routingControl) {
-            map.removeControl(routingControl);
-            routingControl = null;
-        }
-
-        // Reset the custom panel to loading state
-        document.getElementById('routeSummary').innerHTML =
-            '<span class="text-muted">' + "{{ 'Calculating'|trans }}" + '...</span>';
-        document.getElementById('routeStepsList').innerHTML = '';
-
-        routingControl = L.Routing.control({
-            waypoints: [
-                L.latLng(clientLatLng[0], clientLatLng[1]),
-                destination,
-            ],
-            language:           data.locale,  // translate steps to the active locale
-            routeWhileDragging: false,
-            addWaypoints:       false,
-            draggableWaypoints: false,
-            fitSelectedRoutes:  true,
-            show:               false,   // always hide the default LRM panel
-            lineOptions: {
-                styles: [{ color: '#0d6efd', weight: 4, opacity: 0.8 }],
-                extendToWaypoints:     true,
-                missingRouteTolerance: 0,
-            },
-            createMarker: () => null,
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom:     19,
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(map);
 
-        // When the route is computed, populate our custom panel
-        routingControl.on('routesfound', function (e) {
-            const route    = e.routes[0];
-            const totalKm  = (route.summary.totalDistance / 1000).toFixed(1);
-            const totalMin = Math.round(route.summary.totalTime / 60);
-            const hours    = Math.floor(totalMin / 60);
-            const mins     = totalMin % 60;
-            const duration = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
+        // ── Client marker + radius circle ─────────────────────────
+        if (clientLatLng) {
+            L.marker(clientLatLng, { icon: clientIcon })
+                .addTo(map)
+                .bindPopup('<strong>' + "{{ 'Calculating'|trans }}" + '...</strong>');
 
-            // Summary bar
-            document.getElementById('routeSummary').innerHTML = `
-                <div class="d-flex gap-3">
-                    <span><i class="bi bi-sign-turn-right-fill text-primary me-1"></i>
-                        <strong>${totalKm} km</strong>
-                    </span>
-                    <span><i class="bi bi-clock-fill text-primary me-1"></i>
-                        <strong>${duration}</strong>
-                    </span>
-                </div>`;
+            if (data.radiusKm !== null) {
+                const circle = L.circle(clientLatLng, {
+                    radius:      data.radiusKm * 1000,
+                    color:       '#a3c8ff',
+                    fillColor:   '#84b5ff',
+                    fillOpacity: 0.05,
+                    weight:      2,
+                }).addTo(map);
 
-            // Step-by-step list
-            const ul = document.getElementById('routeStepsList');
-            ul.innerHTML = '';
-            route.instructions.forEach(step => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <i class="bi bi-arrow-right-circle step-icon"></i>
-                    <span>${esc(step.text)}
-                        ${step.distance > 0
-                            ? `<span class="text-muted ms-1">(${(step.distance).toFixed(0)} m)</span>`
-                            : ''}
-                    </span>`;
-                ul.appendChild(li);
-            });
-
-            // Show the toggle button and open the panel automatically
-            document.getElementById('routeToggleBtn').classList.remove('d-none');
-            document.getElementById('routeOffcanvas').classList.add('show');
-
-            const start = L.latLng(clientLatLng[0], clientLatLng[1]);
-            console.log(start.distanceTo(destination));
-            if (start.distanceTo(destination) < 50) {
-                
-                map.setView(clientLatLng, 15);
-                document.getElementById('routeOffcanvas').classList.remove('show');
-                document.getElementById('routeToggleBtn').classList.add('d-none');
+                // Auto-zoom: fit the map to the circle's bounding box
+                map.fitBounds(circle.getBounds(), { padding: [20, 20] });
             }
-        });
-    }
+        }
 
-    function setActive(index) {
-        document.querySelectorAll('.map-product-card')
-            .forEach(c => c.classList.remove('bg-primary-subtle'));
-        document.querySelector(`.map-product-card[data-index="${index}"]`)
-            ?.classList.add('bg-primary-subtle');
-    }
+        // ── Product markers ───────────────────────────────────────
+        data.products.forEach((p, i) => {
+            const latlng = [p.lat, p.lng];
 
-    // ── Search filter ─────────────────────────────────────────
-    const searchInput = document.getElementById('mapSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('.map-product-card').forEach(card => {
-                card.style.display =
-                    card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
+            const marker = L.marker(latlng, { icon: productIcon })
+                .addTo(map)
+                .bindPopup(buildPopup(p));
+
+            marker.on('click', () => {
+                setActive(i);
+                drawRoute(marker.getLatLng());
             });
+            markers.push(marker);
         });
-    }
 
-    function esc(s) {
-        return String(s ?? '')
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+        console.log(clientLatLng)
+        if (clientLatLng && markers.length === 1) {
+            drawRoute(markers[0].getLatLng());
+        }
 
-    // ── Fix Leaflet dans un Bootstrap Collapse ────────────────
-    const collapseEl = document.getElementById('map')?.closest('.collapse');
-    if (collapseEl) {
+        // ── Popup content ─────────────────────────────────────────
+        function buildPopup(p) {
+            return `
+                <div style="min-width:180px;font-family:var(--bs-body-font-family,sans-serif)">
+                    <a href="${p.companyLink}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover fw-semibold">${esc(p.company)}</a>
+                    <p class="mb-0">${p.phone}</p>
+                    <hr class="my-2">
+                    <p class="mb-0 text-muted small">
+                        <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
+                    </p>
+                </div>`;
+        }
+
+        // ── Focus from sidebar → map + draw route ────────────────
+        window.mapFocusMarker = function (index) {
+            const marker = markers[index];
+            if (!marker) return;
+            map.setView(marker.getLatLng(), 14, { animate: true });
+            marker.openPopup();
+            setActive(index);
+            drawRoute(marker.getLatLng());
+        };
+
+        // ── Routing via OSRM (free, no API key) ───────────────────
+        function drawRoute(destination) {
+            if (!clientLatLng) return;
+
+            // Remove the previous route if any
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+
+            // Reset the custom panel to loading state
+            document.getElementById('routeSummary').innerHTML =
+                '<span class="text-muted">' + "{{ 'Calculating'|trans }}" + '...</span>';
+            document.getElementById('routeStepsList').innerHTML = '';
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(clientLatLng[0], clientLatLng[1]),
+                    destination,
+                ],
+                language:           data.locale,  // translate steps to the active locale
+                routeWhileDragging: false,
+                addWaypoints:       false,
+                draggableWaypoints: false,
+                fitSelectedRoutes:  true,
+                show:               false,   // always hide the default LRM panel
+                lineOptions: {
+                    styles: [{ color: '#0d6efd', weight: 4, opacity: 0.8 }],
+                    extendToWaypoints:     true,
+                    missingRouteTolerance: 0,
+                },
+                createMarker: () => null,
+            }).addTo(map);
+
+            // When the route is computed, populate our custom panel
+            routingControl.on('routesfound', function (e) {
+                const route    = e.routes[0];
+                const totalKm  = (route.summary.totalDistance / 1000).toFixed(1);
+                const totalMin = Math.round(route.summary.totalTime / 60);
+                const hours    = Math.floor(totalMin / 60);
+                const mins     = totalMin % 60;
+                const duration = hours > 0 ? `${hours}h ${mins}min` : `${mins} min`;
+
+                // Summary bar
+                document.getElementById('routeSummary').innerHTML = `
+                    <div class="d-flex gap-3">
+                        <span><i class="bi bi-sign-turn-right-fill text-primary me-1"></i>
+                            <strong>${totalKm} km</strong>
+                        </span>
+                        <span><i class="bi bi-clock-fill text-primary me-1"></i>
+                            <strong>${duration}</strong>
+                        </span>
+                    </div>`;
+
+                // Step-by-step list
+                const ul = document.getElementById('routeStepsList');
+                ul.innerHTML = '';
+                route.instructions.forEach(step => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <i class="bi bi-arrow-right-circle step-icon"></i>
+                        <span>${esc(step.text)}
+                            ${step.distance > 0
+                                ? `<span class="text-muted ms-1">(${(step.distance).toFixed(0)} m)</span>`
+                                : ''}
+                        </span>`;
+                    ul.appendChild(li);
+                });
+
+                // Show the toggle button and open the panel automatically
+                document.getElementById('routeToggleBtn').classList.remove('d-none');
+                document.getElementById('routeOffcanvas').classList.add('show');
+
+                const start = L.latLng(clientLatLng[0], clientLatLng[1]);
+                console.log(start.distanceTo(destination));
+                if (start.distanceTo(destination) < 50) {
+                    
+                    map.setView(clientLatLng, 15);
+                    document.getElementById('routeOffcanvas').classList.remove('show');
+                    document.getElementById('routeToggleBtn').classList.add('d-none');
+                }
+            });
+        }
+
+        function setActive(index) {
+            document.querySelectorAll('.map-product-card')
+                .forEach(c => c.classList.remove('bg-primary-subtle'));
+            document.querySelector(`.map-product-card[data-index="${index}"]`)
+                ?.classList.add('bg-primary-subtle');
+        }
+
+        // ── Search filter ─────────────────────────────────────────
+        const searchInput = document.getElementById('mapSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const q = this.value.toLowerCase();
+                document.querySelectorAll('.map-product-card').forEach(card => {
+                    card.style.display =
+                        card.dataset.name.includes(q) || card.dataset.company.includes(q) ? '' : 'none';
+                });
+            });
+        }
+
+        function esc(s) {
+            return String(s ?? '')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── Fix Leaflet dans un Bootstrap Collapse ────────────────
+        const collapseEl = document.getElementById('map')?.closest('.collapse');
+        if (collapseEl) {
+            collapseEl.addEventListener('shown.bs.collapse', function () {
+                map.invalidateSize();
+            });
+        }
+
         collapseEl.addEventListener('shown.bs.collapse', function () {
             map.invalidateSize();
+
+            if (clientLatLng && data.radiusKm !== null) {
+                const center = L.latLng(clientLatLng[0], clientLatLng[1]);
+                // toBounds(metres) calcule un rectangle englobant sans avoir besoin de la carte
+                const bounds = center.toBounds(data.radiusKm * 1000 * 2);
+                map.fitBounds(bounds, { padding: [20, 20] });
+            } else if (clientLatLng) {
+                map.setView(clientLatLng, 12);
+            }
         });
-    }
-
-    collapseEl.addEventListener('shown.bs.collapse', function () {
-        map.invalidateSize();
-
-        if (clientLatLng && data.radiusKm !== null) {
-            const center = L.latLng(clientLatLng[0], clientLatLng[1]);
-            // toBounds(metres) calcule un rectangle englobant sans avoir besoin de la carte
-            const bounds = center.toBounds(data.radiusKm * 1000 * 2);
-            map.fitBounds(bounds, { padding: [20, 20] });
-        } else if (clientLatLng) {
-            map.setView(clientLatLng, 12);
-        }
-    });
-})();
+    })();
 </script>

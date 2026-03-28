@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}
+    {% trans %}Register{% endtrans %}
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -117,6 +119,7 @@
 {% endblock %}
 
 {% block professional %}
+    {{ form_row(registrationForm.professional.logo) }}
     {{ form_row(registrationForm.professional.name) }}
 
     {{ form_label(registrationForm.professional.siret) }}

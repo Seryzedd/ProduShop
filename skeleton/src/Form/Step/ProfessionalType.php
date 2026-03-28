@@ -8,6 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\User\AdressType;
 use App\DTO\User\ProfessionalUser;
+use App\Form\ImageType;
 
 class ProfessionalType extends AbstractType
 {
@@ -28,6 +29,7 @@ class ProfessionalType extends AbstractType
                 'help' => 'Siret of company are numbers only',
                 'empty_data' => ''
             ])
+            ->add('logo', ImageType::class, [])
         ;
     }
 

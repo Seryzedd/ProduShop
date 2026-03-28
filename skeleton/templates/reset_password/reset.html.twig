@@ -10,11 +10,28 @@
 
 {% block breadcrumb %}{% endblock %}
 
-{% block body %}
-    <h1>{% trans %}Reset your password{% endtrans %}</h1>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}
 
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">{% trans %}Reset password{% endtrans %}</button>
-    {{ form_end(resetForm) }}
+{% block body %}
+    <main class="row w-100 h-100 p-3 bg-light mx-auto align-items-center justify-content-center">
+        <div class="col-lg-6 card p-3 text-center">
+            <a href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
+
+            <h1>{% trans %}Reset your password{% endtrans %}</h1>
+
+            {{ form_start(resetForm) }}
+                {{ form_row(resetForm.plainPassword) }}
+                <button class="btn btn-primary">{% trans %}Reset password{% endtrans %}</button>
+            {{ form_end(resetForm) }}
+        </div>
+    </main>
 {% endblock %}
