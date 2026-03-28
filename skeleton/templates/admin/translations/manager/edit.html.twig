@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block body %}
-    <main class="container">
+    <main class="container p-4">
         <div class="row align-items-center">
             <h1 class="col-sm-10">
                 {% trans with {'%lang%': locale|language} %}Translations in %lang%{% endtrans %}
@@ -39,37 +39,86 @@
             </div>
         </div>
 
-        {% include 'components/filters/filter_by_input_val.html.twig' with {'value': 'translations'|trans, 'container': 'form[name="all_translations"]'} %}
+        {% include 'components/filters/filter_by_input_val.html.twig' with {'value': 'translations'|trans, 'container': '.translations-form'} %}
 
-        {{ form_start(form) }}
-            <div class="d-flex align-items-start">
-                <div class="nav flex-column nav-pills sticky-top" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    {% for data in form.languages.vars.data %}
-                        <a href="#{{ data.provider }}" class="btn btn-light rounded-start rounded-end-0{% if loop.first %} active{% endif %}" id="v-pills-{{ data.provider }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ data.provider }}" aria-controls="v-pills-{{ data.provider }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ data.provider }}</a>
-                    {% endfor %}
-                </div>
-                <div class="tab-content bg-light w-100 card rounded-end rounded-start-0 p-3" id="v-pills-tabContent">
-                    {% for file in form.languages.children %}
-                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="v-pills-{{ file.vars.data.provider }}" role="tabpanel" aria-labelledby="v-pills-{{ file.vars.data.provider }}-tab" tabindex="{{ loop.index }}">
-                            
-                            {{ block('provider_translations') }}
-                        </div>
-                    {% endfor %}
-                </div>
+        <ul class="nav nav-tabs justify-content-end" role="tablist">
+            {% for provider in languages.providers %}
+                <li class="nav-item">
+                    <button class="nav-link{% if loop.first %} active{% endif %}" id="{{ provider }}-tab" data-bs-toggle="tab" data-bs-target="#{{ provider }}-tab-pane" type="button" role="tab" aria-controls="{{ provider }}-tab-pane" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ provider }}</button>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% set prototypeHtml = form_widget(prototypeForm.translations.vars.prototype) %}
+        <form method="POST" action="" class="translations-form">
+            <div class="tab-content" id="pills-tabContent">
+                {% for languageFile in languages.languages %}
+                    <div role="tabpanel" class="tab-pane border-end border-start border-bottom p-4 fade{% if loop.first %} show active{% endif %}" id="{{ languageFile.provider }}-tab-pane" role="tabpanel" aria-labelledby="{{ languageFile.provider }}-tab" tabindex="{{ loop.index }}">
+                        
+                        <h5 class="text-secondary">{{ languageFile.filename }}</h5>
+
+                        <ul class="list-group list-group-flush {{ languageFile.provider }}-collection"
+                            data-index="{{ languageFile.translations|length }}"
+                            data-filename="{{ languageFile.filename }}"
+                            data-collection-holder-class="{{ languageFile.provider }}-collection"
+                            data-prototype="
+                                <div class=&quot;row align-items-start mt-2&quot;>
+                                    <div class=&quot;col-lg-6&quot;>
+                                        <label>{{ 'Translation key'|trans }}</label>
+                                        <input type=&quot;text&quot; class=&quot;form-control mb-2 mb-lg-0&quot; name=&quot;translations[{{ languageFile.filename }}][__name__][translationKey]&quot; placeholder=&quot;{{ 'New key'|trans }}&quot;>
+                                    </div>
+                                    <div class=&quot;col-lg-6&quot;>
+                                        <label>{{ 'Translation value'|trans }}</label>
+                                        <input type=&quot;text&quot; class=&quot;form-control&quot; name=&quot;translations[{{ languageFile.filename }}][__name__][translationValue]&quot; placeholder=&quot;{{ 'Translated value'|trans }}&quot;>
+                                    </div>
+                                </div>
+                            "
+                        >
+                            {% for translation in languageFile.translations %}
+                                <li class="list-group-item">
+                                    <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash position-absolute top-0 end-0 p-2 rounded-start-0"></button>
+                                    <div class="row align-items-start mt-2">
+                                        <div class="col-lg-6">
+                                            <label for="translation_key_{{ loop.index }}">{% trans %}Translation key{% endtrans %}</label>
+                                            <input type="text"
+                                                id="translation_key_{{ loop.index }}"
+                                                class="form-control mb-2 mb-lg-0 disabled"
+                                                value="{{ translation.translationKey }}"
+                                                readonly
+                                            >
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <label for="translation_value_{{ loop.index }}">{% trans %}Translation value{% endtrans %}</label>
+                                            <input type="text"
+                                                id="translation_value_{{ loop.index }}"
+                                                class="form-control"
+                                                name="translations[{{ languageFile.filename }}][{{ translation.translationKey }}]"
+                                                value="{{ translation.translationValue }}"
+                                            >
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <p class="text-end">
+                            <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ languageFile.provider }}-collection">
+                                {% trans %}Add new{% endtrans %}
+                                {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+                            </button>
+                        </p>
+                    </div>
+                {% endfor %}
+
+                <input type="hidden" name="_token" value="{{ csrf_token('translations_edit') }}">
             </div>
-
-            <div class="text-end py-4">
-                <button class="btn btn-primary" type="submit">
-                    {% trans %}Validate{% endtrans %}
-                </button>
-            </div>
-
-        {{ form_end(form) }}
-    <main>
-{% endblock %}
-
-{% block provider_translations %}
-    {% include 'form/collectionType.html.twig' with {'collection': file.translations} %}
+            
+            <button type="submit" class="btn btn-primary mt-2">
+                {% trans %}Save{% endtrans %}
+            </button>
+        </form>
+    </main>
 {% endblock %}
 
 {% block javascripts %}

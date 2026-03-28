@@ -17,4 +17,15 @@ class TranslationsDTO
 
         return $this;
     }
+
+    public function getProviders()
+    {
+        $providers = [];
+
+        foreach($this->languages as $language) {
+            $providers[] = $language->getProvider();
+        }
+
+        return $providers;
+    }
 }

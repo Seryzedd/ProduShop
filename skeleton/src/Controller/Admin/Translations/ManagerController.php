@@ -9,7 +9,7 @@ use App\Service\Translation\TranslationFileReader;
 use App\DTO\Translations\TranslationFileDTO;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\HttpFoundation\Request;
-use App\Form\Translation\AllTranslationsType;
+use App\Form\Translation\PrototypeType;
 use App\Service\CommandRunner;
 use App\Service\Translation\Languages;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -69,35 +69,52 @@ final class ManagerController extends AbstractController
         } else {
             $languages = $translationFileReader->getFilesByLocale($locale);
         }
-        
-        $form = $this->createForm(AllTranslationsType::class, $languages);
 
-        $form->handleRequest($request);
+        $prototypeForm = $this->createForm(PrototypeType::class);
         
-        if ($form->isSubmitted() && $form->isValid()) { 
-            
-            $files = $form->getData();
+        if ($request->getMethod() === "POST") {
+            $data = $request->request->all('translations');
+            // $data = ['messages.fr.yml' => ['key' => 'value', ...], ...]
 
-            foreach($files->getLanguages() as $file) {
+            foreach ($data as $file => $entries) {
                 try {
-                    $filename = $file->getFilename();
+                    $translations = [];
 
-                    $translations = $file->getTranslationsToArray();
+                    foreach ($entries as $key => $value) {
+                        if (is_array($value)) {
+                            // Nouvelle entrée ajoutée via le prototype JS
+                            // Structure : ['translationKey' => '...', 'translationValue' => '...']
+                            $translationKey   = trim($value['translationKey'] ?? '');
+                            $translationValue = $value['translationValue'] ?? '';
 
-                    $translationFileReader->updateFile($filename, $translations);
+                            if ($translationKey !== '') {
+                                $translations[$translationKey] = $translationValue;
+                            }
+                        } else {
+                            // Entrée existante — structure plate : 'ma.cle' => 'valeur'
+                            $translations[$key] = $value;
+                        }
+                    }
 
-                    $this->addFlash('success', new TranslatableMessage('Translation file "%filename%" updated successfully.', ['%filename%' => $filename]));
+                    $translationFileReader->updateFile($file, $translations);
+
+                    $this->addFlash('success', new TranslatableMessage(
+                        'Translation file "%filename%" updated successfully.',
+                        ['%filename%' => $file]
+                    ));
                 } catch (\Exception $e) {
                     $this->addFlash('danger', $e->getMessage());
                 }
             }
+
+            return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
         }
 
         return $this->render('admin/translations/manager/edit.html.twig', [
             'languages' => $languages,
             'locale' => $locale,
-            'form' => $form,
             'filename' => $filename,
+            'prototypeForm' => $prototypeForm,
         ]);
     }
 
