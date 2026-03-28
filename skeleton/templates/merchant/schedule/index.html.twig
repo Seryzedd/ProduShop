@@ -26,10 +26,31 @@
         <h1>{% trans %}Schedules{% endtrans %}</h1>
 
         {{ form_start(form) }}
-            {% include 'form/collectionType.html.twig' with {'collection': form.scheduleDays} %}
+            <ul class="list-group">
+                {% for day in form.scheduleDays %}
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h4 class="text-primary">{{ day.vars.data.dayName }}</h4>
+                            </div>
+                            <div class="col-md-8">
+                                {% include 'form/collectionType.html.twig' with {'collection': day.hours} %}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            
             <button class="btn btn-primary" type="submit">
                 {% trans %}Save{% endtrans %}
             </button>
         {{ form_end(form) }}
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+    <script src="{{ asset('script/deleteInputValue.js') }}"></script>
+    <script src="{{ asset('script/filters.js') }}"></script>
 {% endblock %}

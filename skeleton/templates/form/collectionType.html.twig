@@ -1,7 +1,4 @@
-<h4 class="mb-2 text-muted">
-    {{ collection.vars.name|capitalize }}
-</h4>
-
+{{ form_label(collection) }}
 <ul class="{{ collection.vars.name }}-collection list-group list-group"
     {% if collection.vars.prototype is defined %}
         data-prototype="{{ form_widget(collection.vars.prototype)|e('html_attr') }}"

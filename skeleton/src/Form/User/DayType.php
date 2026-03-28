@@ -28,7 +28,9 @@ class DayType extends AbstractType
 
             $form->add('hours', CollectionType::class, [
                 'entry_type' => HoursType::class,
-                'label' => $label,
+                'label' => false,
+                'allow_add' => true,
+                'allow_delete' => true,
                 'label_attr' => ['class' => 'fw-bold text-primary'],
                 'by_reference' => false,
                 'constraints' => [new Valid()]
