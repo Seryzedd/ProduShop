@@ -4,6 +4,21 @@
     {% trans %}Admin payments list{% endtrans %}
 {% endblock %}
 
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard'|trans,
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Payments'|trans,
+            route: 'app_admin_payments'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
     <main class="container">
 

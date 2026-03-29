@@ -4,6 +4,26 @@
     {% trans %}Admin payment{% endtrans %}
 {% endblock %}
 
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard'|trans,
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Payments'|trans,
+            route: 'app_admin_payments'
+        },
+        {
+            label: 'Payment "%date%"'|trans({'%date%': payment.createdAt|date('d/m/Y H:i')}),
+            route: 'app_admin_payment',
+            parameters: {id: payment.id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
 {% block body %}
     <main class="container">
 
@@ -60,6 +80,5 @@
                 </a>
             {% endfor %}
         </div>
-        
     </main>
 {% endblock %}

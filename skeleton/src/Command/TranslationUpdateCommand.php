@@ -20,11 +20,11 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Extractor\ExtractorInterface;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
-use Symfony\Component\Translation\Writer\TranslationWriterInterface;
+use App\Service\Translation\TranslationFileReader;
 
 #[AsCommand(
     name: 'app:translation:update',
-    description: 'Add a short description for your command',
+    description: 'Retrieve translations and update translations files',
 )]
 class TranslationUpdateCommand extends Command
 {
@@ -34,7 +34,7 @@ class TranslationUpdateCommand extends Command
         private readonly KernelInterface $kernel,
         private readonly ExtractorInterface $extractor,
         private readonly TranslationReaderInterface $reader,
-        private readonly TranslationWriterInterface $writer
+        private readonly TranslationFileReader $translationFileReader
     )
     {
         parent::__construct();
@@ -186,10 +186,33 @@ class TranslationUpdateCommand extends Command
         * 6. Write one file per domain
         * ============================= */
 
-        $this->writer->write($existingCatalogue, 'yml', [
-            'path' => $this->translationPath,
-            'default_locale' => $locale,
-        ]);
+        // show messages ------------
+        foreach ($domains as $domain) {
+            foreach ($existingCatalogue->all($domain) as $id => $message) {
+                if ($id === $message) {
+                    $output->writeln("<comment>Non traduit : [$domain] $id</comment>");
+                }
+            }
+        }
+
+        foreach ($domains as $domain) {
+            $filename = $domain . '.' . $locale . '.yml';
+            $messages = $existingCatalogue->all($domain);
+
+            // Supprimer le placeholder
+            unset($messages['__placeholder__']);
+
+            if (!empty($messages)) {
+                $path = $this->translationPath . '/' . $filename;
+
+                // Crée le fichier s'il n'existe pas
+                if (!file_exists($path)) {
+                    touch($path);
+                }
+
+                $this->translationFileReader->updateFile($filename, $messages);
+            }
+        }
 
         $io->success('Sync completed for locale: ' . $locale);
 

@@ -6,10 +6,15 @@ use Twig\Extension\RuntimeExtensionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\DTO\Breadcrumb\Link;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class BreadcrumbRuntime implements RuntimeExtensionInterface
 {
-    public function __construct(protected RequestStack $requestStack, protected UrlGeneratorInterface $urlGenerator)
+    public function __construct(
+        protected RequestStack $requestStack,
+        protected UrlGeneratorInterface $urlGenerator,
+        protected TranslatorInterface $translator
+    )
     {
         // Inject dependencies if needed
     }
@@ -23,7 +28,7 @@ class BreadcrumbRuntime implements RuntimeExtensionInterface
         $routeName = $request->attributes->get('_route');
 
         $routes = [
-            new Link(label: 'Home', route: $this->urlGenerator->generate('app_home_index'), isCurrent: $routeName === 'app_home'),
+            new Link(label: $this->translator->trans('Home'), route: $this->urlGenerator->generate('app_home_index'), isCurrent: $routeName === 'app_home'),
         ];
 
         foreach ($configured as $route) {

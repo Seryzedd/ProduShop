@@ -25,7 +25,7 @@ class TranslationFileReader
             throw new \InvalidArgumentException("File not found: " . $completeFileName);
         }
 
-        $translations = Yaml::parse(file_get_contents($completeFileName), true);
+        $translations = Yaml::parse(file_get_contents($completeFileName));
 
         return $translations;
     }
@@ -119,7 +119,12 @@ class TranslationFileReader
             
         }
 
-        $yaml = Yaml::dump($content);
+        $yaml = Yaml::dump(
+            $content,
+            indent: 4,
+            inline: 4,
+            flags: Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK | Yaml::DUMP_EXCEPTION_ON_INVALID_TYPE
+        );
 
         $valid = file_put_contents($path, $yaml);
 
