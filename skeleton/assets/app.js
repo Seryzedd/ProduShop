@@ -114,6 +114,31 @@ $('.img-miniature').on('click', function() {
     $('#main-img-preview').attr('src', $(this).attr('src'));
 })
 
+// hide alerts automatically
+
+function hideAlerts() {
+  
+    setTimeout(function() {
+      
+      hideAlertsDelayed();
+    }, 1000);
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function hideAlertsDelayed() {
+  const alerts = $(".alert");
+
+  for (let i = 0; i < alerts.length; i++) {
+    $(alerts[i]).slideUp()
+    await delay(2000); // pause de 2 secondes
+  }
+}
+
+hideAlerts();
+
 $('.alert .btn-close').on('click', function() {
     $(this).closest('.alert').slideUp();
 
