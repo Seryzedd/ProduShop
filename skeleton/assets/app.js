@@ -121,7 +121,7 @@ function hideAlerts() {
     setTimeout(function() {
       
       hideAlertsDelayed();
-    }, 1000);
+    }, 10000);
 }
 
 function delay(ms) {

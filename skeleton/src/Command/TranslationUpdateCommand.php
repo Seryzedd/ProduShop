@@ -188,30 +188,17 @@ class TranslationUpdateCommand extends Command
 
         // show messages ------------
         foreach ($domains as $domain) {
-            foreach ($existingCatalogue->all($domain) as $id => $message) {
-                if ($id === $message) {
-                    $output->writeln("<comment>Non traduit : [$domain] $id</comment>");
-                }
-            }
-        }
-
-        foreach ($domains as $domain) {
             $filename = $domain . '.' . $locale . '.yml';
             $messages = $existingCatalogue->all($domain);
 
-            // Supprimer le placeholder
+            // Supprimer le placeholder technique
             unset($messages['__placeholder__']);
 
-            if (!empty($messages)) {
-                $path = $this->translationPath . '/' . $filename;
-
-                // Crée le fichier s'il n'existe pas
-                if (!file_exists($path)) {
-                    touch($path);
-                }
-
-                $this->translationFileReader->updateFile($filename, $messages);
+            if (empty($messages)) {
+                continue;
             }
+
+            $this->translationFileReader->updateFile($filename, $messages);
         }
 
         $io->success('Sync completed for locale: ' . $locale);

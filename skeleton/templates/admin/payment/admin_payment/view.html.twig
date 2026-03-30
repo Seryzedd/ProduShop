@@ -7,17 +7,18 @@
 {% block breadcrumb %}
     {% set breadcrumb = [
         {
-            label: 'Admin Dashboard'|trans,
+            label: 'Admin Dashboard',
             route: 'app_admin_index'
         },
         {
-            label: 'Payments'|trans,
+            label: 'Payments',
             route: 'app_admin_payments'
         },
         {
-            label: 'Payment "%date%"'|trans({'%date%': payment.createdAt|date('d/m/Y H:i')}),
+            label: 'Payment "%date%"',
             route: 'app_admin_payment',
-            parameters: {id: payment.id}
+            parameters: {id: payment.id},
+            translationKey: {'%date%': payment.createdAt|date('d/m/Y H:i')}
         }
     ] %}
 

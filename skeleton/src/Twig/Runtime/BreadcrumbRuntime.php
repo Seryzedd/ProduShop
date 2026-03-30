@@ -32,8 +32,11 @@ class BreadcrumbRuntime implements RuntimeExtensionInterface
         ];
 
         foreach ($configured as $route) {
+            // @Translation $translatedLabel
+            $translatedLabel = $this->translator->trans($route['label'], $route['translationKey'] ?? []);
+
             $routes[] = new Link(
-                label: $route['label'],
+                label: $translatedLabel,
                 route: $this->urlGenerator->generate($route['route'], $route['parameters'] ?? []),
                 isCurrent: $routeName === $route['route'],
                 routeParameters: $route['parameters'] ?? []

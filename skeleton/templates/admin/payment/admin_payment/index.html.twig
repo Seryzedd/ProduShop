@@ -38,11 +38,11 @@
 
                         <div class="col-2">
                             {% if payment.status == "Pending" %}
-                                <p class="link-info mb-0">{{ payment.status }}</p>
+                                <p class="link-info mb-0">{{ payment.status|trans }}</p>
                             {% elseif payment.status == "Treated" %}
-                                <p class="link-success mb-0">{{ payment.status }}</p>
+                                <p class="link-success mb-0">{{ payment.status|trans }}</p>
                             {% else %}
-                                <p class="link-warning mb-0">{{ payment.status }}</p>
+                                <p class="link-warning mb-0">{{ payment.status|trans }}</p>
                             {% endif %}
                         </div>
 

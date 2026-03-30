@@ -5,19 +5,20 @@
 {% block breadcrumb %}
     {% set breadcrumb = [
         {
-            label: 'Admin Dashboard'|trans,
+            label: 'Admin Dashboard',
             route: 'app_admin_index',
             parameters: []
         },
         {
-            label: 'Translations'|trans,
+            label: 'Translations',
             route: 'app_admin_translations_manager',
             parameters: []
         },
         {
-            label: 'Translations in %lang%'|trans({'%lang%': locale|language}),
+            label: 'Translations in %lang%',
             route: 'app_admin_translations_manager_edit',
-            parameters: {'locale': locale}
+            parameters: {'locale': locale},
+            translationKey: {'%lang%': locale|language}
         }
     ] %}
 

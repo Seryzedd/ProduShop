@@ -7,12 +7,15 @@ use App\DTO\Translations\TranslationsDTO;
 use App\DTO\Translations\TranslationFileDTO;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Translation\DataCollectorTranslator;
 
 class TranslationFileReader
 {
     public function __construct(
         #[Autowire('%translator.default_path%')]
-        private string $translationPath)
+        private string $translationPath,
+        private ?DataCollectorTranslator $dataCollectorTranslator = null
+    )
     {
         
     }
@@ -114,9 +117,9 @@ class TranslationFileReader
     public function updateFile(string $filename, array $content)
     {
         $path = $this->translationPath . '/' . $filename;
+        
         if(!file_exists($path)) {
-            throw new \Exception("Error file does not exist.");
-            
+            touch($path);
         }
 
         $yaml = Yaml::dump(

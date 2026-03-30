@@ -7,6 +7,7 @@
 'Your password should be at least {{ limit }} characters': 'Your password should be at least {{ limit }} characters'
 'There is already an account with this email': 'There is already an account with this email'
 Error: Error
+'Please enter an email.': 'Please enter an email.'
 'This value should be false.': 'Cette valeur doit être fausse.'
 'This value should be true.': 'Cette valeur doit être vraie.'
 'This value should be of type {{ type }}.': 'Cette valeur doit être de type {{ type }}.'
@@ -177,4 +178,3 @@ Error: Error
 'Please select a valid option.': 'Veuillez sélectionner une option valide.'
 'Please select a valid range.': 'Veuillez sélectionner une plage valide.'
 'Please enter a valid week.': 'Veuillez entrer une semaine valide.'
-'Please enter an email.': 'Please enter an email.'

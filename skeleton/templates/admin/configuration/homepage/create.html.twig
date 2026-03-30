@@ -7,10 +7,12 @@
 {% block breadcrumb %}
     {% set params = [] %}
     {% if app.request.attributes.get('_route') == 'app_admin_configuration_homepage_update' %}
-        {% set label = 'Update homepage block "%id%"'|trans({'%id%': form.vars.data.id}) %}
+        {% set label = 'Update homepage block "%id%"' %}
         {% set params = {'block': form.vars.data.id} %}
+        {% set translations = {'%id%': form.vars.data.id} %}
     {% else %}
-        {% set label = 'app_admin_configuration_homepage_new'|trans %}
+        {% set label = 'app_admin_configuration_homepage_new' %}
+        {% set translations = [] %}
     {% endif %}
     {% set breadcrumb = [
         {
@@ -24,7 +26,8 @@
         {
             label: label,
             route: app.request.attributes.get('_route'),
-            parameters: params
+            parameters: params,
+            translationKey: translations
         }
     ] %}
 
