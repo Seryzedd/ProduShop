@@ -200,11 +200,11 @@
                     <div class="col-md-6">
                         <p class="fw-light mb-0">
                             <a class="stretched-link fw-bold me-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_merchant_product_edit', {'product': product.id}) }}">
-                                {{ product.name }}
+                                {{ product|translated('name') }}
                             </a>
                             <small class="fst-italic">{{ product.shelf.name }}</small>
                             </p>
-                        <p class="text-muted fw-bold"><small>{{ product.description }}</small></p>
+                        <p class="text-muted fw-bold"><small>{{ product|translated('description') }}</small></p>
                     </div>
 
                     <div class="col-md-4">

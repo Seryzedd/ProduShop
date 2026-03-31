@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\Product\ProductType;
 use App\Entity\Product\Product;
 use App\Repository\Product\ProductRepository;
+use App\Entity\Translations\ProductTranslation;
 
 #[Route('/merchant/product')]
 final class ProductController extends AbstractController
@@ -90,5 +91,20 @@ final class ProductController extends AbstractController
         $this->addFlash('success', new TranslatableMessage('Product "%name%" removed successfully.', ['%name%' => $product->getName()], 'messages'));
 
         return $this->redirectToRoute('app_merchant_products');
+    }
+
+    #[Route('/{product}/translation/add/{language}', name: 'app_merchant_product_translation_add')]
+    public function addTranslation(Product $product, string $language)
+    {   
+        $translation = new ProductTranslation($language, $product);
+        
+        $product->addTranslation($translation);
+
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', new TranslatableMessage('Product translation %lang% added on product "%name%" removed successfully.', ['%name%' => $product->getName(), '%lang%' => $language], 'messages'));
+
+        return $this->redirectToRoute('app_merchant_product_edit', ['product' => $product->getId()]);
     }
 }

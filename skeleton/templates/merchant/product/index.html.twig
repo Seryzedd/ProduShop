@@ -7,6 +7,10 @@
 {% block breadcrumb %}
     {% set breadcrumb = [
         {
+            label: 'My account',
+            route: 'app_account_informations',
+        },
+        {
             label: 'My products',
             route: 'app_merchant_products',
         }
@@ -44,10 +48,10 @@
                             {% endif %}
                         </div>
                         <div class="col-md-2">
-                            <a href="{{ path('app_merchant_product_edit', {product: product.id}) }}" >{{ product.name }}</a>
+                            <a href="{{ path('app_merchant_product_edit', {product: product.id}) }}" >{{ product|translated('name') }}</a>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-0 text-muted">{{ product.description }}</p>
+                            <p class="mb-0 text-muted">{{ product|translated('description') }}</p>
                         </div>
 
                         <div class="col-md-2 text-end">

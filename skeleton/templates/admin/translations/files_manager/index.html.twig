@@ -47,6 +47,28 @@
 
         <ul class="list-group">
             {% if locale %}
+                <p class="text-muted">{% trans with {'%language%': locale|name} %}Translations files in %language%{% endtrans %}<small>{{ locale|region }}</small></p>
+                {% for file in files.languages %}
+                    <li class="list-group-item">
+                         <nav class="nav flex-column">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <a class="nav-link" href="{{ path('app_admin_translations_file_download', {'filename': file.filename}) }}">
+                                    {{ ux_icon('line-md:file-download', {width: '24px', height: '24px'}) }}
+                                    {{ file.filename }}
+                                </a>
+
+                                <div class="justify-content-end d-flex px-2">
+                                    <a class="btn btn-outline-dark btn-sm me-2" href="{{ path('app_admin_translations_file_manager_edit', {'locale': locale, 'filename': file.filename}) }}">
+                                        {{ ux_icon('line-md:pencil-alt-twotone' )}}
+                                    </a>
+                                    <a class="btn btn-outline-danger btn-sm" href="{{ path('app_admin_translations_file_delete', {'filename': file.filename}) }}">
+                                        {{ ux_icon('line-md:trash')}}
+                                    </a>
+                                </div>
+                            </div>
+                        </nav>
+                    </li>
+                {% endfor %}
             {% else %}
                 {% for language, languagefiles in files %}
                     <li class="list-group-item">

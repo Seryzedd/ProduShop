@@ -8,9 +8,10 @@
 
     {% set breadcrumb = [
         {
-            label: 'Shelf "%shelf%" products'|trans({'%shelf%': shelf}),
+            label: 'Shelf "%shelf%" products',
             route: 'app_shelf_product',
-            parameters: {'shelf': shelf}
+            parameters: {'shelf': shelf},
+            translationKey: {'%shelf%': shelf}
         },
     ] %}
 

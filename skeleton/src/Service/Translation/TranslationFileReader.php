@@ -96,7 +96,7 @@ class TranslationFileReader
     {
         $dir = '/var/www/html/translations/';
         if(!is_dir($dir)) {
-            return null;
+            return [];
         }
 
         $files = scandir($dir);

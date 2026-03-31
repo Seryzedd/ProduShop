@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type as FormTypes;
 use App\Entity\Product\Shelf;
 use App\Form\ImageType;
+use App\Form\Translations\Product\ProductTranslationType;
 
 class ProductType extends AbstractType
 {
@@ -49,6 +50,11 @@ class ProductType extends AbstractType
             ->add('shelf', EntityType::class, [
                 'class' => Shelf::class,
                 'choice_label' => 'name',
+            ])
+            ->add('translations', CollectionType::class, [
+                'entry_type' => ProductTranslationType::class,
+                'label' => false,
+                'by_reference' => false,
             ])
         ;
     }

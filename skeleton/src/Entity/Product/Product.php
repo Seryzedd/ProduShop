@@ -9,10 +9,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Translations\ProductTranslation;
+use App\Interface\TranslatableInterface;
+use App\Trait\TranslatableTrait;
+use App\Attribute\TranslationEntity;
 
+#[TranslationEntity(class: ProductTranslation::class)]
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-class Product
+class Product implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -48,6 +55,7 @@ class Product
     {
         $this->setCompany($company);
         $this->packages = new ArrayCollection();
+        $this->initializeTranslations();
     }
 
     public function getId(): ?int

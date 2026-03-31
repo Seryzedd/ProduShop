@@ -35,6 +35,9 @@
             "migrations/.gitignore"
         ]
     },
+    "knplabs/doctrine-behaviors": {
+        "version": "v3.1.0"
+    },
     "phpunit/phpunit": {
         "version": "13.0",
         "recipe": {

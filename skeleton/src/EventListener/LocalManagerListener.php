@@ -34,6 +34,8 @@ final class LocalManagerListener
             $locale = $request->getDefaultLocale();
         }
 
+        $request->setLocale($locale);
+
         $this->switcher->setLocale($locale);  
     }
 }

@@ -26,8 +26,8 @@
     <div class="card-body">
         <div class='position-relative'>
             <p class="text-end"><small class="text-muted text-end fst-italic">{{ product.shelf.name }}</small></p>
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="card-text text-muted">{{ product.description }}</p>
+            <h5 class="card-title">{{ product|translated('name') }}</h5>
+            <p class="card-text text-muted">{{ product|translated('description') }}</p>
             <p>
                 <a href="{{ path('app_view_product', {id: product.packages|first.id}) }}" class="stretched-link link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
                     {% trans %}See more{% endtrans %}
