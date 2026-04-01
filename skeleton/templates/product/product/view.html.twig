@@ -7,14 +7,16 @@
 {% block breadcrumb %}
     {% set breadcrumb = [
         {
-            label: 'Shelf "%shelf%" products'|trans({'%shelf%': package.product.shelf.name}),
+            label: 'Shelf "%shelf%" products',
             route: 'app_shelf_product',
-            parameters: {'shelf': package.product.shelf.name}
+            parameters: {'shelf': package.product.shelf.name},
+            translationKey: {'%shelf%': package.product.shelf|translated('name')}
         },
         {
-            label: '"%name%" details'|trans({'%name%': package.product|translated('name')}),
+            label: '"%name%" details',
             route: 'app_view_product',
-            parameters: {'id': package.id}
+            parameters: {'id': package.id},
+            translationKey: {'%name%': package.product|translated('name')}
         }
     ] %}
 
@@ -50,25 +52,26 @@
                     <p class="mb-0 fw-semibold">x{{ package.quantity }}</p>
                 </div>
                 <h3 class="text-center">
-                    {{ package.finalPrice }}
+                    {{ package.finalPrice|number_format(2, ',', ' ') }}
                     {{ ux_icon('ic:outline-euro') }}
                 </h3>
-
-                <a class="btn btn-light mx-auto" href="{{ path('app_cart_add', {'id': package.id}) }}">
-                    {% trans %}Add to cart{% endtrans %}
-                </a>
+                <p class="text-center">
+                    <a class="btn btn-primary" href="{{ path('app_cart_add', {'id': package.id}) }}">
+                        {% trans %}Add to cart{% endtrans %}
+                    </a>
+                </p>
 
                 {% if product.packages|length > 1 %}
                     <p class="text-end text-primary">{% trans %}Other packages{% endtrans %}</p>
-                    <div class="row">
+                    
                         {% for otherPack in product.packages %}
                             {% if otherPack !== package %}
-                                {% include 'product/product/package_link.html.twig' with {'package': otherPack} %}
+                                <div class="row border-top">
+                                    {% include 'product/product/package_link.html.twig' with {'package': otherPack} %}
+                                </div>
                             {% endif %}
                         {% endfor %}
-                    </div>
                 {% endif %}
-                
             </div>
         </div>
         <h3 class="text-muted py-4">

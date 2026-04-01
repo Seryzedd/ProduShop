@@ -1,5 +1,5 @@
 {% block package_link %}
-    <div class="col position-relative text-center{% if not loop.last %} border-end border-dark{% endif %}">
+    <div class="col position-relative text-center">
         <div class="d-flex justify-content-between">
             {% if package.stock == 0 %}
                 <p class="text-danger"><small>{% trans %}Out of stock{% endtrans %}</small></p>
@@ -16,11 +16,19 @@
             {{ package.finalPrice|number_format(2, ',', ' ') }}
             {{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}
         </h4>
-        {% if package.stock > 0 %}
-            <a class="btn btn-primary stretched-link" href="{{ path('app_cart_add', {id: package.id}) }}">
-                {{ ux_icon('ic:round-shopping-cart') }}
-                {% trans %}Add to cart{% endtrans %}
+
+        <p class="text-center">
+            <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_view_product', {id: package.id}) }}">
+                {{ ux_icon('line-md:search') }}
+                {% trans %}Package view{% endtrans %}
             </a>
-        {% endif %}
+            {% if package.stock > 0 %}
+                <a class="btn btn-primary btn-sm ms-3" href="{{ path('app_cart_add', {id: package.id}) }}">
+                    {{ ux_icon('ic:round-shopping-cart') }}
+                    {% trans %}Add to cart{% endtrans %}
+                </a>
+            {% endif %}
+        </p>
+        
     </div>
 {% endblock %}

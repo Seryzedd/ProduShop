@@ -17,11 +17,16 @@ use Symfony\Component\Form\Extension\Core\Type as FormTypes;
 use App\Entity\Product\Shelf;
 use App\Form\ImageType;
 use App\Form\Translations\Product\ProductTranslationType;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProductType extends AbstractType
 {
+    public function __construct(private RequestStack $requestStack) {}
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $locale = $this->requestStack->getCurrentRequest()?->getLocale() ?? 'fr';
+
         $builder
             ->add('name', FormTypes\TextType::class, [
                 'attr' => ['placeholder' => 'Product name'],
@@ -49,7 +54,9 @@ class ProductType extends AbstractType
             ])
             ->add('shelf', EntityType::class, [
                 'class' => Shelf::class,
-                'choice_label' => 'name',
+                'choice_label' => function (Shelf $shelf) use ($locale): string {
+                    return $shelf->translate($locale) ? $shelf->translate($locale)->getName() : $shelf->getName();
+                },
             ])
             ->add('translations', CollectionType::class, [
                 'entry_type' => ProductTranslationType::class,

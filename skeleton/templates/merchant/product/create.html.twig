@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {% trans %}Create new product{% endtrans %}
+    {% if app.request.attributes.get('_route') == 'app_merchant_product_create' %}
+        {% trans %}Create new product{% endtrans %}
+    {% elseif app.request.attributes.get('_route') == 'app_merchant_product_edit' %}
+        {% trans with {'%name%': form.vars.data|translated('name')} %}Edit %name% product{% endtrans %}
+    {% endif %}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -12,9 +16,10 @@
         } %}
     {% elseif app.request.attributes.get('_route') == 'app_merchant_product_edit' %}
         {% set currentroute = {
-            label: 'Edit "%name%" product'|trans({'%name%': form.vars.data.name}),
+            label: 'Edit "%name%" product',
             route: 'app_merchant_product_edit',
-            parameters: {product: form.vars.data.id}
+            parameters: {product: form.vars.data.id},
+            translationKey: {'%name%': form.vars.data|translated('name')}
         } %}
     {% endif %}
 

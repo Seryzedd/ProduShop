@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Shelves manager{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index',
+            parameters: []
+        },
+        {
+            label: 'Shelves',
+            route: 'app_admin_product_shelf',
+            parameters: []
+        },
+        {
+            label: 'Edit shelf "%name%"',
+            route: 'app_admin_product_shelf_edit',
+            parameters: {shelf: shelf.id},
+            translationKey: {'%name%': shelf|translated('name')}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex align-items-end justify-content-between">
+            <h1 class="mb-0">
+                {% trans %}Shelves Manager{% endtrans %}
+            </h1>
+
+            <button type="button"  class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#newShelf">
+                {{ ux_icon('line-md:plus', {width: '26px', height: '26px'}) }}
+            </button>
+        </div>
+
+        {{ form_start(form) }}
+            {{ form_row(form.name) }}
+            {% include 'form/collectionType.html.twig' with {collection: form.translations} %}
+
+            <button type="submit" class="btn btn-primary">
+                {% trans %}Update{% endtrans %}
+            </button>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+{% endblock %}

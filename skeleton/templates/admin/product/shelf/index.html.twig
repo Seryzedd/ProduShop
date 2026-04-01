@@ -39,15 +39,18 @@
                     <ul class="nav flex-column">
                         {% for shelf in shelves %}
                             <li class="nav-item">
-                                <button class="nav-link{% if loop.first %} active{% endif %}" id="v-pills-{{ shelf.name }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ shelf.name }}" type="button" role="tab" aria-controls="v-pills-{{ shelf.name }}" aria-selected="true">{{ shelf.name }}</button>
+                                <button class="nav-link{% if loop.first %} active{% endif %}" id="v-pills-{{ shelf.name }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ shelf.name }}" type="button" role="tab" aria-controls="v-pills-{{ shelf.name }}" aria-selected="true">{{ shelf|translated('name') }}</button>
                             </li>
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="col-md-9 border-start border-dark">
-                    <div class="tab-content" id="v-pills-tabContent">
+                <div class="col-md-9 border">
+                    <div class="tab-content p-2" id="v-pills-tabContent">
                         {% for shelf in shelves %}
                             <div class="tab-pane{% if loop.first %} show active{% endif %} fade" id="v-pills-{{ shelf.name }}" role="tabpanel" aria-labelledby="v-pills-{{ shelf.name }}-tab" tabindex="{{ loop.index }}">
+                                <p class="text-end">
+                                    <a href="{{ path('app_admin_product_shelf_edit', {shelf: shelf.id}) }}" class="btn btn-outline-primary">{% trans %}Edit Shelf{% endtrans %}</a>
+                                </p>
                                 {% if shelf.products|length == 0 %}
                                     <h2 class="text-muted text-center">{% trans %}No product in this shelf{% endtrans %}</h2>
                                 {% else %}
@@ -84,9 +87,6 @@
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
-
-
-                                
                             </div>
                         {% endfor %}
                     </div>
@@ -108,6 +108,8 @@
                     <div class="modal-body">
                         
                         {{ form_row(form.name) }}
+
+                        {% include 'form/collectionType.html.twig' with {collection: form.translations} %}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -117,4 +119,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
 {% endblock %}

@@ -20,7 +20,28 @@ final class ShelfController extends AbstractController
     #[Route('/', name: 'app_admin_product_shelf')]
     public function index(ShelfRepository $repository, Request $request): Response
     {
-        $form = $this->createForm(ShelfType::class, new Shelf());
+        $form = $this->getForm(new Shelf(), $request);
+
+        return $this->render('admin/product/shelf/index.html.twig', [
+            'shelves' => $repository->findAll(),
+            'form' => $form
+        ]);
+    }
+
+    #[Route('/edit/{shelf}', name: 'app_admin_product_shelf_edit')]
+    public function editShelf(Shelf $shelf, Request $request): Response
+    {
+        $form = $this->getForm($shelf, $request);
+
+        return $this->render('admin/product/shelf/edit.html.twig', [
+            'shelf' => $shelf,
+            'form' => $form
+        ]);
+    }
+
+    private function getForm(Shelf $shelf, Request $request)
+    {
+        $form = $this->createForm(ShelfType::class, $shelf);
 
         $form->handleRequest($request);
 
@@ -32,9 +53,7 @@ final class ShelfController extends AbstractController
 
             $this->addFlash('success', new TranslatableMessage('Shelf "%name%" saved.', ['%name%' => $shelf->getName()]));
         }
-        return $this->render('admin/product/shelf/index.html.twig', [
-            'shelves' => $repository->findAll(),
-            'form' => $form
-        ]);
+
+        return $form;
     }
 }

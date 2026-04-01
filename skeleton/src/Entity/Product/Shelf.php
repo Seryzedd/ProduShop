@@ -6,10 +6,17 @@ use App\Repository\Product\ShelfRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Interface\TranslatableInterface;
+use App\Trait\TranslatableTrait;
+use App\Attribute\TranslationEntity;
+use App\Entity\Translations\ShelfTranslation;
 
+#[TranslationEntity(class: ShelfTranslation::class)]
 #[ORM\Entity(repositoryClass: ShelfRepository::class)]
-class Shelf
+class Shelf implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
