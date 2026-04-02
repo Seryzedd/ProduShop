@@ -47,12 +47,12 @@
                                 </div>
 
                                 <div class="col-md-6 col-sm-4">
-                                    <p class="mb-0 text-muted">{{ item.package.product.company.companyName }}</p>
+                                    <a href="{{ path('app_company', {id: item.package.product.company.id}) }}" class="mb-0 link-secondary link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ item.package.product.company.companyName }}</a>
                                     <div class="d-flex align-items-end">
-                                        <h4 class="mb-0">{{ item.package.product.name }}</h4>
-                                        <p class="mb-0 ms-3">{{ item.package.name }}</p>
+                                        <a href="{{ path('app_view_product', {id: item.package.id}) }}" class="mb-0 fs-3 link-offset-2-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ item.package.product|translated('name') }}</a>
+                                        <p class="mb-0 ms-3 fst-italic">{{ item.package.name }}</p>
                                     </div>
-                                    <p>{{ item.package.product.description }}</p>
+                                    <p class="text-muted">{{ item.package.product|translated('description') }}</p>
                                 </div>
 
                                 <div class="col-md-2 col-sm-2">

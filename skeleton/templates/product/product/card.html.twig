@@ -25,11 +25,15 @@
     
     <div class="card-body">
         <div class='position-relative text-center'>
-            <p class="text-end"><small class="text-muted fst-italic">{{ product.shelf.name }}</small></p>
+            <div class="d-flex justify-content-between">
+                <p>{% trans %}Solded by{% endtrans %} : <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ product.company.companyName }}</a></p> 
+                <p class="text-end"><small class="text-muted fst-italic">{{ product.shelf.name }}</small></p>
+            </div>
+            
             <h5 class="card-title">{{ product|translated('name') }}</h5>
             <p class="card-text text-muted">{{ product|translated('description') }}</p>
         </div>
-        <p>{% trans %}Solded by{% endtrans %} : <a href="{{ path('app_company', {id: product.company.id}) }}" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ product.company.companyName }}</a></p> 
+        
     </div>
 
     <div class="card-footer">

@@ -212,15 +212,17 @@
     };
 
     var addressForm = document.querySelector("select[name='adressId']");
+    
+    if(addressForm !== null) {
+        addressForm.addEventListener('change', function (event) {
+            const id = event.target.value;
 
-    addressForm.addEventListener('change', function (event) {
-        const id = event.target.value;
-        console.log(event.target);
+            const url = event.currentTarget.dataset.url.replace('__ID__', id);
 
-        const url = event.currentTarget.dataset.url.replace('__ID__', id);
-
-        window.location.href = url;
-    })
+            window.location.href = url;
+        })
+    }
+    
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

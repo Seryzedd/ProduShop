@@ -7,7 +7,7 @@
         <div class="offcanvas-body">
             {% if cart.items|length > 0 %}
                 <p class="text-end">
-                    <a href="" class="btn btn-light">
+                    <a href="{{ path('app_cart_clear') }}" class="btn btn-light">
                         {% trans %}Clear my cart{% endtrans %}
                         {{ ux_icon('ic:round-delete') }}
                     </a>
@@ -22,14 +22,14 @@
                                     {% endif %}
                                 </div>
                                 <div class="col-lg-6">
-                                    <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_view_product', {id: item.package.id}) }}">{{ item.package.product.name }}</a>
+                                    <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="{{ path('app_view_product', {id: item.package.id}) }}">{{ item.package.product|translated('name') }}</a>
                                     <p class="mb-0 text-muted">
                                         <small>{{ item.package.name}}</small>
                                     </p>
                                 </div>
                                 <div class="col-lg-2">
                                     <p class="mb-0 text-end">
-                                        <a class="btn btn-light btn-sm">
+                                        <a class="btn btn-light btn-sm" href="{{ path('app_cart_remove', {itemId: item.package.id}) }}">
                                             {{ ux_icon('ic:round-delete') }}
                                         </a>
                                     </p>

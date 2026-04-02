@@ -29,7 +29,7 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ path('app_shelf_product') }}">{% trans %}All{% endtrans %}</a></li>
                                 {% for shelf in shelvesEntities %}
-                                    <li><a class="dropdown-item" href="{{ path('app_shelf_product', {'shelf': shelf.name}) }}">{{ shelf.name|trans }}</a></li>
+                                    <li><a class="dropdown-item" href="{{ path('app_shelf_product', {'shelf': shelf.name}) }}">{{ shelf|translated('name') }}</a></li>
                                 {% endfor %}
                             </ul>
                         </li>

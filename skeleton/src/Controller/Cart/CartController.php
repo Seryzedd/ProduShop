@@ -79,7 +79,7 @@ final class CartController extends AbstractController
     }
 
     #[Route('/clear', name: 'app_cart_clear')]
-    public function clear(): Response
+    public function clear(Request $request): Response
     {
         $this->cart->clear();
 

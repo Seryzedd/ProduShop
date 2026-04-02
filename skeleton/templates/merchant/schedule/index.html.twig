@@ -31,7 +31,7 @@
                     <li class="list-group-item">
                         <div class="row">
                             <div class="col-md-4">
-                                <h4 class="text-primary">{{ day.vars.data.dayName }}</h4>
+                                <h4 class="text-primary">{{ day.vars.data.dayName|trans }}</h4>
                             </div>
                             <div class="col-md-8">
                                 {% include 'form/collectionType.html.twig' with {'collection': day.hours} %}
