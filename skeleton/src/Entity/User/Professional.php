@@ -13,10 +13,17 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User\AbstractUser;
 use App\Entity\User\Schedule\Hours;
+use App\Interface\TranslatableInterface;
+use App\Trait\TranslatableTrait;
+use App\Attribute\TranslationEntity;
+use App\Entity\Translations\ProfessionalTranslation;
 
+#[TranslationEntity(class: ProfessionalTranslation::class)]
 #[ORM\Entity]
-class Professional extends AbstractUser
+class Professional extends AbstractUser implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     #[ORM\Column(length: 255)]
     private ?string $siret = null;
 
