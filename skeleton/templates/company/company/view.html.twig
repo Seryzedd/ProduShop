@@ -75,9 +75,9 @@
                         <ul class="list-group list-group-flush card">
                             {% for day in professional.openingSchedule.scheduleDays %}
                                 <li class="list-group-item">
-                                    <div class="d-flex align-items-center py-0">
-                                        <small>{{ day.dayName }}</small>
-                                        <ul class="list-group list-group-flush">
+                                    <div class="row align-items-center jusfify-content-between py-0">
+                                        <small class="col-6">{{ day.dayName|trans }}</small>
+                                        <ul class="list-group list-group-flush col-6">
                                             {% for hour in day.hours %}
                                                 <li class="list-group-item py-0">
                                                     <p class="mb-0 text-muted text-end">

@@ -55,8 +55,6 @@ final class ManagerController extends AbstractController
     {
         $this->extractTranslations($locale);
 
-        $this->addFlash('success', new TranslatableMessage('Translation %locale% reloaded.', ['%locale%' => \Locale::getDisplayName($locale)]));
-
         return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
     }
 
@@ -122,6 +120,14 @@ final class ManagerController extends AbstractController
     {
         try {
             $this->commandRunner->run('app:translation:update', ['locale' => $locale]);
+
+            $this->addFlash(
+                'info',
+                new TranslatableMessage(
+                    'Translations updating in %locale% done.',
+                    ['%locale%' => $locale])
+                )
+            ;
         } catch (\Exception $e) {
             $this->addFlash('danger', $e->getMessage());
         }

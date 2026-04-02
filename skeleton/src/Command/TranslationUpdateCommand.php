@@ -145,7 +145,9 @@ class TranslationUpdateCommand extends Command
         $appCatalogue = new MessageCatalogue($locale);
         $this->reader->read($this->translationPath, $appCatalogue);
         $existingCatalogue->addCatalogue($appCatalogue);
-
+        
+        // DEBUG
+        dump($existingCatalogue->all());
         /* =============================
         * 5. Diff and merge keys per domain
         * ============================= */

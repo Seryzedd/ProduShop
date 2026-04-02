@@ -20,6 +20,7 @@ final class CompanyController extends AbstractController
         $radius = $request->query->get('radius') ?? 20;
         $user = $this->getUser();
 
+        $adress = null;
         if($user) {
             $adress = $this->getUser()->getPostalAdress();
             
@@ -29,7 +30,7 @@ final class CompanyController extends AbstractController
                     $adress = $foundAdress;
                 }
             }
-
+            
             if($adress) {
                 $products = $productRepository->findWithinRadius($adress, $radius);
             } else {
