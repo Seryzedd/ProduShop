@@ -13,6 +13,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use App\Form\ImageType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use App\Form\Translations\ProfessionalTranslationType;
 
 class ProfessionalType extends AbstractType
 {
@@ -58,6 +60,11 @@ class ProfessionalType extends AbstractType
                 ],
                 'help' => 'Introduce your company with <span id="count">0</span>/160 characters',
                 'help_html' => true,
+            ])
+            ->add('translations', CollectionType::class, [
+                'entry_type' => ProfessionalTranslationType::class,
+                'label' => false,
+                'by_reference' => false,
             ])
         ;
     }

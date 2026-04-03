@@ -33,6 +33,7 @@
                         {{ form_row(form.logo) }}
                         {{ form_row(form.companyName) }}
                         {{ form_row(form.email) }}
+                        {{ form_row(form.phone) }}
 
                         {{ form_label(form.siret) }}
                         <div class="input-group">
@@ -45,14 +46,57 @@
                             <p class="content text-muted"></p>
                         </div>
 
-                        {{ form_row(form.description) }}
+                        <ul class="nav nav-tabs mt-2" id="languagesTabsMenu" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#default-tab-pane" type="button" role="tab" aria-controls="default-tab-pane" aria-selected="true">
+                                    {% trans %}Default{% endtrans %}
+                                </button>
+                            </li>
+                            
+                            {% for translation in form.vars.data.translations %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="{{ translation.locale }}-tab" data-bs-toggle="tab" data-bs-target="#{{ translation.locale }}-tab-pane" type="button" role="tab" aria-controls="{{ translation.locale }}-tab-pane" aria-selected="true">
+                                        {{ translation.locale }}
+                                    </button>
+                                </li>
+                            {% endfor %}
+
+                            <li class="nav-item" role="presentation">
+                                <div class="dropdown">
+                                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{ ux_icon('line-md:plus') }}
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+                                        {% for locale in app.enabled_locales %}
+                                            <li>
+                                                <a class="dropdown-item" href="{{ path('app_account_translation_add', {langage: locale}) }}">
+                                                    {{ locale|name }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="tab-content p-3 border-bottom border-end border-start" id="languagesTabContent">
+                            <div class="tab-pane fade show active" id="default-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                                {{ form_row(form.description) }}
+                            </div>
+
+                            {% for translation in form.translations %}
+                                <div class="tab-pane fade" id="{{ translation.vars.data.locale }}-tab-pane" role="tabpanel" aria-labelledby="{{ translation.vars.data.locale }}-tab" tabindex="0">
+                                    {{ form_row(translation, {label: translation.vars.data.locale|name}) }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
                     {% else %}
                         {{ form_row(form.gender) }}
                         {{ form_row(form.firstname) }}
                         {{ form_row(form.lastname) }}
+                        {{ form_row(form.phone) }}
                     {% endif %}
-
-                    {{ form_row(form.phone) }}
 
                     <button class="btn btn-primary mt-4 mb-4">
                         {% trans %}Save{% endtrans %}

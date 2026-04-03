@@ -17,6 +17,8 @@ use App\Entity\User\Client;
 use App\Entity\User\Payment\Payment;
 use App\Entity\User\Professional;
 use App\Repository\User\OrderRepository;
+use App\Entity\Translations\ProfessionalTranslation;
+use Symfony\Component\Translation\TranslatableMessage;
 
 #[Route('/account')]
 final class InformationsController extends AbstractController
@@ -64,6 +66,39 @@ final class InformationsController extends AbstractController
         return $this->render('account/informations/update.html.twig', [
             'form' => $form
         ]);
+    }
+
+    #[Route('/professional/translation/add/{langage}', name: 'app_account_translation_add')]
+    public function addProfessionalTranslation(string $langage): Response
+    {
+        $user = $this->getUser();
+
+        if($user instanceof Professional) {
+            $translation = new ProfessionalTranslation();
+            $translation->setLocale($langage);
+
+            $user->addTranslation($translation);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                new TranslatableMessage(
+                    'Translation %language% added in your account.',
+                        ['%language%' => $langage]
+                    )
+                )
+            ;
+        } else {
+            $this->addFlash(
+                'danger',
+                'Invalid account type.'
+            );
+        }
+        
+
+        return $this->redirectToRoute('app_account_update');
     }
 
     #[Route('/adress/update/{adress}', name: 'app_account_adress')]
