@@ -50,6 +50,7 @@ class UserSignUp
         } else {
             $user = new User\Professional();
 
+            $user->setLogo($this->professional->logo);
             $user->setSiret($this->professional->siret);
             $user->setCompanyName($this->professional->name);
             $user->setAdress($this->adress);

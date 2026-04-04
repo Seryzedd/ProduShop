@@ -25,17 +25,20 @@
 {% block body %}
     <main class="row w-100 h-100 p-3 bg-light mx-auto align-items-center justify-content-center">
         <div class="col-lg-6 card p-3 text-center">
-            <a href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
+            <a href="{{ path('app_home_index') }}" class="img-fluid mb-2">
+                <img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25">
+            </a>
 
             <p>
-            {% trans with {'%delay%': resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle')} %}
-                If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-                This link will expire in %delay%.
-            {% endtrans %}
-        </p>
-        <p>
-            <a href="{{ path('app_forgot_password_request') }}">{% trans %}try again{% endtrans %}</a>.
-        </p>
+                {% trans with {'%delay%': resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle')} %}
+                    If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
+                    This link will expire in %delay%.
+                {% endtrans %}
+            </p>
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('app_login') }}" class="btn btn-outline-dark">{% trans %}Go login{% endtrans %}</a>
+                <a href="{{ path('app_forgot_password_request') }}" class="btn btn-primary">{% trans %}try again{% endtrans %}</a>
+            </div>
         </div>
     </main>
 {% endblock %}

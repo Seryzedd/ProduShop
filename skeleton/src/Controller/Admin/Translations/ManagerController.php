@@ -74,6 +74,7 @@ final class ManagerController extends AbstractController
             $data = $request->request->all('translations');
             // $data = ['messages.fr.yml' => ['key' => 'value', ...], ...]
 
+            $validated = false;
             foreach ($data as $file => $entries) {
                 try {
                     $translations = [];
@@ -96,13 +97,18 @@ final class ManagerController extends AbstractController
 
                     $translationFileReader->updateFile($file, $translations);
 
-                    $this->addFlash('success', new TranslatableMessage(
-                        'Translation file "%filename%" updated successfully.',
-                        ['%filename%' => $file]
-                    ));
+                    $validated = true;
+                    
                 } catch (\Exception $e) {
                     $this->addFlash('danger', $e->getMessage());
                 }
+            }
+
+            if($validated) {
+                $this->addFlash('success', new TranslatableMessage(
+                    'Translations "%locale%" files updated successfully.',
+                    ['%locale%' => $locale]
+                ));
             }
 
             return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);

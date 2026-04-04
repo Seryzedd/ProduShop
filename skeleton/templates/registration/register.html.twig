@@ -36,7 +36,7 @@
 {% block body %}
     <div class="row w-100 p-3 bg-light align-items-center justify-content-center">
         <div class="col-lg-8 card p-3">
-            <a class='text-center' href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
+            <a class='text-center mb-3' href="{{ path('app_home_index') }}"><img src="{{ asset('icons/logo.png') }}" class="mx-auto img-fluid w-25"></a>
 
             <h1 class="text-center">{% trans %}Register{% endtrans %}</h1>
 
@@ -60,7 +60,7 @@
                                     
                                 {% endif %}
                                 
-                                {{ step.name|capitalize }}
+                                {{ step.name|trans|capitalize }}
                             </h3>
                         {% endfor %}
                     </div>
