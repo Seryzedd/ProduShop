@@ -47,8 +47,9 @@
             
             <div class="col-lg-8">
                 <h3 class="text-end flex-row-reverse lined pt-2">{% trans %}Authorizations{% endtrans %}</h3>
+                
                 {{ form_start(form, {attr: {class: 'mb-4'}}) }}
-                    {{ form_row(form.roles) }}
+                    {{ form_row(form.roles, {attr: {class: 'd-flex justify-content-around'}}) }}
                     <button class="btn btn-primary" type="submit">
                         {% trans %}Save{% endtrans %}
                     </button>
@@ -61,7 +62,7 @@
                             {% trans %}Schedules{% endtrans %}
                         </h3>
                         {% if user.openingSchedule %}
-                            {{ block('pro_schedules') }}
+                            {{ block('pro_schedules', 'account/informations/index.html.twig') }}
                         {% else %}
                             <p class="ms-2 text-muted">
                                 {% trans %}No Schedules{% endtrans %}

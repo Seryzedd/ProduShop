@@ -99,6 +99,11 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
         return array_unique($roles);
     }
 
+    public static function getAvailableRoles(): array
+    {
+        return self::getNamedRoles();
+    }
+
     public static function getNamedRoles()
     {
         $roles = [];

@@ -194,4 +194,13 @@ class Client extends AbstractUser
 
         return $this;
     }
+
+    public static function getAvailableRoles(): array
+    {
+        $roles = parent::getAvailableRoles();
+
+        unset($roles['ROLE_SELLER']);
+
+        return $roles;
+    }
 }

@@ -27,16 +27,12 @@ class RolesManagerType extends AbstractType
                         $user = $builder->getData();
                         $isProfessional = $user instanceof Professional;
 
-                        if ($role === 'ROLE_ADMIN') {
+                        if ($role === 'ROLE_ADMIN' || $role === 'ROLE_USER') {
                             return true; // disponible pour tous
                         }
 
                         if ($role === 'ROLE_SELLER') {
                             return $isProfessional; // uniquement pour Professional
-                        }
-
-                        if ($role === 'ROLE_USER') {
-                            return !$isProfessional; // uniquement pour les clients
                         }
 
                         return false;
