@@ -35,7 +35,7 @@
             {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
         </h1>
 
-        <p class="text-muted">{{ professional.description }}</p>
+        <p class="text-muted">{{ professional|translated('description') }}</p>
         
         <div class="row mb-4">
             <p class="col-lg-4">
