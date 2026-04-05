@@ -18,18 +18,22 @@
 
 {% block body %}
     <main class="container">
-        
+        <h1>{% trans %}Admin dashboard{% endtrans %}</h1>
         <div class="row justify-content-around align-items-center">
-            <div class="col-md-4 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
                 {{ block('users_block') }}
             </div>
 
-            <div class="col-md-4 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
                 {{ block('payments_block') }}
             </div>
 
-            <div class="col-md-4 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
                 {{ block('products_block') }}
+            </div>
+
+            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
+                {{ block('translations_block') }}
             </div>
         </div>
     <main>
@@ -49,7 +53,7 @@
 
     {% for payment in paymentStats %}
         {% set pct = payment.total|percentage(total) %}
-        <p class="text-end mb-0"><small>{{ payment.status|replace({'ROLE_': ''})|lower|capitalize }} : {{ pct|number_format(2, ',', ' ') }}%</small></p>
+        <p class="text-end mb-0"><small>{{ payment.status|replace({'ROLE_': ''})|lower|capitalize|trans }} : {{ pct|number_format(2, ',', ' ') }}%</small></p>
         <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
     {% endfor %}
 {% endblock %}
@@ -60,7 +64,7 @@
 
     {% for role, count in usersStats.by_role %}
         {% set pct = count|percentage(usersStats.total) %}
-        <p class="text-end mb-0"><small>{{ role|replace({'ROLE_': ''})|lower|capitalize }} : {{ pct }}%</small></p>
+        <p class="text-end mb-0"><small>{{ role|replace({'ROLE_': ''})|lower|capitalize|trans }} : {{ pct }}%</small></p>
         <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
     {% endfor %}
 {% endblock %}
@@ -78,6 +82,23 @@
     {% for shelf in productsStats.by_shelf %}
         {% set pct = shelf.total|percentage(productsStats.total) %}
         <p class="text-end mb-0"><strong class="me-1">{{ shelf.total }}</strong><small>{{ shelf.shelf|capitalize }} : {{ shelf.avg_price|number_format(2, ',', ' ') }}{{ ux_icon('ic:round-euro', {width: '12px', height: '12px'}) }}</small></p>
+        <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+    {% endfor %}
+{% endblock %}
+
+{% block translations_block %}
+    {% set fileTotal = 0 %}
+    {% for file in translations %}
+        {% set fileTotal = fileTotal + file|length %}
+    {% endfor %}
+    <h2 class="text-secondary number-animation mb-0" style="--end:{{ translations|length }}"></h2>
+    <a href="{{ path('app_admin_translations_manager') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">
+        {% trans with {'%count%': translations|length} %}{1}language|]1,Inf]languages{% endtrans %}
+    </a>
+
+    {% for local, file in translations %}
+        {% set pct = file|length|percentage(fileTotal) %}
+        <p class="text-end mb-0"><small class="me-1">{{ local|name }}</small><span class="fst-italic">{% trans with {'%count%': file|length} %}{1}%count% file|]1,Inf]%count% files{% endtrans %}</span></p>
         <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
     {% endfor %}
 {% endblock %}

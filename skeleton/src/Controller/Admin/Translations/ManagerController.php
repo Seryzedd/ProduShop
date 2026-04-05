@@ -62,6 +62,7 @@ final class ManagerController extends AbstractController
     #[Route('/edit/{locale}', name: 'app_admin_translations_manager_edit')]
     public function editLanguage(string $locale, TranslationFileReader $translationFileReader, Request $request, ?string $filename = null)
     {
+        
         if ($filename) {
             $languages = $translationFileReader->getFileByFilename($filename);
         } else {
@@ -69,33 +70,39 @@ final class ManagerController extends AbstractController
         }
 
         $prototypeForm = $this->createForm(PrototypeType::class);
+
+        $activeFileName = null;
         
         if ($request->getMethod() === "POST") {
             $data = $request->request->all('translations');
             // $data = ['messages.fr.yml' => ['key' => 'value', ...], ...]
 
+            dump($data);
+            
             $validated = false;
             foreach ($data as $file => $entries) {
                 try {
                     $translations = [];
-
+                    
                     foreach ($entries as $key => $value) {
-                        if (is_array($value)) {
-                            // Nouvelle entrée ajoutée via le prototype JS
-                            // Structure : ['translationKey' => '...', 'translationValue' => '...']
-                            $translationKey   = trim($value['translationKey'] ?? '');
-                            $translationValue = $value['translationValue'] ?? '';
-
-                            if ($translationKey !== '') {
-                                $translations[$translationKey] = $translationValue;
-                            }
-                        } else {
-                            // Entrée existante — structure plate : 'ma.cle' => 'valeur'
+                        if (!is_array($value)) {
+                            // Old flat structure still coming from the form
                             $translations[$key] = $value;
+                            continue;
+                        }
+                        
+                        // Structure : ['translationKey' => '...', 'translationValue' => '...']
+                        $translationKey   = trim($value['translationKey'] ?? '');
+                        $translationValue = $value['translationValue'] ?? '';
+
+                        if ($translationKey !== '') {
+                            $translations[$translationKey] = $translationValue;
                         }
                     }
 
                     $translationFileReader->updateFile($file, $translations);
+
+                    $activeFileName = $file;
 
                     $validated = true;
                     
@@ -109,9 +116,13 @@ final class ManagerController extends AbstractController
                     'Translations "%locale%" files updated successfully.',
                     ['%locale%' => $locale]
                 ));
-            }
 
-            return $this->redirectToRoute('app_admin_translations_manager_edit', ['locale' => $locale]);
+                if ($filename) {
+                    $languages = $translationFileReader->getFileByFilename($filename);
+                } else {
+                    $languages = $translationFileReader->getFilesByLocale($locale);
+                }
+            }
         }
 
         return $this->render('admin/translations/manager/edit.html.twig', [
@@ -119,6 +130,7 @@ final class ManagerController extends AbstractController
             'locale' => $locale,
             'filename' => $filename,
             'prototypeForm' => $prototypeForm,
+            'activeFile' => $activeFileName
         ]);
     }
 

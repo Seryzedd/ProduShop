@@ -43,25 +43,28 @@
         {% include 'components/filters/filter_by_input_val.html.twig' with {'value': 'translations'|trans, 'container': '.translations-form'} %}
 
         <ul class="nav nav-tabs justify-content-end" role="tablist">
-            {% for provider in languages.providers %}
+            {% for file in languages.languages %}
+                
                 <li class="nav-item">
-                    <button class="nav-link{% if loop.first %} active{% endif %}" id="{{ provider }}-tab" data-bs-toggle="tab" data-bs-target="#{{ provider }}-tab-pane" type="button" role="tab" aria-controls="{{ provider }}-tab-pane" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ provider }}</button>
+                
+                    <button class="nav-link{% if (activeFile == null and loop.first) or (file.filename == activeFile) %} active{% endif %}" id="{{ file.provider }}-tab" data-bs-toggle="tab" data-bs-target="#{{ file.provider }}-tab-pane" type="button" role="tab" aria-controls="{{ file.provider }}-tab-pane" aria-selected="{% if (activeFile == null and loop.first) or (file.filename == activeFile) %}true{% else %}false{% endif %}">{{ file.provider }}</button>
                 </li>
             {% endfor %}
         </ul>
 
         {% set prototypeHtml = form_widget(prototypeForm.translations.vars.prototype) %}
-        <form method="POST" action="" class="translations-form">
-            <div class="tab-content" id="pills-tabContent">
-                {% for languageFile in languages.languages %}
-                    <div role="tabpanel" class="tab-pane border-end border-start border-bottom p-4 fade{% if loop.first %} show active{% endif %}" id="{{ languageFile.provider }}-tab-pane" role="tabpanel" aria-labelledby="{{ languageFile.provider }}-tab" tabindex="{{ loop.index }}">
-                        
-                        <h5 class="text-secondary">{{ languageFile.filename }}</h5>
+        <div class="tab-content translations-form" id="pills-tabContent">
+            {% for languageFile in languages.languages %}
+                <div role="tabpanel" class="tab-pane border-end border-start border-bottom p-4 fade{% if (activeFile == null and loop.first) or (languageFile.filename == activeFile) %} show active{% endif %}" id="{{ languageFile.provider }}-tab-pane" aria-labelledby="{{ languageFile.provider }}-tab" tabindex="{{ loop.index }}">
 
-                        <ul class="list-group list-group-flush {{ languageFile.provider }}-collection"
-                            data-index="{{ languageFile.translations|length }}"
+                    <h5 class="text-secondary">{{ languageFile.filename }}</h5>
+
+                    {% set holderClass = languageFile.filename|replace({'.': '-'}) ~ '-collection' %}
+                    <form method="POST" action="" class="translations-form">
+                        <ul class="list-group list-group-flush {{holderClass}}"
+                            data-index="{{ languageFile.translations|length + 1 }}"
                             data-filename="{{ languageFile.filename }}"
-                            data-collection-holder-class="{{ languageFile.provider }}-collection"
+                            data-collection-holder-class="{{holderClass}}"
                             data-prototype="
                                 <div class=&quot;row align-items-start mt-2&quot;>
                                     <div class=&quot;col-lg-6&quot;>
@@ -81,6 +84,7 @@
                                     <div class="row align-items-start mt-2">
                                         <div class="col-lg-6">
                                             <label for="translation_key_{{ loop.index }}">{% trans %}Translation key{% endtrans %}</label>
+                                            <input type="hidden" name="translations[{{ languageFile.filename }}][{{ loop.index }}][translationKey]" value="{{ translation.translationKey }}">
                                             <input type="text"
                                                 id="translation_key_{{ loop.index }}"
                                                 class="form-control mb-2 mb-lg-0 disabled"
@@ -88,13 +92,12 @@
                                                 readonly
                                             >
                                         </div>
-
                                         <div class="col-lg-6">
                                             <label for="translation_value_{{ loop.index }}">{% trans %}Translation value{% endtrans %}</label>
                                             <input type="text"
                                                 id="translation_value_{{ loop.index }}"
                                                 class="form-control"
-                                                name="translations[{{ languageFile.filename }}][{{ translation.translationKey }}]"
+                                                name="translations[{{ languageFile.filename }}][{{ loop.index }}][translationValue]"
                                                 value="{{ translation.translationValue }}"
                                             >
                                         </div>
@@ -104,21 +107,21 @@
                         </ul>
 
                         <p class="text-end">
-                            <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ languageFile.provider }}-collection">
+                            <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ holderClass }}">
                                 {% trans %}Add new{% endtrans %}
                                 {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
                             </button>
                         </p>
-                    </div>
-                {% endfor %}
 
-                <input type="hidden" name="_token" value="{{ csrf_token('translations_edit') }}">
-            </div>
-            
-            <button type="submit" class="btn btn-primary mt-2">
-                {% trans %}Save{% endtrans %}
-            </button>
-        </form>
+                        <input type="hidden" name="_token" value="{{ csrf_token('translations_edit') }}">
+
+                        <button type="submit" class="btn btn-primary mt-2">
+                            {% trans %}Save{% endtrans %}
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
     </main>
 {% endblock %}
 
