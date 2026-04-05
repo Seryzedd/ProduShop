@@ -6,9 +6,6 @@ use App\Entity\User\Payment\Payment;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Payment>
- */
 class PaymentRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -33,6 +30,16 @@ class PaymentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function getPaymentStats(): array
+    {
+        return $this->createQueryBuilder('p')
+                ->select('p.status, COUNT(p.id) as count, SUM(p.amount) as total')
+                ->groupBy('p.status')
+                ->getQuery()
+                ->getResult()
+            ;
     }
 
     //    /**

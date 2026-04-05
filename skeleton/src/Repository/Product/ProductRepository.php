@@ -59,6 +59,37 @@ class ProductRepository extends ServiceEntityRepository
         ;
     }
 
+    public function getStats(): array
+    {
+        $byShelf = $this->createQueryBuilder('p')
+            ->select('s.name as shelf, COUNT(p.id) as total, AVG(pkg.price) as avg_price')
+            ->join('p.packages', 'pkg')
+            ->leftJoin('p.shelf', 's')
+            ->groupBy('s.id')
+            ->getQuery()
+            ->getArrayResult();
+
+        $byShelf = array_map(fn($row) => [
+            'shelf'     => $row['shelf'] ?? 'Sans rayon',
+            'total'     => (int) $row['total'],
+            'avg_price' => round((float) $row['avg_price'], 2),
+        ], $byShelf);
+
+        $totalProducts = array_sum(array_column($byShelf, 'total'));
+        $globalAvg     = $totalProducts > 0
+            ? round(array_sum(array_map(
+                fn($r) => $r['avg_price'] * $r['total'],
+                $byShelf
+            )) / $totalProducts, 2)
+            : 0;
+
+        return [
+            'total'     => $totalProducts,
+            'avg_price' => $globalAvg,
+            'by_shelf'  => $byShelf,
+        ];
+    }
+
     /**
      * Returns products whose producer is located within $radiusKm
      * kilometres of the logged-in client.

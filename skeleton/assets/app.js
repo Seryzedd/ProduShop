@@ -262,3 +262,18 @@ if(mybutton) {
     document.documentElement.scrollTop = 0;
   })
 }
+
+document.querySelectorAll('.number-float-animation').forEach(el => {
+    const target = parseFloat(el.dataset.end);
+    const start = performance.now();
+    const duration = 1800;
+    const span = $(el).find('span');
+    const step = now => {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(2, -10 * t);
+        console.log(span);
+        span.text((ease * target).toFixed(2));
+        if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+});

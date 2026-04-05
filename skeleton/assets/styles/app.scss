@@ -399,3 +399,36 @@ input[type='checkbox']:checked + label.btn-more-less::after {
     right: 20px;
     z-index: 20;
 }
+
+@property --n { syntax: '<integer>'; initial-value: 0; inherits: false; }
+
+@keyframes count { to { --n: var(--end); } }
+@keyframes bar   { to { width: var(--pct); } }
+
+.number-animation {
+  counter-reset: n var(--n);
+  animation: count 1.8s cubic-bezier(.22, 1, .36, 1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+.number-animation::before { content: counter(n); }
+
+.progress-percent-bar {
+  height: 4px;
+  background: #e5e4e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-percent-bar::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: currentColor;
+  animation: bar 1.8s cubic-bezier(.22, 1, .36, 1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+
+

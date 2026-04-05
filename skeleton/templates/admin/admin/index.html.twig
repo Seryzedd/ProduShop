@@ -19,5 +19,65 @@
 {% block body %}
     <main class="container">
         
+        <div class="row justify-content-around align-items-center">
+            <div class="col-md-4 px-4 position-relative text-center">
+                {{ block('users_block') }}
+            </div>
+
+            <div class="col-md-4 px-4 position-relative text-center">
+                {{ block('payments_block') }}
+            </div>
+
+            <div class="col-md-4 px-4 position-relative text-center">
+                {{ block('products_block') }}
+            </div>
+        </div>
     <main>
+{% endblock %}
+
+
+{% block payments_block %}
+    {% set total = 0 %}
+    {% set count = 0 %}
+    {% for payment in paymentStats %}
+        {% set total = total + payment.total %}
+        {% set count = count + payment.count %}
+    {% endfor %}
+
+    <h2 class="text-secondary number-float-animation"  data-end="{{ total / 100 }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
+    <a href='{{ path('app_admin_payments') }}' class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans with {'%count%': count} %}{1}%count% payment|]1,Inf]%count% payments{% endtrans %}</a>
+
+    {% for payment in paymentStats %}
+        {% set pct = payment.total|percentage(total) %}
+        <p class="text-end mb-0"><small>{{ payment.status|replace({'ROLE_': ''})|lower|capitalize }} : {{ pct|number_format(2, ',', ' ') }}%</small></p>
+        <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+    {% endfor %}
+{% endblock %}
+
+{% block users_block %}
+    <h2 class="text-secondary number-animation" style="--end:{{ usersStats.total }}"></h2>
+    <a href="{{ path('app_admin_users') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans %}Users{% endtrans %}</a>
+
+    {% for role, count in usersStats.by_role %}
+        {% set pct = count|percentage(usersStats.total) %}
+        <p class="text-end mb-0"><small>{{ role|replace({'ROLE_': ''})|lower|capitalize }} : {{ pct }}%</small></p>
+        <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+    {% endfor %}
+{% endblock %}
+
+{% block products_block %}
+    <div class="d-flex justify-content-center align-items-end">
+        <h2 class="text-secondary number-float-animation mb-0" data-end="{{ productsStats.avg_price }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
+        <p class="mb-0 text-muted fst-italic">
+            {% trans %}Average{% endtrans %}
+        </p>
+    </div>
+    
+    <a href="{{ path('app_admin_product_shelf') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans with {'%count%': productsStats.total} %}{1}%count% product|]1,Inf]%count% products{% endtrans %}</a>
+
+    {% for shelf in productsStats.by_shelf %}
+        {% set pct = shelf.total|percentage(productsStats.total) %}
+        <p class="text-end mb-0"><strong class="me-1">{{ shelf.total }}</strong><small>{{ shelf.shelf|capitalize }} : {{ shelf.avg_price|number_format(2, ',', ' ') }}{{ ux_icon('ic:round-euro', {width: '12px', height: '12px'}) }}</small></p>
+        <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+    {% endfor %}
 {% endblock %}

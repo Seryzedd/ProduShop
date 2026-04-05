@@ -50,6 +50,32 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->getResult();
     }
 
+    public function getStats(): array
+    {
+        $rows = $this->createQueryBuilder('u')
+        ->select('u.roles')
+        ->getQuery()
+        ->getSingleColumnResult();
+
+        
+        $byRole = [];
+        foreach ($rows as $rolesJson) {
+            $roles = array_filter(
+                json_decode($rolesJson),
+                fn($r) => $r !== 'ROLE_USER'
+            );
+            $role = !empty($roles) ? array_values($roles)[0] : 'ROLE_USER';
+            $byRole[$role] = ($byRole[$role] ?? 0) + 1;
+        }
+
+        arsort($byRole);
+
+        return [
+            'total'   => array_sum($byRole),
+            'by_role' => $byRole,
+        ];
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */
