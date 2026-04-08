@@ -12,6 +12,9 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Configuration\Homepage\Block;
 use App\Form\Configuration\BlockType;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Configuration\AbstractText;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use App\Form\Translations\TextTranslationType;
 
 #[Route('/admin/configuration/homepage')]
 final class HomepageController extends AbstractController
@@ -50,6 +53,39 @@ final class HomepageController extends AbstractController
     public function update(Block $block, Request $request): Response
     {
         return $this->getView($block, $request);
+    }
+
+    #[Route('/{text}/translate', name: 'app_admin_configuration_homepage_translate')]
+    public function translateText(AbstractText $text, Request $request): Response
+    {
+        
+        $form = $this->createForm(CollectionType::class, $text->getTranslations(), [
+            'entry_type' => TextTranslationType::class,
+            'label' => 'Translations',
+            'allow_add' => true,
+            'allow_delete' => true
+        ]);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            
+            foreach($form->getData() as $element) {
+                
+                $element->setTranslatable($text);
+
+                $this->entityManager->persist($element);
+            }
+
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Test Translations updated.');
+        }
+
+        return $this->render('admin/configuration/homepage/translate.html.twig', [
+            'form' => $form,
+            'textElement' => $text
+        ]);
     }
 
     #[Route('/new', name: 'app_admin_configuration_homepage_new')]

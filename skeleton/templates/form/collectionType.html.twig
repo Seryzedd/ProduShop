@@ -11,13 +11,15 @@
     {% endif %}
 >
     {% for item in collection %}
-        <li class="list-group-item">
-            {% if collection.vars.prototype is defined %}
-                <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash position-absolute top-0 end-0 p-2 rounded-start-0"></button>
-            {% endif %}
-            
-            {{ form_row(item) }}
-        </li>
+        {% if item.vars.name != '_token' %}
+            <li class="list-group-item">
+                {% if collection.vars.prototype is defined %}
+                    <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash position-absolute top-0 end-0 p-2 rounded-start-0"></button>
+                {% endif %}
+                
+                {{ form_row(item) }}
+            </li>
+        {% endif %}
     {% endfor %}
 </ul>
 

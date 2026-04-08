@@ -31,12 +31,14 @@ trait TranslatableTrait
         return $this->translations;
     }
 
-    public function addTranslation(TranslationInterface $translation): void
+    public function addTranslation(TranslationInterface $translation): static
     {
         if (!$this->translations->contains($translation)) {
             $this->translations->add($translation);
             $translation->setTranslatable($this);
         }
+
+        return $this;
     }
     
     public function removeTranslation(TranslationInterface $translation): void

@@ -59,7 +59,44 @@
                 </div>
 
                 <div class="col-12">
-                    {% include 'form/collectionType.html.twig' with {collection: form.htmlElement} %}
+                    {% set collection = form.htmlElement %}
+
+                    {{ form_label(collection) }}
+
+                    <ul class="{{ collection.vars.name }}-collection list-group list-group"
+                        {% if collection.vars.prototype is defined %}
+                            data-prototype="{{ form_widget(collection.vars.prototype)|e('html_attr') }}"
+                        {% endif %}
+                        deletable="{{ collection.vars.allow_delete }}"
+                        data-index="{{ collection|length > 0 ? collection|length + 1 : 0 }}"
+                        {% if formInline is defined %}
+                            data-inline-items="{{ formInline ? 'true' : 'false' }}"
+                        {% endif %}
+                    >
+                        {% for item in collection %}
+                            <li class="list-group-item">
+                                {% if collection.vars.prototype is defined %}
+                                    <div class="position-absolute top-0 end-0">
+                                        <a href="{{ path('app_admin_configuration_homepage_translate', {text: item.vars.data.id}) }}" class="link-dark link-underline-opacity-0 link-dark-">{{ ux_icon('ic:outline-language') }}</a>
+                                        <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash p-2 rounded-start-0"></button>
+                                    </div>
+                                {% endif %}
+                                
+                                {{ form_row(item) }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if collection.vars.allow_add %}
+                        <p class="text-end">
+                            <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ collection.vars.name }}-collection">
+                                {% trans %}Add new{% endtrans %}
+                                {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
+                            </button>
+                        </p>
+                    {% endif %}
+
+                    {% do collection.setRendered %}
                 </div>
             </div>
             

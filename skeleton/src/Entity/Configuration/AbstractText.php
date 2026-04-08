@@ -8,7 +8,12 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Configuration;
 use Doctrine\DBAL\Types\Types;
+use App\Entity\Translations\TextTranslation;
+use App\Interface\TranslatableInterface;
+use App\Trait\TranslatableTrait;
+use App\Attribute\TranslationEntity;
 
+#[TranslationEntity(class: TextTranslation::class)]
 #[ORM\Entity]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name: 'text_type', type: 'string')]
@@ -20,8 +25,10 @@ use Doctrine\DBAL\Types\Types;
     'paragraph' => Configuration\Paragraph::class,
     'link' => Configuration\Link::class
 ])]
-abstract class AbstractText
+abstract class AbstractText implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -167,6 +174,29 @@ abstract class AbstractText
             $this->getColor(),
             $this->getAlign(),
             nl2br($this->getContent()),
+            $this->getTag()
+        );
+
+        return $html;
+    }
+
+    public function openElement(): string
+    {
+        $html = sprintf(
+            '<%s class="%s" style="color: %s; text-align: %s;">',
+            $this->getTag(),
+            $this->getStringClasses(),
+            $this->getColor(),
+            $this->getAlign()
+        );
+
+        return $html;
+    }
+
+    public function closeElement(): string
+    {
+        $html = sprintf(
+            '</%s>',
             $this->getTag()
         );
 

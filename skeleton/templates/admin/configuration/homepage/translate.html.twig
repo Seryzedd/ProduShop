@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Admin homepage configuration{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Homepage Blocks',
+            route: 'app_admin_configuration_homepage'
+        },
+        {
+            label: 'Update homepage block "%id%"',
+            parameters: {'block': textElement.id},
+            route: 'app_admin_configuration_homepage_update',
+            translationKey: {'%id%': textElement.id}
+        },
+        {
+            label: 'Text translations admin',
+            route: 'app_admin_configuration_homepage_translate',
+            parameters: {text: textElement.id}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="">
+            <h1>{% trans %}Translation text{% endtrans %}</h1>
+            <p class="mb-0">{% trans %}Original Text{% endtrans %} :</p>
+            <p class="text-muted">{{ textElement.content|raw }}</p>
+        </div>
+
+        
+        {{ form_start(form) }}
+            {% include 'form/collectionType.html.twig' with {collection: form} %}
+
+            <div class="d-flex justify-content-end align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    {% trans %}Update{% endtrans %}
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+{% endblock %}

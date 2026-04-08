@@ -1,16 +1,7 @@
-<div class="position-relative" style="background-color: {{ block.backgroundColor }};">
-    {% if block.backgroundImage != null and block.backgroundImage.src|length > 0 %}
-        <img src="{{ block.backgroundImage.src }}" style="object-fit: cover; width: 100%; height: 100%" class="z-1">
-        <div class="position-absolute z-2 p-2">
-            {% for element in block.htmlElement %}
-                {{ element.html|raw }}
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="p-2">
-            {% for element in block.htmlElement %}
-                {{ element.html|raw }}
-            {% endfor %}
-        </div>
-    {% endif %}
+<div class="position-relative p-4" style="{% if block.backgroundImage != null and block.backgroundImage.src|length > 0 %}background: center / cover no-repeat url('{{ block.backgroundImage.src }}'), {{ block.backgroundColor ?: 'transparent' }};{% else %}background-color: {{ block.backgroundColor ?: 'transparent' }};{% endif %}">
+    {% for element in block.htmlElement %}
+        {{ element.openElement()|raw }}
+            {{ element|translated("content")|raw }}
+        {{ element.closeElement()|raw }}
+    {% endfor %}
 </div>
