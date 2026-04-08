@@ -16,11 +16,11 @@
     {% endif %}
     {% set breadcrumb = [
         {
-            label: 'Admin Dashboard'|trans,
+            label: 'Admin Dashboard',
             route: 'app_admin_index'
         },
         {
-            label: 'Homepage configuration'|trans,
+            label: 'Homepage configuration',
             route: 'app_admin_configuration_homepage'
         },
         {
@@ -49,10 +49,13 @@
                     {{ form_row(form.type) }}
                 </div>
 
-                <div class="col-lg-4">
+                <div class="col-lg-2">
                     {{ form_row(form.backgroundColor) }}
                 </div>
                 
+                <div class="col-lg-2">
+                    {{ form_row(form.height) }}
+                </div>
                 
                 <div class="col-lg-4 text-center">
                     {{ form_row(form.backgroundImage) }}

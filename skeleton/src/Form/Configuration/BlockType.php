@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use App\Form\ImageType;
 use App\Form\Configuration\AbstractTextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
 class BlockType extends AbstractType
 {
@@ -23,6 +24,13 @@ class BlockType extends AbstractType
                 'multiple' => false
             ])
             ->add('active')
+            ->add('height', NumberType::class, [
+                'html5' => true,
+                'label' => 'Px',
+                'required' => false,
+                'empty_data' => null,
+                'row_attr' => ['class' => 'input-group mb-lg-0 mb-2']
+            ])
             ->add('backgroundImage', ImageType::class, [
                 'label' => false,
             ])

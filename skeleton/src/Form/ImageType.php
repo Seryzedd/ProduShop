@@ -32,7 +32,7 @@ class ImageType extends AbstractType
                 ],
                 'help' => 'Upload image file type',
                 'label_attr' => [
-                    'class' => 'image-form'
+                    'class' => 'image-form mb-0'
                 ],
                 'constraints' => [
                     new File(

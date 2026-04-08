@@ -1,4 +1,4 @@
-<div class="position-relative p-4" style="{% if block.backgroundImage != null and block.backgroundImage.src|length > 0 %}background: center / cover no-repeat url('{{ block.backgroundImage.src }}'), {{ block.backgroundColor ?: 'transparent' }};{% else %}background-color: {{ block.backgroundColor ?: 'transparent' }};{% endif %}">
+<div class="position-relative p-4" style="{% if block.backgroundImage != null and block.backgroundImage.src|length > 0 %}background: center / cover no-repeat url('{{ block.backgroundImage.src }}'), {{ block.backgroundColor ?: 'transparent' }};{% else %}background-color: {{ block.backgroundColor ?: 'transparent' }};{% endif %}{% if block.height != null %}height: {{ block.height }}px;{% endif %}">
     {% for element in block.htmlElement %}
         {{ element.openElement()|raw }}
             {{ element|translated("content")|raw }}

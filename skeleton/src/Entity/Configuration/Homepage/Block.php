@@ -41,6 +41,9 @@ class Block
     #[ORM\OneToMany(targetEntity: AbstractText::class, mappedBy: 'block', cascade: ['persist', 'remove'])]
     private Collection $htmlElement;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $height = null;
+
     public function __construct()
     {
         $this->htmlElement = new ArrayCollection();
@@ -144,6 +147,18 @@ class Block
                 $element->setBlock(null);
             }
         }
+        return $this;
+    }
+
+    public function getHeight(): ?int
+    {
+        return $this->height;
+    }
+
+    public function setHeight(?int $height): static
+    {
+        $this->height = $height;
+
         return $this;
     }
 }
