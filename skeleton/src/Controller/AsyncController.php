@@ -11,6 +11,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Entity\Product;
 use App\Entity\User\Professional;
+use App\Repository\Product\ProductRepository;
+use App\Entity\User\PostalAdress\Adress;
 
 #[Route('/async')]
 final class AsyncController extends AbstractController
@@ -81,5 +83,21 @@ final class AsyncController extends AbstractController
         $session->set('admin-menu-expanded', (bool) $request->request->get('isChecked'));
         
         return new JsonResponse(true);
+    }
+
+    #[Route('/map/products/adress/{adress}/radius/{radius}', name: 'map_products_adress_list')]
+    public function productsByAdress(Adress $adress, ProductRepository $productRepository, float $radius): JsonResponse
+    {
+        $products = $productRepository->findWithinRadiusToArray($adress, $radius);
+
+        return new JsonResponse($products);
+    }
+
+    #[Route('/map/products/coordinates/lat/{latitude}/lng/{longitude}/radius/{radius}', name: 'map_products_by_coordinates')]
+    public function productsByCoordinates(ProductRepository $productRepository, float $latitude, float $longitude, float $radius): JsonResponse
+    {
+        $products = $productRepository->findByNumbersToArray($longitude, $latitude, $radius);
+
+        return new JsonResponse($products);
     }
 }

@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Datas Extractor{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Request maker',
+            route: 'app_utils_sql_generator_list',
+        },
+        {
+            label: 'Request "%name%"'|trans({'%name%': form.vars.data.name}),
+            route: 'app_utils_sql_generator_update',
+            parameters: {id: form.vars.data.id},
+            translationKey: {'%name%': form.vars.data.name}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        
+        <div class="d-flex align-items-baseline justify-content-between">
+            <h1>{% trans %}Datas Extractor{% endtrans %}</h1>
+
+            <button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#formConfiguration" aria-expanded="{% if form.vars.data.id %}false{% else %}true{% endif %}" aria-controls="collapseWidthExample">
+                {% trans %}Configure{% endtrans %}
+            </button>
+        </div>
+
+        <div class="row justify-content-around align-items-center collapse{% if form.vars.data.id == null %} show{% endif %}" id="formConfiguration">
+            {{ form_start(form) }}
+                <div class="col-12">
+                    <h5 class="text-secondary">{% trans %}Request description{% endtrans %}</h5>
+                    <div class="row">
+                        {{ form_row(form.name) }}
+                        {{ form_row(form.description) }}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <h5 class="text-secondary">{% trans %}Request configuration{% endtrans %}</h5>
+                </div>
+                
+                {{ form_row(form.entityclassName) }}
+
+                <div class="col-6 pt-2">
+                    {% include 'form/collectionType.html.twig' with {collection: form.selector, 'buttonText': 'Add new select'|trans} %}
+                </div>
+                
+                <div class="col-12">
+                    {% include 'form/collectionType.html.twig' with {collection: form.conditions, 'buttonText': 'Add new condition'|trans} %}
+                </div>
+
+                <div class="col-12">
+                    <button class="btn btn-secondary" type="submit">
+                        {% trans %}Save{% endtrans %}
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+
+        {{ block('error_message') }}
+
+        {{ block('datas') }}
+    <main>
+{% endblock %}
+
+{% block error_message %}
+    {% if error|length > 0 %}
+        <div class="border-danger text-danger bg-light mx-auto p-4 text-center">
+            <h4>{% trans %}Error{% endtrans %}</h4>
+            <p>{{ error }}</p>
+        </div>
+    {% endif %}
+{% endblock %}
+    
+{% block datas %}
+    {% if datas|length > 0 %}
+        {% set titles = datas|first|keys %}
+
+        <p class="text-end">
+            <a href="" class="btn btn-outline-secondary btn-sm">
+                {{ ux_icon('line-md:file-download-twotone', {width: '14px', height: '14px'}) }}
+            </a>
+        </p>
+
+        <table class="table text-center table-striped-columns border table-responsive table-hover table-bordered">
+            <thead>
+                <tr>
+                    {% for title in titles %}
+                        <th scope="col">{{ title }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in datas %}
+                    <tr>
+                        {% for value in item %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+    <script>
+    var url = "{{ path('app_utils_sql_entity_request', {'class': '__className__'}) }}";
+        function request(className) {
+            fetch(url.replace('__className__', className))
+            .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+        }
+        
+
+        document.querySelector('#configuration_entityclassName').addEventListener("change", (event) => {
+            var parameters = request(event.target.value);
+        })
+    </script>
+{% endblock %}

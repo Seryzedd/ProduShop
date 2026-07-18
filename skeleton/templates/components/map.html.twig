@@ -51,6 +51,8 @@
     {% set adress = null %}
 {% endif %}
 
+{{ dump() }}
+
 <div class="d-flex border rounded overflow-hidden" style="max-height: 520px;">
     {% set companies = [] %}
     {% if list is not defined %}
@@ -63,19 +65,42 @@
 
             <div class="p-2 border-bottom">
                 <div class="d-flex align-items-start my-2">
-
+                    
                     {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
-                        <form method="POST" class="d-flex mx-auto justify-content-center">
-                            <select class="form-select" name="adressId" aria-label="" data-url="{{ path(app.request.attributes.get('_route'), { adressId: '__ID__' }) }}">
+                        <div class="dropdown" id="adress-dropdown">
+                            <button class="btn btn-outline-dark dropdown-toggle" id="adressDropdownLabel" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if adress %}
+                                    {{ adress.street }} {{ adress.zipCode }} {{ adress.country }}
+                                {% else %}
+                                    {{ 'Select an address'|trans }}
+                                {% endif %}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
+                                        href="#"
+                                        data-value="__geoloc__"
+                                    >
+                                        {{ ux_icon('ic:outline-my-location') }}
+                                        {{ 'My current position'|trans }}
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
                                 {% for shippingAdress in app.user.shippingAdress %}
-
-                                    <option value="{{ shippingAdress.id }}" {% if adress == shippingAdress %}selected{% endif %}>
-                                        {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
-                                    </option>
-                                    
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 {% if adress == shippingAdress %}active{% endif %}"
+                                        href="#"
+                                        data-value="{{ shippingAdress.id }}"
+                                        data-radius="{{ radius is defined ? radius : 20}}"
+                                        data-url="{{ path('map_products_adress_list', { adressId: shippingAdress.id }) }}">
+                                            <span class="material-symbols-outlined" style="font-size:1.1rem;">location_on</span>
+                                            {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
+                                        </a>
+                                    </li>
                                 {% endfor %}
-                            </select>
-                        </form>
+                            </ul>
+                        </div>
+                        
                     {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
                         {% set adress = app.user.adress %}
                         <p class="me-2">
@@ -210,24 +235,124 @@
             {% endfor %}
         ]
     };
-
-    var addressForm = document.querySelector("select[name='adressId']");
-    
-    if(addressForm !== null) {
-        addressForm.addEventListener('change', function (event) {
-            const id = event.target.value;
-
-            const url = event.currentTarget.dataset.url.replace('__ID__', id);
-
-            window.location.href = url;
-        })
-    }
-    
 </script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
+    var addressForm = document.querySelectorAll("#adress-dropdown .dropdown-item");
+    
+    if(addressForm.length > 0) {
+        addressForm.forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const value = this.dataset.value;
+
+                // Met à jour le label du bouton
+                document.getElementById('adressDropdownLabel').textContent = this.textContent.trim();
+
+                if (value === '__geoloc__') {
+                    if (!navigator.geolocation) {
+                        alert("{{ 'Geolocation is not supported by your browser'|trans }}");
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+
+                            // Construit l'URL avec lat/lng en query params
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('lat', lat);
+                            url.searchParams.set('lng', lng);
+                            url.searchParams.delete('adressId'); // retire l'adressId si présent
+
+                            window.location.href = url.toString(); // rechargement avec les coordonnées
+                        },
+                        function (err) {
+                            console.error('Geolocation error:', err.code, err.message);
+                            alert("{{ 'Unable to retrieve your location'|trans }}");
+                        }
+                    );
+                    return;
+                }
+
+                // Adresse normale → rechargement
+                window.location.href = this.dataset.url;
+            });
+        });
+    }
+
+    // ── Fonction : mettre à jour markers + sidebar ────────────
+    function updateMap(newProducts, newClientLatLng) {
+
+        // Supprime les anciens markers
+        markers.forEach(m => map.removeLayer(m));
+        markers.length = 0;
+
+        // Supprime l'ancienne route
+        if (routingControl) {
+            map.removeControl(routingControl);
+            routingControl = null;
+        }
+
+        // Recentre la carte
+        if (newClientLatLng) {
+            map.setView(newClientLatLng, 12, { animate: true });
+        }
+
+        // Ajoute les nouveaux markers
+        newProducts.forEach((p, i) => {
+            const marker = L.marker([p.lat, p.lng], { icon: productIcon })
+                .addTo(map)
+                .bindPopup(buildPopup(p));
+
+            marker.on('click', () => {
+                setActive(i);
+                drawRoute(marker.getLatLng());
+            });
+            markers.push(marker);
+        });
+
+        // Met à jour la sidebar
+        updateSidebar(newProducts);
+
+        // Route auto si 1 seul marker
+        if (newClientLatLng && markers.length === 1) {
+            drawRoute(markers[0].getLatLng());
+        }
+    }
+
+    // ── Fonction : re-rendre la sidebar ──────────────────────
+    function updateSidebar(newProducts) {
+        const list = document.querySelector('.map-sidebar-list');
+        if (!list) return;
+
+        if (newProducts.length === 0) {
+            list.innerHTML = `<p class="text-muted text-center small py-4">{{ 'No product available'|trans }}</p>`;
+            return;
+        }
+
+        list.innerHTML = newProducts.map((p, i) => `
+            <div class="p-2 border-bottom map-product-card position-relative"
+                role="button"
+                data-index="${i}"
+                data-name="${esc(p.companyName?.toLowerCase())}"
+                data-company="${esc(p.companyName?.toLowerCase())}"
+                onclick="mapFocusMarker(${i})"
+                onmouseover="this.classList.add('bg-light')"
+                onmouseout="this.classList.remove('bg-light')"
+                style="cursor:pointer;">
+                <p class="mb-0 text-muted" style="font-size:.68rem;">
+                    <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
+                </p>
+                <span class="position-absolute top-0 end-0 badge rounded-pill ${p.open ? 'bg-success' : 'bg-danger'}">
+                    ${p.open ? '{{ 'Opened'|trans }}' : '{{ 'Closed'|trans }}'}
+                </span>
+            </div>
+        `).join('');
+    }
+
     (function () {
         const data    = window._mapData;
         const markers = [];
@@ -309,7 +434,6 @@
             markers.push(marker);
         });
 
-        console.log(clientLatLng)
         if (clientLatLng && markers.length === 1) {
             drawRoute(markers[0].getLatLng());
         }
@@ -445,26 +569,5 @@
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
-
-        // ── Fix Leaflet dans un Bootstrap Collapse ────────────────
-        const collapseEl = document.getElementById('map')?.closest('.collapse');
-        if (collapseEl) {
-            collapseEl.addEventListener('shown.bs.collapse', function () {
-                map.invalidateSize();
-            });
-        }
-
-        collapseEl.addEventListener('shown.bs.collapse', function () {
-            map.invalidateSize();
-
-            if (clientLatLng && data.radiusKm !== null) {
-                const center = L.latLng(clientLatLng[0], clientLatLng[1]);
-                // toBounds(metres) calcule un rectangle englobant sans avoir besoin de la carte
-                const bounds = center.toBounds(data.radiusKm * 1000 * 2);
-                map.fitBounds(bounds, { padding: [20, 20] });
-            } else if (clientLatLng) {
-                map.setView(clientLatLng, 12);
-            }
-        });
     })();
 </script>

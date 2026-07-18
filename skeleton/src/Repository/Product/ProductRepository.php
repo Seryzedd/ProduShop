@@ -110,9 +110,33 @@ class ProductRepository extends ServiceEntityRepository
     ): array {
         $latitude = $adress->getLatitude();
         $longitude = $adress->getLongitude();
-        // Haversine formula expressed in native SQL.
-        // Doctrine does not natively support SIN/COS/ASIN/SQRT in pure DQL,
-        // so we use a native SQL query which remains portable across MySQL/PostgreSQL.
+
+        return $this->findBycoordinates($longitude, $latitude, $radiusKm, $shelfName)->getResult();
+    }
+
+    public function findWithinRadiusToArray(
+        Adress $adress,
+        ?float $radiusKm = 20,
+        ?string  $shelfName  = null,
+    ): array {
+        $latitude = $adress->getLatitude();
+        $longitude = $adress->getLongitude();
+
+        return $this->findBycoordinates($longitude, $latitude, $radiusKm, $shelfName)->getArrayResult();
+    }
+
+    public function findByNumbers(float $lng, float $lat, ?float $radius = 20, ?string $shelfName = null)
+    {
+        return $this->findBycoordinates($lng, $lat, $radius, $shelfName)->getResult();
+    }
+
+    public function findByNumbersToArray(float $lng, float $lat, ?float $radius = 20, ?string $shelfName = null)
+    {
+        return $this->findBycoordinates($lng, $lat, $radius, $shelfName)->getArrayResult();
+    }
+
+    private function findBycoordinates(float $lng, float $lat, ?float $radius = 20, ?string $shelfName = null): array
+    {
         $qb = $this->createQueryBuilder('p')
             ->addSelect('company', 'addr', 'shelf', 'image')
             ->join('p.company', 'company')
@@ -133,9 +157,9 @@ class ProductRepository extends ServiceEntityRepository
             ')
             // Filter completed Stripe's account
             ->andWhere('stripe.ready = true')
-            ->setParameter('lat',    $latitude)
-            ->setParameter('lng',    $longitude)
-            ->setParameter('radius', $radiusKm);
+            ->setParameter('lat',    $lat)
+            ->setParameter('lng',    $lng)
+            ->setParameter('radius', $radius);
 
         // Optional shelf name filter — case-insensitive partial match
         if ($shelfName !== null) {
@@ -143,7 +167,7 @@ class ProductRepository extends ServiceEntityRepository
                ->setParameter('shelfName', '%' . $shelfName . '%');
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery();
     }
 
     /**

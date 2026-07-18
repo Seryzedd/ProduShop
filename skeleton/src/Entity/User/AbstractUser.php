@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\Utils\SqlGenerator;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -55,9 +56,16 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     #[ORM\Column(length: 100)]
     private string $phone = '';
 
+    /**
+     * @var Collection<int, SqlGenerator>
+     */
+    #[ORM\OneToMany(targetEntity: SqlGenerator::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $sqlGenerators;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->sqlGenerators = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -201,6 +209,36 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SqlGenerator>
+     */
+    public function getSqlGenerators(): Collection
+    {
+        return $this->sqlGenerators;
+    }
+
+    public function addSqlGenerator(SqlGenerator $sqlGenerator): static
+    {
+        if (!$this->sqlGenerators->contains($sqlGenerator)) {
+            $this->sqlGenerators->add($sqlGenerator);
+            $sqlGenerator->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSqlGenerator(SqlGenerator $sqlGenerator): static
+    {
+        if ($this->sqlGenerators->removeElement($sqlGenerator)) {
+            // set the owning side to null (unless already changed)
+            if ($sqlGenerator->getUser() === $this) {
+                $sqlGenerator->setUser(null);
+            }
+        }
 
         return $this;
     }

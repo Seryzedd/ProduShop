@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Datas Extractor{% endtrans %}{% endblock %}
+
+{% block body %}
+    <main class="container">
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="text-primary">{% trans %}Datas Extractor{% endtrans %}</h1>
+            <a href="{{ path('app_utils_sql_generator_new') }}" class="btn btn-secondary rounded-circle">
+                {{ ux_icon('line-md:plus', {height: '20px', width: '20px'}) }}
+            </a>
+        </div>
+        
+        {% for configuration in app.user.sqlGenerators %}
+            <div class="row align-items-center border p-2">
+                <div class="col-4">
+                    <h4 class="text-dark mb-0">{{ configuration.name }}</h4>
+                </div>
+
+                <div class="col-4">
+                    <p class="text-light mb-0"><small>{{ configuration.description ?: 'No description'|trans }}</small></p>
+                </div>
+
+                <div class="col-4">
+                    <p class="text-end mb-0">
+                        <a href="{{ path('app_utils_sql_generator_update', {id: configuration.id}) }}" class="btn btn-outline-dark">
+                            {{ ux_icon('line-md:edit', {width: '20px', height: '20px'}) }}
+                        </a>
+
+                        <a href="" class="btn btn-outline-dark">
+                            {{ ux_icon('line-md:file-download-twotone', {width: '20px', height: '20px'}) }}
+                        </a>
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    <main>
+{% endblock %}

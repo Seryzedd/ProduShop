@@ -26,7 +26,14 @@
 {% if collection.vars.allow_add %}
     <p class="text-end">
         <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ collection.vars.name }}-collection">
-            {% trans %}Add new{% endtrans %}
+            {% if buttonText is defined %}
+                {% if buttonText != false %}
+                    {{ buttonText }}
+                {% endif %}
+            {% else %}
+                {% trans %}Add new{% endtrans %}
+            {% endif %}
+            
             {{ ux_icon('ic:outline-add', {height: '20px', width: '20px'}) }}
         </button>
     </p>

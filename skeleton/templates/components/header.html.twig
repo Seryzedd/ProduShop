@@ -97,6 +97,13 @@
                                 </li>
                             {% endif %}
 
+                            <li>
+                                <a class="dropdown-item" href="{{ path('app_utils_sql_generator_list') }}" title="{% trans %}Datas{% endtrans %}">
+                                    {{ ux_icon('ic:sharp-table-rows', {height: '20px', width: '20px'}) }}
+                                    {% trans %}Datas{% endtrans %}
+                                </a>
+                            </li>
+
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li>
                                     <a class="dropdown-item text-secondary" href="{{ path('app_admin_index') }}" title="{% trans %}Admin dashboard{% endtrans %}">
