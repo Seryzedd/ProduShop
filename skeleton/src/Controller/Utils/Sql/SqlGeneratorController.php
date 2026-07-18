@@ -63,11 +63,9 @@ final class SqlGeneratorController extends AbstractController
         $datas = [];
         $error = null;
 
-        $datas = $this->requestGenerator->getDatas($config);
         try{
             $datas = $this->requestGenerator->getDatas($config);
         } catch(\Exception $e) {
-            dump($e);
             $error = $e->getMessage();
         }
 

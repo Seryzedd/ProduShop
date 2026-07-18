@@ -6,10 +6,13 @@ use App\Entity\Utils\SqlGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\EntityBuilder\EntityMetaDatas;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 class SqlRequestGenerator
 {
-    const  ALIAS = [];
+    private array $alias = [];
+
+    private array $tableNames = []; 
 
     public function __construct(private EntityManagerInterface $entityManager, private EntityMetaDatas $metadatas) {}
     
@@ -30,9 +33,11 @@ class SqlRequestGenerator
     {
         $queryClass = $sqlconfig->getClassNamespace($sqlconfig->getEntityclassName());
 
+        
         $tablename = $this->metadatas->getTableName($queryClass);
 
         $this->addAlias($sqlconfig->getEntityclassName(), $tablename);
+        $this->addTableDatas($queryClass);
 
         $way = explode('\\', $queryClass);
         $classname =  end($way);
@@ -42,8 +47,6 @@ class SqlRequestGenerator
         $sql .= $this->from($queryClass);
 
         $sql .= $this->addWhere($sqlconfig->getConditions());
-
-        dump($sql);
 
         return $sql;
     }
@@ -60,6 +63,7 @@ class SqlRequestGenerator
         $sql = '';
         $tableNames = $this->metadatas->getMetadatas($from);
         
+        dump($tableNames, $from);
 
         foreach($selects as $selection) {
             $sql .= 'SELECT ';
@@ -84,17 +88,22 @@ class SqlRequestGenerator
     {
         $conditions = ' ';
 
+        
         foreach($wheres as $where) {
+
+            dump($where, $this);
             if($where === $wheres->first()) {
                 $conditions .= 'WHERE ';
             } else {
                 $conditions .= 'ANDWHERE ';
             }
 
-            $alias = $this->getAliasValue($where->getAlias());
-            dump();
+            $tableNames = $this->getTableDatas($this->config->getClassNamespace($where->getAlias()));
 
-            $conditions .= $alias . '.' . $where->getField() . ' ' . $where->getOperator() . ' \'' . $where->getValue() . '\' ';
+            $alias = $this->getAliasValue($where->getAlias());
+            $fieldName = $tableNames->getColumnName($where->getField());
+
+            $conditions .= $alias . '.' . $fieldName . ' ' . $where->getOperator() . ' \'' . $where->getValue() . '\' ';
         }
 
         return $conditions;
@@ -102,18 +111,35 @@ class SqlRequestGenerator
 
     private function addAlias(string $alias, string $name): array
     {
-        $this->ALIAS[$alias] = $name;
+        $this->alias[$alias] = $name;
 
-        return $this->ALIAS;
+        return $this->alias;
     }
 
     private function getAliases(): array
     {
-        return $this->ALIAS;
+        return $this->alias;
     }
 
     private function getAliasValue(string $alias): string
     {
-        return $this->ALIAS[$alias];
+        return $this->alias[$alias];
+    }
+
+    private function getTablesDatas(): array
+    {
+        return $this->tableNames;
+    }
+
+    private function addTableDatas(string $name): void
+    {
+        $tableNames = $this->metadatas->getMetadatas($name);
+
+        $this->tableNames[$name] = $tableNames;
+    }
+
+    private function getTableDatas(string $name): ClassMetadata
+    {
+        return $this->tableNames[$name];
     }
 }
