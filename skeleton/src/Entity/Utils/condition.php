@@ -22,7 +22,6 @@ class condition
         '=' => '=',
         '!=' => '!=',
         'Like' => 'LIKE',
-        'Contains' => 'CONTAINS',
         'In' => 'IN'
 
     ];

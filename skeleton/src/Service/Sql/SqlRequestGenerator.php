@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Service\EntityBuilder\EntityMetaDatas;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use App\Service\String\Normalizer;
 
 class SqlRequestGenerator
 {
@@ -14,7 +15,7 @@ class SqlRequestGenerator
 
     private array $tableNames = []; 
 
-    public function __construct(private EntityManagerInterface $entityManager, private EntityMetaDatas $metadatas) {}
+    public function __construct(private EntityManagerInterface $entityManager, private EntityMetaDatas $metadatas, private Normalizer $normalizer) {}
     
     public function getDatas(SqlGenerator $sqlconfig)
     {
@@ -62,8 +63,6 @@ class SqlRequestGenerator
     {
         $sql = '';
         $tableNames = $this->metadatas->getMetadatas($from);
-        
-        dump($tableNames, $from);
 
         foreach($selects as $selection) {
             $sql .= 'SELECT ';
@@ -91,7 +90,6 @@ class SqlRequestGenerator
         
         foreach($wheres as $where) {
 
-            dump($where, $this);
             if($where === $wheres->first()) {
                 $conditions .= 'WHERE ';
             } else {
@@ -103,10 +101,51 @@ class SqlRequestGenerator
             $alias = $this->getAliasValue($where->getAlias());
             $fieldName = $tableNames->getColumnName($where->getField());
 
-            $conditions .= $alias . '.' . $fieldName . ' ' . $where->getOperator() . ' \'' . $where->getValue() . '\' ';
+            $conditions .= $alias . '.' . $fieldName . ' ' . $where->getOperator() . ' ' . $this->insertValue($where->getOperator(), $where->getValue()) . ' ';
         }
 
         return $conditions;
+    }
+
+    private function insertValue(string $operator, string $value): string
+    {
+        $string = '';
+
+        switch($operator) {
+            case '=':
+            case '>':
+            case '<':
+            case '<=':
+            case '>=':
+            case '!=':
+                $string = '\'' . $value . '\'';
+                break;
+            case 'LIKE':
+                $string = '\'%' . $value . '%\'';
+                break;
+            case 'IN':
+                $string = $this->toListStr($this->normalizer->stringToList($value));
+                break;
+        }
+
+        return $string;
+    }
+
+    private function toListStr(array $list): string
+    {
+        $response = '(';
+
+        foreach($list as $key => $val) {
+            $response .= '\'' . $val . '\'';
+
+            if(count($list) !== $key + 1) {
+                $response .= ',';
+            }
+        }
+
+        $response .= ')';
+
+        return $response;
     }
 
     private function addAlias(string $alias, string $name): array
