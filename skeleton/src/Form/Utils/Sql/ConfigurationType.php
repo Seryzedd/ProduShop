@@ -46,12 +46,27 @@ class ConfigurationType extends AbstractType
             ])
         ;
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
             $config = $event->getData();
             $form = $event->getForm();
 
             $entityclassName = $config->getEntityclassName();
 
+
+            $form->add('selector', CollectionType::class, [
+                'entry_type' => SelectorType::class,
+                'row_attr' => ['class' => 'col-6'],
+                'label' => 'Select',
+                'label_attr' => ['class' => ''],
+                'entry_options' => [
+                    'sources' => [
+                        $entityclassName => $entityclassName
+                    ]
+                ],
+                'by_reference' => false,
+                'allow_add' => true,
+                'allow_delete' => true
+            ]);
             
             $form->add('conditions', CollectionType::class, [
                 'entry_options' => [

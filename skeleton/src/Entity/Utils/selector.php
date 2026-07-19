@@ -31,6 +31,9 @@ class selector
     #[ORM\JoinColumn(nullable: false)]
     private ?SqlGenerator $sqlGenerator = null;
 
+    #[ORM\Column(length: 100)]
+    private ?string $source = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -68,6 +71,18 @@ class selector
     public function setSqlGenerator(?SqlGenerator $sqlGenerator): static
     {
         $this->sqlGenerator = $sqlGenerator;
+
+        return $this;
+    }
+
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+
+    public function setSource(string $source): static
+    {
+        $this->source = $source;
 
         return $this;
     }
