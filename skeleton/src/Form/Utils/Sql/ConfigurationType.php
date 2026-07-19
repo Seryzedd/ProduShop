@@ -61,7 +61,7 @@ class ConfigurationType extends AbstractType
                     'class_name' => $config->getClassNamespace($entityclassName)
                 ],
                 'entry_type' => ConditionType::class,
-                'label' => 'Conditions',
+                'label' => false,
                 'label_attr' => ['class' => ''],
                 'row_attr' => ['class' => 'col-12'],
                 'by_reference' => false,

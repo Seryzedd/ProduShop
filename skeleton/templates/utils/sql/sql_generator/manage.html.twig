@@ -51,6 +51,12 @@
                 </div>
                 
                 <div class="col-12">
+                    <p class="d-table-cell align-items-baseline">
+                        {% trans %}Conditions{% endtrans %}
+                        <button type="button" class="btn btn-outline-dark btn-sm rounded-circle" data-bs-container="#formConfiguration" data-bs-trigger="hover focus" data-bs-placement="right" data-bs-toggle="popover" data-bs-content="{{ 'You can choose many values to check for IN operator (example: A B C or A, B, C)'|trans }}">
+                            {{ ux_icon('ic:round-question-mark', {width: '10px', height: '10px'}) }}
+                        </button>
+                    </p>
                     {% include 'form/collectionType.html.twig' with {collection: form.conditions, 'buttonText': 'Add new condition'|trans} %}
                 </div>
 
@@ -87,11 +93,11 @@
             </a>
         </p>
 
-        <table class="table text-center table-striped-columns border table-responsive table-hover table-bordered">
+        <table class="table text-center table-striped-columns table-responsive table-hover table-bordered">
             <thead>
                 <tr>
                     {% for title in titles %}
-                        <th scope="col">{{ title }}</th>
+                        <th scope="col" class="table-primary">{{ title }}</th>
                     {% endfor %}
                 </tr>
             </thead>
