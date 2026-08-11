@@ -42,8 +42,6 @@ class SelectorType extends AbstractType
             $form->add('source', ChoiceType::class, [
                 'choices' => $options['sources'],
             ]);
-
-            
         });
     }
 

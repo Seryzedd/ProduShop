@@ -32,7 +32,14 @@ final class CompanyController extends AbstractController
             }
             
             if($adress) {
-                $products = $productRepository->findWithinRadius($adress, $radius);
+                $products = [];
+                try {
+                    $products = $productRepository->findWithinRadius($adress, $radius);
+                } catch (\Throwable $th) {
+                    dump($th);
+                    $this->addFlash('danger', $th->getMessage());
+                }
+                
             } else {
                 $products = $productRepository->findAll();
             }

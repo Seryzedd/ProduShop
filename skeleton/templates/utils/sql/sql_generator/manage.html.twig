@@ -118,8 +118,8 @@
     {{ parent() }}
     {{ importmap('collection-form') }}
     <script>
-    var url = "{{ path('app_utils_sql_entity_request', {'class': '__className__'}) }}";
-        function request(className) {
+    var url = "{{ path('app_utils_sql_entity_request', {'class': '__className__', 'formType': '__type__'}) }}";
+        function requestForm(className, type) {
             fetch(url.replace('__className__', className))
             .then(response => {
                 if (!response.ok) {
@@ -132,8 +132,17 @@
         }
         
 
-        document.querySelector('#configuration_entityclassName').addEventListener("change", (event) => {
-            var parameters = request(event.target.value);
-        })
+        document.querySelector('#configuration_entityclassName').addEventListener("change", async (event) => {
+            const response = await fetch(url.replace('__className__', event.target.value).replace('__type__', 'selector'));
+            if (!response.ok) return;
+
+            const html = await response.text();
+
+            console.log(html);
+            // Remplace le bloc property de CHAQUE selector déjà présent dans la collection
+            // document.querySelectorAll('[data-property-field]').forEach(container => {
+            //     container.innerHTML = html;
+            // });
+        });
     </script>
 {% endblock %}

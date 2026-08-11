@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\Form;
 use App\Service\Sql\SqlRequestGenerator;
+use App\Service\EntityBuilder\EntityMetaDatas;
 
 #[Route('/utils/sql/generator')]
 final class SqlGeneratorController extends AbstractController
@@ -82,16 +83,24 @@ final class SqlGeneratorController extends AbstractController
         ]);
     }
 
-    #[Route('/request/{class}', name: 'app_utils_sql_entity_request')]
-    public function asyncRequestEntityParameters(string $class, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/request/{class}/{formType}', name: 'app_utils_sql_entity_request')]
+    public function asyncRequestEntityParameters(string $class, EntityMetaDatas $metadatas): JsonResponse
     {
-        $list = SqlGenerator::CLASSELIST;
+        if (!isset(SqlGenerator::CLASSELIST[$class])) {
+            throw $this->createNotFoundException('Entité inconnue.');
+        }
 
-        $classNamespace = $list[$class];
+        $entityClass = SqlGenerator::CLASSELIST[$entityKey];
+        $choices = $metaDatas->buildDefaults($entityClass);
 
-        $metadata = $entityManager->getClassMetadata($classNamespace);
+        // On construit un SelectorType "à vide" juste pour générer le champ property
+        $form = $this->createForm(SelectorType::class, new Selector(), [
+            'fields_options' => $choices,
+        ]);
 
-        return new JsonResponse($metadata->getFieldNames());
+        return $this->render('form/_property_field.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     private function saveDatas(Form $form)

@@ -51,7 +51,63 @@
     {% set adress = null %}
 {% endif %}
 
-{{ dump() }}
+{% if app.user %}
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            {{ block('radius_form', 'product/product/index.html.twig') }}
+        </div>
+
+        <div class="col-md-4 my-2">
+                
+                {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
+                    <div class="dropdown" id="adress-dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle w-100" id="adressDropdownLabel" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if adress %}
+                                {{ adress.street }} {{ adress.zipCode }} {{ adress.country }}
+                            {% else %}
+                                {{ 'Select an address'|trans }}
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2"
+                                    href="#"
+                                    data-value="__geoloc__"
+                                >
+                                    {{ ux_icon('ic:baseline-share-location') }}
+                                    {{ 'My current position'|trans }}
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for shippingAdress in app.user.shippingAdress %}
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 {% if adress == shippingAdress %}active{% endif %}"
+                                    href="#"
+                                    data-value="{{ shippingAdress.id }}"
+                                    data-radius="{{ radius }}"
+                                    data-url="{{ path('map_products_adress_list', { adress: shippingAdress.id, 'radius': radius }) }}">
+                                        {{ ux_icon('ic:outline-location-city') }}
+                                        {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
+                    {% set adress = app.user.adress %}
+                    <p class="me-2">
+                        {% trans %}My adress{% endtrans %} :
+                    </p>
+                    <p class="text-muted">
+                        {{ adress.street }}<br>
+                        {{ adress.zipCode }} {{ adress.country }}
+                    </p>
+                {% endif %}
+            </div>
+    </div>
+    
+{% endif %}
 
 <div class="d-flex border rounded overflow-hidden" style="max-height: 520px;">
     {% set companies = [] %}
@@ -59,59 +115,15 @@
         {% set list = true %}
     {% endif %}
 
+    {% if radius is not defined %}
+        {% set radius = 20 %}
+    {% endif %}
+
     {# ── Sidebar ── #}
     {% if list == true %}
         <div class="d-flex flex-column border-end bg-white" style="width: 50%; flex-shrink: 0;">
 
             <div class="p-2 border-bottom">
-                <div class="d-flex align-items-start my-2">
-                    
-                    {% if app.user|instanceOf('App\\Entity\\User\\Client') %}
-                        <div class="dropdown" id="adress-dropdown">
-                            <button class="btn btn-outline-dark dropdown-toggle" id="adressDropdownLabel" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if adress %}
-                                    {{ adress.street }} {{ adress.zipCode }} {{ adress.country }}
-                                {% else %}
-                                    {{ 'Select an address'|trans }}
-                                {% endif %}
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2"
-                                        href="#"
-                                        data-value="__geoloc__"
-                                    >
-                                        {{ ux_icon('ic:outline-my-location') }}
-                                        {{ 'My current position'|trans }}
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                {% for shippingAdress in app.user.shippingAdress %}
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center gap-2 {% if adress == shippingAdress %}active{% endif %}"
-                                        href="#"
-                                        data-value="{{ shippingAdress.id }}"
-                                        data-radius="{{ radius is defined ? radius : 20}}"
-                                        data-url="{{ path('map_products_adress_list', { adressId: shippingAdress.id }) }}">
-                                            <span class="material-symbols-outlined" style="font-size:1.1rem;">location_on</span>
-                                            {{ shippingAdress.street }} {{ shippingAdress.zipCode }} {{ shippingAdress.country }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        
-                    {% elseif app.user|instanceOf('App\\Entity\\User\\Professional') %}
-                        {% set adress = app.user.adress %}
-                        <p class="me-2">
-                            {% trans %}My adress{% endtrans %} :
-                        </p>
-                        <p class="text-muted">
-                            {{ adress.street }}<br>
-                            {{ adress.zipCode }} {{ adress.country }}
-                        </p>
-                    {% endif %}
-                </div>
 
                 <input type="search" id="mapSearchInput" class="form-control form-control-sm"
                     placeholder="Rechercher…">
@@ -144,7 +156,7 @@
                             >
                                 {% if product.company.adress is defined and product.company.adress %}
                                     <p class="mb-0 text-muted" style="font-size:.68rem;">
-                                        {{ ux_icon('ic:baseline-location-on') }}
+                                        {{ ux_icon('ic:baseline-share-location') }}
 
                                         {{ product.company.adress.street }}
                                         {{ product.company.adress.zipCode }} {{ product.company.adress.country }}
@@ -240,124 +252,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
-    var addressForm = document.querySelectorAll("#adress-dropdown .dropdown-item");
-    
-    if(addressForm.length > 0) {
-        addressForm.forEach(function (item) {
-            item.addEventListener('click', function (e) {
-                e.preventDefault();
-                const value = this.dataset.value;
-
-                // Met à jour le label du bouton
-                document.getElementById('adressDropdownLabel').textContent = this.textContent.trim();
-
-                if (value === '__geoloc__') {
-                    if (!navigator.geolocation) {
-                        alert("{{ 'Geolocation is not supported by your browser'|trans }}");
-                        return;
-                    }
-                    navigator.geolocation.getCurrentPosition(
-                        function (position) {
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
-
-                            // Construit l'URL avec lat/lng en query params
-                            const url = new URL(window.location.href);
-                            url.searchParams.set('lat', lat);
-                            url.searchParams.set('lng', lng);
-                            url.searchParams.delete('adressId'); // retire l'adressId si présent
-
-                            window.location.href = url.toString(); // rechargement avec les coordonnées
-                        },
-                        function (err) {
-                            console.error('Geolocation error:', err.code, err.message);
-                            alert("{{ 'Unable to retrieve your location'|trans }}");
-                        }
-                    );
-                    return;
-                }
-
-                // Adresse normale → rechargement
-                window.location.href = this.dataset.url;
-            });
-        });
-    }
-
-    // ── Fonction : mettre à jour markers + sidebar ────────────
-    function updateMap(newProducts, newClientLatLng) {
-
-        // Supprime les anciens markers
-        markers.forEach(m => map.removeLayer(m));
-        markers.length = 0;
-
-        // Supprime l'ancienne route
-        if (routingControl) {
-            map.removeControl(routingControl);
-            routingControl = null;
-        }
-
-        // Recentre la carte
-        if (newClientLatLng) {
-            map.setView(newClientLatLng, 12, { animate: true });
-        }
-
-        // Ajoute les nouveaux markers
-        newProducts.forEach((p, i) => {
-            const marker = L.marker([p.lat, p.lng], { icon: productIcon })
-                .addTo(map)
-                .bindPopup(buildPopup(p));
-
-            marker.on('click', () => {
-                setActive(i);
-                drawRoute(marker.getLatLng());
-            });
-            markers.push(marker);
-        });
-
-        // Met à jour la sidebar
-        updateSidebar(newProducts);
-
-        // Route auto si 1 seul marker
-        if (newClientLatLng && markers.length === 1) {
-            drawRoute(markers[0].getLatLng());
-        }
-    }
-
-    // ── Fonction : re-rendre la sidebar ──────────────────────
-    function updateSidebar(newProducts) {
-        const list = document.querySelector('.map-sidebar-list');
-        if (!list) return;
-
-        if (newProducts.length === 0) {
-            list.innerHTML = `<p class="text-muted text-center small py-4">{{ 'No product available'|trans }}</p>`;
-            return;
-        }
-
-        list.innerHTML = newProducts.map((p, i) => `
-            <div class="p-2 border-bottom map-product-card position-relative"
-                role="button"
-                data-index="${i}"
-                data-name="${esc(p.companyName?.toLowerCase())}"
-                data-company="${esc(p.companyName?.toLowerCase())}"
-                onclick="mapFocusMarker(${i})"
-                onmouseover="this.classList.add('bg-light')"
-                onmouseout="this.classList.remove('bg-light')"
-                style="cursor:pointer;">
-                <p class="mb-0 text-muted" style="font-size:.68rem;">
-                    <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
-                </p>
-                <span class="position-absolute top-0 end-0 badge rounded-pill ${p.open ? 'bg-success' : 'bg-danger'}">
-                    ${p.open ? '{{ 'Opened'|trans }}' : '{{ 'Closed'|trans }}'}
-                </span>
-            </div>
-        `).join('');
-    }
-
     (function () {
         const data    = window._mapData;
         const markers = [];
-
-        console.log(data);
 
         // ── Product icon (inline SVG) ─────────────────────────────
         const productIcon = L.divIcon({
@@ -382,12 +279,12 @@
         });
 
         // ── Map initialisation — synchronous, no network call ────────
-        // Declared at IIFE scope so drawRoute() and mapFocusMarker() can access it
-        const clientLatLng = data.client.lat !== null
-            ? [data.client.lat, data.client.lng]
-            : null;
-
+        // `let` (pas `const`) : ces valeurs sont réassignées après chaque
+        // mise à jour asynchrone (changement d'adresse / géolocalisation).
+        let clientLatLng   = data.client.lat !== null ? [data.client.lat, data.client.lng] : null;
         let routingControl = null; // holds the active route, replaced on each click
+        let clientMarker   = null;
+        let radiusCircle   = null;
 
         const map = L.map('map').setView(
             clientLatLng ?? [46.603354, 1.888334],
@@ -398,45 +295,6 @@
             maxZoom:     19,
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(map);
-
-        // ── Client marker + radius circle ─────────────────────────
-        if (clientLatLng) {
-            L.marker(clientLatLng, { icon: clientIcon })
-                .addTo(map)
-                .bindPopup('<strong>' + "{{ 'Calculating'|trans }}" + '...</strong>');
-
-            if (data.radiusKm !== null) {
-                const circle = L.circle(clientLatLng, {
-                    radius:      data.radiusKm * 1000,
-                    color:       '#a3c8ff',
-                    fillColor:   '#84b5ff',
-                    fillOpacity: 0.05,
-                    weight:      2,
-                }).addTo(map);
-
-                // Auto-zoom: fit the map to the circle's bounding box
-                map.fitBounds(circle.getBounds(), { padding: [20, 20] });
-            }
-        }
-
-        // ── Product markers ───────────────────────────────────────
-        data.products.forEach((p, i) => {
-            const latlng = [p.lat, p.lng];
-
-            const marker = L.marker(latlng, { icon: productIcon })
-                .addTo(map)
-                .bindPopup(buildPopup(p));
-
-            marker.on('click', () => {
-                setActive(i);
-                drawRoute(marker.getLatLng());
-            });
-            markers.push(marker);
-        });
-
-        if (clientLatLng && markers.length === 1) {
-            drawRoute(markers[0].getLatLng());
-        }
 
         // ── Popup content ─────────────────────────────────────────
         function buildPopup(p) {
@@ -450,6 +308,59 @@
                     </p>
                 </div>`;
         }
+
+        // ── Client marker + radius circle ─────────────────────────
+        function renderClient(latlng, radiusKm) {
+            if (clientMarker) { map.removeLayer(clientMarker); clientMarker = null; }
+            if (radiusCircle) { map.removeLayer(radiusCircle); radiusCircle = null; }
+
+            if (!latlng) return;
+
+            clientMarker = L.marker(latlng, { icon: clientIcon })
+                .addTo(map)
+                .bindPopup('<strong>' + "{{ 'Calculating'|trans }}" + '...</strong>');
+
+            if (radiusKm !== null && radiusKm !== undefined) {
+                radiusCircle = L.circle(latlng, {
+                    radius:      radiusKm * 1000,
+                    color:       '#a3c8ff',
+                    fillColor:   '#84b5ff',
+                    fillOpacity: 0.05,
+                    weight:      2,
+                }).addTo(map);
+
+                // Auto-zoom: fit the map to the circle's bounding box
+                map.fitBounds(radiusCircle.getBounds(), { padding: [20, 20] });
+            } else {
+                map.setView(latlng, 13, { animate: true });
+            }
+        }
+
+        // ── Product markers ───────────────────────────────────────
+        function renderProducts(products) {
+            markers.forEach(m => map.removeLayer(m));
+            markers.length = 0;
+
+            products.forEach((p, i) => {
+                const marker = L.marker([p.lat, p.lng], { icon: productIcon })
+                    .addTo(map)
+                    .bindPopup(buildPopup(p));
+
+                marker.on('click', () => {
+                    setActive(i);
+                    drawRoute(marker.getLatLng());
+                });
+                markers.push(marker);
+            });
+
+            if (clientLatLng && markers.length === 1) {
+                drawRoute(markers[0].getLatLng());
+            }
+        }
+
+        // ── Initial (synchronous) render ────────────────────────────
+        renderClient(clientLatLng, data.radiusKm);
+        renderProducts(data.products);
 
         // ── Focus from sidebar → map + draw route ────────────────
         window.mapFocusMarker = function (index) {
@@ -535,9 +446,7 @@
                 document.getElementById('routeOffcanvas').classList.add('show');
 
                 const start = L.latLng(clientLatLng[0], clientLatLng[1]);
-                console.log(start.distanceTo(destination));
                 if (start.distanceTo(destination) < 50) {
-                    
                     map.setView(clientLatLng, 15);
                     document.getElementById('routeOffcanvas').classList.remove('show');
                     document.getElementById('routeToggleBtn').classList.add('d-none');
@@ -551,6 +460,136 @@
             document.querySelector(`.map-product-card[data-index="${index}"]`)
                 ?.classList.add('bg-primary-subtle');
         }
+
+        // ── Re-rendre la sidebar (liste des produits/enseignes) ────
+        function updateSidebar(products) {
+            const list = document.querySelector('.map-sidebar-list');
+            if (!list) return;
+
+            if (!products || products.length === 0) {
+                list.innerHTML = `<p class="text-muted text-center small py-4">{{ 'No product available'|trans }}</p>`;
+                return;
+            }
+
+            list.innerHTML = products.map((p, i) => `
+                <a href="${p.companyLink}" class="link-offset-2 fw-bold px-2 ms-2 mt-3 link-offset-3-hover link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover d-block">
+                    ${esc(p.company)}
+                </a>
+                <div class="p-2 border-bottom map-product-card position-relative"
+                    role="button"
+                    data-index="${i}"
+                    data-name="${esc((p.company || '').toLowerCase())}"
+                    data-company="${esc((p.company || '').toLowerCase())}"
+                    onclick="mapFocusMarker(${i})"
+                    onmouseover="this.classList.add('bg-light')"
+                    onmouseout="this.classList.remove('bg-light')"
+                    style="cursor:pointer;">
+                    <p class="mb-0 text-muted" style="font-size:.68rem;">
+                        <i class="bi bi-geo-alt-fill text-primary"></i> ${esc(p.address)}
+                    </p>
+                    <span class="position-absolute top-0 end-0 badge rounded-pill ${p.open ? 'bg-success' : 'bg-danger'}">
+                        ${p.open ? '{{ 'Opened'|trans }}' : '{{ 'Closed'|trans }}'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function setSidebarLoading() {
+            const list = document.querySelector('.map-sidebar-list');
+            if (!list) return;
+            list.innerHTML = `
+                <div class="text-center text-muted small py-4">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    {{ 'Loading'|trans }}...
+                </div>`;
+        }
+
+        function setSidebarError() {
+            const list = document.querySelector('.map-sidebar-list');
+            if (!list) return;
+            list.innerHTML = `<p class="text-danger text-center small py-4">{{ 'An error occurred'|trans }}</p>`;
+        }
+
+        // ── Applique une réponse JSON du contrôleur (client + produits) ──
+        function updateMap(payload) {
+            console.log(payload);
+
+            clientLatLng = (payload.client && payload.client.lat !== null && payload.client.lat !== undefined)
+                ? [payload.client.lat, payload.client.lng]
+                : null;
+
+            renderClient(clientLatLng, payload.radiusKm);
+            renderProducts(payload.products || []);
+            updateSidebar(payload.products || []);
+        }
+
+        // ── Appel asynchrone vers AsyncController (sans recharger la page) ──
+        function fetchMapData(url) {
+            setSidebarLoading();
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(payload => updateMap(payload))
+                .catch(err => {
+                    console.error('Map update failed:', err);
+                    setSidebarError();
+                });
+        }
+
+        // ── Sélecteur d'adresse (dropdown) ──────────────────────────
+        const addressItems = document.querySelectorAll('#adress-dropdown .dropdown-item');
+
+        addressItems.forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const value = this.dataset.value;
+
+                // Met à jour le label du bouton + l'item actif
+                document.getElementById('adressDropdownLabel').textContent = this.textContent.trim();
+                addressItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                if (value === '__geoloc__') {
+                    if (!navigator.geolocation) {
+                        alert("{{ 'Geolocation is not supported by your browser'|trans }}");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+
+                            // Le gabarit d'URL est généré côté Twig avec des valeurs
+                            // factices, puis substitué en JS (les routes Symfony ont
+                            // besoin de valeurs réelles à la génération).
+                            const urlTemplate = {{ path('map_products_by_coordinates', { latitude: 'LAT_PLACEHOLDER', longitude: 'LNG_PLACEHOLDER', radius: radius })|json_encode|raw }};
+                            const url = urlTemplate
+                                .replace('LAT_PLACEHOLDER', lat)
+                                .replace('LNG_PLACEHOLDER', lng);
+
+                            fetchMapData(url);
+                        },
+                        function (err) {
+                            console.error('Geolocation error:', err.code, err.message);
+                            alert("{{ 'Unable to retrieve your location'|trans }}");
+                        }
+                    );
+                    return;
+                }
+
+                // Adresse de livraison sélectionnée : l'URL est déjà prête (data-url)
+                const url = this.dataset.url;
+                if (url) {
+                    fetchMapData(url);
+                }
+            });
+        });
 
         // ── Search filter ─────────────────────────────────────────
         const searchInput = document.getElementById('mapSearchInput');

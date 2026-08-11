@@ -7,6 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User\PostalAdress\Adress;
 use App\Entity\User\Professional;
+use Doctrine\ORM\Query;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -111,6 +112,10 @@ class ProductRepository extends ServiceEntityRepository
         $latitude = $adress->getLatitude();
         $longitude = $adress->getLongitude();
 
+        if(!$latitude || !$longitude) {
+            throw new \Exception('Error ! No coordinates found.');
+        }
+
         return $this->findBycoordinates($longitude, $latitude, $radiusKm, $shelfName)->getResult();
     }
 
@@ -135,7 +140,7 @@ class ProductRepository extends ServiceEntityRepository
         return $this->findBycoordinates($lng, $lat, $radius, $shelfName)->getArrayResult();
     }
 
-    private function findBycoordinates(float $lng, float $lat, ?float $radius = 20, ?string $shelfName = null): array
+    private function findBycoordinates(float $lng, float $lat, ?float $radius = 20, ?string $shelfName = null): Query
     {
         $qb = $this->createQueryBuilder('p')
             ->addSelect('company', 'addr', 'shelf', 'image')

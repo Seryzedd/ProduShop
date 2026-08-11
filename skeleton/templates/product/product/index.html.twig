@@ -21,10 +21,9 @@
 {% block body %}
     {% set radius = app.request.query.get('radius') ?: 20 %}
     <main class="container">
-        <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
         <div class="row align-items-center">
             <div class="col-lg-11 col-10">
-                {{ block("radius_form") }}
+                <h1 class="mb-2">{% trans with {'%shelf%': shelf} %}"%shelf%" Products{% endtrans %}</h1>
             </div>
             <div class="col-lg-1 col-2 text-end">
                 <button class="btn btn-primary" title="{% trans %}Show map{% endtrans %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMap" aria-expanded="false" aria-controls="collapseMap">
@@ -37,14 +36,24 @@
             {{ block('map') }}
         </div>
 
-        {% block product_list %}
-            <div class="card-group row-cols-1 row-cols-lg-6">
-                {% for product in products %}
-                    {% include 'product/product/card.html.twig' %}
-                {% endfor %}
-            </div>
-        {% endblock %}
+        <div>
+            {{ block('product_list') }}
+        </div>
     </main>
+{% endblock %}
+
+{% block product_list %}
+    {% if products|length == 0 %}
+        <h3 class="text-center">
+            {% trans %}No product available.{% endtrans %}
+        </h3>
+    {% else %}
+        <div class="card-group row-cols-1 row-cols-lg-6">
+            {% for product in products %}
+                {% include 'product/product/card.html.twig' %}
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block radius_form %}

@@ -89,8 +89,13 @@ final class AsyncController extends AbstractController
     public function productsByAdress(Adress $adress, ProductRepository $productRepository, float $radius): JsonResponse
     {
         $products = $productRepository->findWithinRadiusToArray($adress, $radius);
-
-        return new JsonResponse($products);
+ 
+        return new JsonResponse($this->buildMapResponse(
+            $products,
+            $radius,
+            $adress->hasCoordinates() ? $adress->getLatitude() : null,
+            $adress->hasCoordinates() ? $adress->getLongitude() : null,
+        ));
     }
 
     #[Route('/map/products/coordinates/lat/{latitude}/lng/{longitude}/radius/{radius}', name: 'map_products_by_coordinates')]
@@ -98,6 +103,45 @@ final class AsyncController extends AbstractController
     {
         $products = $productRepository->findByNumbersToArray($longitude, $latitude, $radius);
 
-        return new JsonResponse($products);
+        dump($this->buildMapResponse($products, $radius, $latitude, $longitude));
+ 
+        return new JsonResponse($this->buildMapResponse($products, $radius, $latitude, $longitude));
+    }
+
+    private function buildMapResponse(array $products, float $radius, ?float $lat, ?float $lng): array
+    {
+        $seenCompanies = [];
+        $results = [];
+ 
+        foreach ($products as $product) {
+            $company = $product->getCompany();
+ 
+            if (!$company || isset($seenCompanies[$company->getId()])) {
+                continue;
+            }
+            $seenCompanies[$company->getId()] = true;
+ 
+            $companyAdress = $company->getAdress();
+ 
+            if (!$companyAdress || !$companyAdress->hasCoordinates()) {
+                continue;
+            }
+ 
+            $results[] = [
+                'company'     => $company->getCompanyName(),
+                'companyLink' => $this->urlGenerator->generate('app_company', ['id' => $company->getId()]),
+                'lat'         => $companyAdress->getLatitude(),
+                'lng'         => $companyAdress->getLongitude(),
+                'phone'       => $company->getPhone(),
+                'address'     => sprintf('%s, %s %s', $companyAdress->getStreet(), $companyAdress->getZipCode(), $companyAdress->getCountry()),
+                'open'        => method_exists($company, 'isOpen') ? $company->isOpen() : null,
+            ];
+        }
+ 
+        return [
+            'radiusKm' => $radius,
+            'client'   => ['lat' => $lat, 'lng' => $lng],
+            'products' => $results,
+        ];
     }
 }
