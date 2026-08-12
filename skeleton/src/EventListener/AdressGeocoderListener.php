@@ -14,11 +14,17 @@ use Doctrine\ORM\Events;
  */
 #[AsEntityListener(event: Events::prePersist, entity: Adress::class)]
 #[AsEntityListener(event: Events::preUpdate,  entity: Adress::class)]
+#[AsEntityListener(event: Events::preFlush,  entity: Adress::class)]
 class AdressGeocoderListener
 {
     public function __construct(
         private readonly GeocoderService $geocoder,
     ) {}
+
+    public function preFlush(Adress $adress): void
+    {
+        $this->fillCoordinates($adress);
+    }
 
     public function prePersist(Adress $adress): void
     {
