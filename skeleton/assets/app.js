@@ -53,12 +53,14 @@ async function autocompleteStreet(query) {
   try {
     // Utilisation de l'API adresse du gouvernement français (gratuite)
     const response = await fetch(
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&type=street&limit=5`
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`
     );
     
     const data = await response.json();
+
     return data.features.map(feature => ({
       label: feature.properties.label,
+      number: feature.properties.housenumber,
       street: feature.properties.name,
       city: feature.properties.city,
       postcode: feature.properties.postcode
@@ -87,7 +89,7 @@ if(inputStreet) {
   inputStreet.addEventListener('input', debounce(async (e) => {
     const query = e.target.value;
     const suggestions = await autocompleteStreet(query);
-    
+
     // Afficher les suggestions
     suggestionsContainer.innerHTML = suggestions
         .map(s => `<div class="suggestion">${s.label}</div>`)
