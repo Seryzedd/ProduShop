@@ -123,6 +123,10 @@ class SqlGenerator
 
     public function getEntityclassName(): ?string
     {
+        if($this->entityclassName === null) {
+            return array_key_first($this::CLASSELIST);
+        }
+
         return $this->entityclassName;
     }
 

@@ -3,19 +3,22 @@
 {% block title %}Datas Extractor{% endblock %}
 
 {% block breadcrumb %}
+    
     {% set breadcrumb = [
         {
             label: 'Request maker',
             route: 'app_utils_sql_generator_list',
-        },
+        }
+        
+        ,
         {
-            label: 'Request "%name%"'|trans({'%name%': form.vars.data.name}),
+            label: form.vars.data.name != null ? 'Request "%name%"'|trans({'%name%': form.vars.data.name}) : 'Unamed request configuration'|trans,
             route: 'app_utils_sql_generator_update',
             parameters: {id: form.vars.data.id},
             translationKey: {'%name%': form.vars.data.name}
         }
     ] %}
-
+    
     {{ parent() }}
 {% endblock %}
 

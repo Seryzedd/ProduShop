@@ -52,7 +52,6 @@ class ConfigurationType extends AbstractType
 
             $entityclassName = $config->getEntityclassName();
 
-
             $form->add('selector', CollectionType::class, [
                 'entry_type' => SelectorType::class,
                 'row_attr' => ['class' => 'col-6'],

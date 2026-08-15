@@ -7,7 +7,7 @@
 <nav class="container py-2" style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
   <ol class="breadcrumb">
     {% for item in breadcrumbItem %}
-        {% if not item.current %}
+        {% if not loop.last %}
             <li class="breadcrumb-item d-flex align-items-center p-2">
                 <a href="{{ item.route }}" class="link-offset-3 link-underline-opacity-100-hover link-primary link-underline link-underline-opacity-10 d-flex align-items-center" title="{{ item.label }}">
                     {% if loop.first %}
