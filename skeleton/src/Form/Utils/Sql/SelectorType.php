@@ -25,7 +25,8 @@ class SelectorType extends AbstractType
                 'choices' => selector::TYPES
             ])
             ->add('source', ChoiceType::class, [
-                'choices' => $options['sources']
+                'choices' => $options['sources'],
+                "data" => $options['selected_source']
             ])
             ->add('property', ChoiceType::class, [
                 'choices' => $options['fields_options'],
@@ -41,7 +42,9 @@ class SelectorType extends AbstractType
 
             $form->add('source', ChoiceType::class, [
                 'choices' => $options['sources'],
+                "data" => $options['selected_source']
             ]);
+
         });
     }
 
@@ -51,7 +54,8 @@ class SelectorType extends AbstractType
             'data_class' => selector::class,
             'label' => 'Shown informations',
             'fields_options' => $this->metaDatas->buildDefaults(current(SqlGenerator::CLASSELIST)),
-            'sources' => []
+            'sources' => [],
+            'selected_source' => null
         ]);
     }
 }

@@ -130,9 +130,9 @@ class SqlGenerator
         return $this->entityclassName;
     }
 
-    public function getClassNamespace(string $classname): string
+    public static function getClassNamespace(string $classname): string
     {
-        return $this::CLASSELIST[$classname];
+        return self::CLASSELIST[$classname];
     }
 
     public function setEntityclassName(string $entityclassName): static

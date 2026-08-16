@@ -49,7 +49,7 @@
                 
                 {{ form_row(form.entityclassName) }}
 
-                <div class="col-6 pt-2">
+                <div class="col-6 pt-2" id="form-collection-select">
                     {% include 'form/collectionType.html.twig' with {collection: form.selector, 'buttonText': 'Add new select'|trans} %}
                 </div>
                 
@@ -137,15 +137,16 @@
 
         document.querySelector('#configuration_entityclassName').addEventListener("change", async (event) => {
             const response = await fetch(url.replace('__className__', event.target.value).replace('__type__', 'selector'));
+            
             if (!response.ok) return;
 
-            const html = await response.text();
+            const jsonResponse = await response.json();
+
+            let html = jsonResponse.form
 
             console.log(html);
             // Remplace le bloc property de CHAQUE selector déjà présent dans la collection
-            // document.querySelectorAll('[data-property-field]').forEach(container => {
-            //     container.innerHTML = html;
-            // });
+            document.querySelector('#form-collection-select').innerHTML = html;
         });
     </script>
 {% endblock %}

@@ -12,9 +12,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Repository\Utils\SqlGeneratorRepository;
 use App\Form\Utils\Sql\ConfigurationType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\Form;
+use App\Form\Utils\Sql\SelectorType;
 use App\Service\Sql\SqlRequestGenerator;
 use App\Service\EntityBuilder\EntityMetaDatas;
 
@@ -90,24 +92,36 @@ final class SqlGeneratorController extends AbstractController
             throw $this->createNotFoundException('Entité inconnue.');
         }
 
-        $entityClass = SqlGenerator::CLASSELIST[$entityKey];
-        $choices = $metaDatas->buildDefaults($entityClass);
+        $entityClass = SqlGenerator::CLASSELIST[$class];
+        $choices = $metadatas->buildDefaults($entityClass);
 
-        // On construit un SelectorType "à vide" juste pour générer le champ property
-        $form = $this->createForm(SelectorType::class, new Selector(), [
-            'fields_options' => $choices,
+        $form = $this->createForm(CollectionType::class, [new Selector()], [
+                'entry_type' => SelectorType::class,
+                'row_attr' => ['class' => 'col-6'],
+                'label' => 'Select',
+                'entry_options' => [
+                    'fields_options' => $metadatas->buildDefaults(SqlGenerator::getClassNamespace($class)),
+                    'label_attr'      => ['class' => ''],
+                    'sources' => SqlGenerator::CLASSELIST,
+                    'selected_source' => SqlGenerator::getClassNamespace($class)
+                ],
+                'label_attr' => ['class' => ''],
+                'by_reference' => false,
+                'allow_add' => true,
+                'allow_delete' => true
+            ]);
+
+        $html = $this->renderView('form/collectionType.html.twig', [
+            'collection' => $form->createView()
         ]);
 
-        return $this->render('form/_property_field.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return new JsonResponse(['form' => $html]);
     }
 
     private function saveDatas(Form $form)
     {
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump($form->getExtraData());
             $configuration = $form->getData();
 
             $this->entityManager->persist($configuration);
