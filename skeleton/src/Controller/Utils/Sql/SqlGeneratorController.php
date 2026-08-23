@@ -19,6 +19,8 @@ use Symfony\Component\Form\Form;
 use App\Form\Utils\Sql\SelectorType;
 use App\Service\Sql\SqlRequestGenerator;
 use App\Service\EntityBuilder\EntityMetaDatas;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 #[Route('/utils/sql/generator')]
 final class SqlGeneratorController extends AbstractController
@@ -58,7 +60,7 @@ final class SqlGeneratorController extends AbstractController
         $form->handleRequest($request);
 
         $save = $this->saveDatas($form);
-
+        
         if($save) {
             return $save;
         }
@@ -86,33 +88,45 @@ final class SqlGeneratorController extends AbstractController
     }
 
     #[Route('/request/{class}/{formType}', name: 'app_utils_sql_entity_request')]
-    public function asyncRequestEntityParameters(string $class, EntityMetaDatas $metadatas): JsonResponse
+    public function asyncRequestEntityParameters(string $class, EntityMetaDatas $metadatas, FormFactoryInterface $formFactory): JsonResponse
     {
         if (!isset(SqlGenerator::CLASSELIST[$class])) {
             throw $this->createNotFoundException('Entité inconnue.');
         }
 
-        $entityClass = SqlGenerator::CLASSELIST[$class];
-        $choices = $metadatas->buildDefaults($entityClass);
+        $entityClass = SqlGenerator::getClassNamespace($class);
 
-        $form = $this->createForm(CollectionType::class, [new Selector()], [
-                'entry_type' => SelectorType::class,
-                'row_attr' => ['class' => 'col-6'],
-                'label' => 'Select',
-                'entry_options' => [
-                    'fields_options' => $metadatas->buildDefaults(SqlGenerator::getClassNamespace($class)),
-                    'label_attr'      => ['class' => ''],
-                    'sources' => SqlGenerator::CLASSELIST,
-                    'selected_source' => SqlGenerator::getClassNamespace($class)
-                ],
-                'label_attr' => ['class' => ''],
-                'by_reference' => false,
-                'allow_add' => true,
-                'allow_delete' => true
-            ]);
+        // On recrée un formulaire nommé "configuration" (identique au nom de
+        // ConfigurationType) avec uniquement le champ "selector", pour que
+        // les inputs générés portent exactement le même chemin de nommage
+        // (configuration[selector][...]) que dans le vrai formulaire. Sans ça,
+        // un CollectionType construit seul est nommé "collection" par défaut
+        // et se retrouve déconnecté du formulaire principal à la soumission.
+        $builder = $formFactory->createNamedBuilder('configuration', FormType::class, null, [
+            'csrf_protection' => false,
+        ]);
+
+        $builder->add('selector', CollectionType::class, [
+            'entry_type'    => SelectorType::class,
+            'row_attr'      => ['class' => 'col-6'],
+            'label'         => 'Select',
+            'label_attr'    => ['class' => ''],
+            'by_reference'  => false,
+            'allow_add'     => true,
+            'allow_delete'  => true,
+            'data'          => [new Selector()],
+            'entry_options' => [
+                'fields_options'  => $metadatas->buildDefaults($entityClass),
+                'label_attr'      => ['class' => ''],
+                'sources'         => SqlGenerator::CLASSELIST,
+                'selected_source' => $entityClass,
+            ],
+        ]);
+
+        $form = $builder->getForm();
 
         $html = $this->renderView('form/collectionType.html.twig', [
-            'collection' => $form->createView()
+            'collection' => $form->get('selector')->createView(),
         ]);
 
         return new JsonResponse(['form' => $html]);

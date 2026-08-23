@@ -78,7 +78,6 @@ final class AsyncController extends AbstractController
     public function adminMenuSaver(Request $request)
     {
         $session = $request->getSession();
-        dump((bool) $request->request->get('isChecked'));
         
         $session->set('admin-menu-expanded', (bool) $request->request->get('isChecked'));
         
@@ -102,8 +101,6 @@ final class AsyncController extends AbstractController
     public function productsByCoordinates(ProductRepository $productRepository, float $latitude, float $longitude, float $radius): JsonResponse
     {
         $products = $productRepository->findByNumbersToArray($longitude, $latitude, $radius);
-
-        dump($this->buildMapResponse($products, $radius, $latitude, $longitude));
  
         return new JsonResponse($this->buildMapResponse($products, $radius, $latitude, $longitude));
     }

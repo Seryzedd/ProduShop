@@ -272,8 +272,6 @@ class InvoiceService
             'phone' => null,
         ];
 
-        dump($pi);
-
         $merchants = $this->extractMerchants($pi['metadata'] ?? []);
         $items     = $this->extractItems($pi['metadata'] ?? []);
 

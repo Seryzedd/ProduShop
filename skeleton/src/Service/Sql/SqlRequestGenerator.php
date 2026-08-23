@@ -45,9 +45,14 @@ class SqlRequestGenerator
 
         $sql = $this->select($sqlconfig->getSelector(), $queryClass);
 
-        $sql .= $this->from($queryClass);
+        if(strlen($sql) > 0) {
+            $sql .= $this->from($queryClass);
 
-        $sql .= $this->addWhere($sqlconfig->getConditions());
+            $sql .= $this->addWhere($sqlconfig->getConditions());
+        } else {
+            throw new \Exception('No selection in sql configuration.');
+        }
+        
 
         return $sql;
     }
@@ -63,7 +68,7 @@ class SqlRequestGenerator
     {
         $sql = '';
         $tableNames = $this->metadatas->getMetadatas($from);
-
+        
         foreach($selects as $selection) {
             $sql .= 'SELECT ';
             $properties = $selection->getProperty();
@@ -80,6 +85,7 @@ class SqlRequestGenerator
                 }
             }
         }
+
         return $sql;
     }
 

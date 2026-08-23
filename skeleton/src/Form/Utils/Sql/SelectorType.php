@@ -46,6 +46,26 @@ class SelectorType extends AbstractType
             ]);
 
         });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
+            $data = $event->getData(); // tableau brut, ex: ['type' => ..., 'source' => 'App\Entity\X', 'property' => [...]]
+            $form = $event->getForm();
+ 
+            $submittedSource = $data['source'] ?? null;
+ 
+            // Revalidation whitelist : on ne fait JAMAIS confiance à la
+            // valeur soumise pour résoudre les métadonnées d'une entité.
+            $fieldsOptions = in_array($submittedSource, SqlGenerator::CLASSELIST, true)
+                ? $this->metaDatas->buildDefaults($submittedSource)
+                : [];
+ 
+            $form->add('property', ChoiceType::class, [
+                'choices'  => $fieldsOptions,
+                'multiple' => true,
+                'label'    => 'Options',
+                'expanded' => true,
+            ]);
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

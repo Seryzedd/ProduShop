@@ -97,7 +97,7 @@ class AbstractTextType extends AbstractType
 
             $targetClass = $data['type'];
             $current     = $form->getData(); // entité actuelle (peut être null si nouvel élément)
-            dump($targetClass);
+            
             // Nouvel élément : on instancie directement la bonne classe
             if ($current === null) {
                 $form->setData(new $targetClass());

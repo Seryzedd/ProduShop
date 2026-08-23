@@ -36,7 +36,6 @@ final class CompanyController extends AbstractController
                 try {
                     $products = $productRepository->findWithinRadius($adress, $radius);
                 } catch (\Throwable $th) {
-                    dump($th);
                     $this->addFlash('danger', $th->getMessage());
                 }
                 

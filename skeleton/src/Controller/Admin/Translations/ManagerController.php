@@ -76,8 +76,6 @@ final class ManagerController extends AbstractController
         if ($request->getMethod() === "POST") {
             $data = $request->request->all('translations');
             // $data = ['messages.fr.yml' => ['key' => 'value', ...], ...]
-
-            dump($data);
             
             $validated = false;
             foreach ($data as $file => $entries) {
