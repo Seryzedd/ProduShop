@@ -83,6 +83,50 @@ class ConfigurationType extends AbstractType
                 'allow_delete' => true
             ]);
         });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+            $data = $event->getData();
+            $form = $event->getForm();
+ 
+            $entityclassName = $data['entityclassName'] ?? null;
+ 
+            // Revalidation whitelist : jamais confiance dans la valeur soumise.
+            if (!array_key_exists($entityclassName, SqlGenerator::getEntityclassNames())) {
+                return; // le champ entityclassName échouera sa propre validation
+            }
+ 
+            $form->add('selector', CollectionType::class, [
+                'entry_type' => SelectorType::class,
+                'row_attr' => ['class' => 'col-6'],
+                'label' => 'Select',
+                'label_attr' => ['class' => ''],
+                'entry_options' => [
+                    'sources' => [
+                        $entityclassName => $entityclassName
+                    ],
+                    'selected_source' => $entityclassName
+                ],
+                'by_reference' => false,
+                'allow_add' => true,
+                'allow_delete' => true
+            ]);
+ 
+            $form->add('conditions', CollectionType::class, [
+                'entry_options' => [
+                    'alias_choices' => [
+                        $entityclassName => $entityclassName
+                    ],
+                    'class_name' => SqlGenerator::getClassNamespace($entityclassName)
+                ],
+                'entry_type' => ConditionType::class,
+                'label' => false,
+                'label_attr' => ['class' => ''],
+                'row_attr' => ['class' => 'col-12'],
+                'by_reference' => false,
+                'allow_add' => true,
+                'allow_delete' => true
+            ]);
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

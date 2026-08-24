@@ -33,7 +33,6 @@ class SqlRequestGenerator
     private function getSqlQuery(SqlGenerator $sqlconfig): string
     {
         $queryClass = $sqlconfig->getClassNamespace($sqlconfig->getEntityclassName());
-
         
         $tablename = $this->metadatas->getTableName($queryClass);
 
@@ -69,19 +68,22 @@ class SqlRequestGenerator
         $sql = '';
         $tableNames = $this->metadatas->getMetadatas($from);
         
+
         foreach($selects as $selection) {
-            $sql .= 'SELECT ';
             $properties = $selection->getProperty();
 
-            foreach($properties as $property) {
-                $table = $tableNames->getColumnName($property);
+            if(count($properties) > 0) {
+                $sql .= 'SELECT ';
+                foreach($properties as $property) {
+                    $table = $tableNames->getColumnName($property);
 
-                $alias = $this->getAliasValue($this->config->getEntityClassName());
-                
-                $sql .= $alias .'.' . $table ;
+                    $alias = $this->getAliasValue($this->config->getEntityClassName());
+                    
+                    $sql .= $alias .'.' . $table ;
 
-                if($property !== end($properties)) {
-                    $sql .= ', ';
+                    if($property !== end($properties)) {
+                        $sql .= ', ';
+                    }
                 }
             }
         }

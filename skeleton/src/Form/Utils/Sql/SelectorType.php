@@ -40,11 +40,33 @@ class SelectorType extends AbstractType
             $selection = $event->getData();
             $form = $event->getForm();
 
-            $form->add('source', ChoiceType::class, [
-                'choices' => $options['sources'],
-                "data" => $options['selected_source']
-            ]);
+            $config = [
+                'choices' => $options['sources']
+            ];
 
+            if($options['selected_source']) {
+                $config['data'] = $options['selected_source'];
+            }
+
+            $form->add('source', ChoiceType::class, $config);
+
+            $properties = [];
+            $propChoices = [];
+            if($selection) {
+                foreach($selection->getProperty() as $property) {
+                    $properties[$property] = $property;
+                }
+
+                $propChoices = $this->metaDatas->buildDefaults(SqlGenerator::getClassNamespace($selection->getSource()));
+            }
+
+            $form->add('property', ChoiceType::class, [
+                'choices' => $propChoices,
+                'multiple' => true,
+                'label' => 'Options',
+                'data' => $properties,
+                'expanded' => true
+            ]);
         });
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
@@ -52,11 +74,11 @@ class SelectorType extends AbstractType
             $form = $event->getForm();
  
             $submittedSource = $data['source'] ?? null;
- 
+
             // Revalidation whitelist : on ne fait JAMAIS confiance à la
             // valeur soumise pour résoudre les métadonnées d'une entité.
-            $fieldsOptions = in_array($submittedSource, SqlGenerator::CLASSELIST, true)
-                ? $this->metaDatas->buildDefaults($submittedSource)
+            $fieldsOptions = array_key_exists($submittedSource, SqlGenerator::CLASSELIST)
+                ? $this->metaDatas->buildDefaults(SqlGenerator::CLASSELIST[$submittedSource])
                 : [];
  
             $form->add('property', ChoiceType::class, [

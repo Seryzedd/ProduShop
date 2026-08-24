@@ -94,8 +94,6 @@ final class SqlGeneratorController extends AbstractController
             throw $this->createNotFoundException('Entité inconnue.');
         }
 
-        $entityClass = SqlGenerator::getClassNamespace($class);
-
         // On recrée un formulaire nommé "configuration" (identique au nom de
         // ConfigurationType) avec uniquement le champ "selector", pour que
         // les inputs générés portent exactement le même chemin de nommage
@@ -105,6 +103,8 @@ final class SqlGeneratorController extends AbstractController
         $builder = $formFactory->createNamedBuilder('configuration', FormType::class, null, [
             'csrf_protection' => false,
         ]);
+
+        dump($class);
 
         $builder->add('selector', CollectionType::class, [
             'entry_type'    => SelectorType::class,
@@ -116,10 +116,10 @@ final class SqlGeneratorController extends AbstractController
             'allow_delete'  => true,
             'data'          => [new Selector()],
             'entry_options' => [
-                'fields_options'  => $metadatas->buildDefaults($entityClass),
+                'fields_options'  => $metadatas->buildDefaults(SqlGenerator::getClassNamespace($class)),
                 'label_attr'      => ['class' => ''],
-                'sources'         => SqlGenerator::CLASSELIST,
-                'selected_source' => $entityClass,
+                'sources'         => SqlGenerator::getEntityclassNames(),
+                'selected_source' => $class,
             ],
         ]);
 
@@ -134,6 +134,9 @@ final class SqlGeneratorController extends AbstractController
 
     private function saveDatas(Form $form)
     {
+        if($form->isSubmitted()) {
+            dump($form->isValid());
+        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             $configuration = $form->getData();
