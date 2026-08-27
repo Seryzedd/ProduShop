@@ -21,6 +21,9 @@ use App\Service\Sql\SqlRequestGenerator;
 use App\Service\EntityBuilder\EntityMetaDatas;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/utils/sql/generator')]
 final class SqlGeneratorController extends AbstractController
@@ -104,8 +107,6 @@ final class SqlGeneratorController extends AbstractController
             'csrf_protection' => false,
         ]);
 
-        dump($class);
-
         $builder->add('selector', CollectionType::class, [
             'entry_type'    => SelectorType::class,
             'row_attr'      => ['class' => 'col-6'],
@@ -134,10 +135,6 @@ final class SqlGeneratorController extends AbstractController
 
     private function saveDatas(Form $form)
     {
-        if($form->isSubmitted()) {
-            dump($form->isValid());
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
             $configuration = $form->getData();
 
@@ -150,5 +147,55 @@ final class SqlGeneratorController extends AbstractController
         }
 
         return null;
+    }
+
+    #[Route('/file/export/{config}', name: 'app_utils_sql_export_file')]
+    public function exportAsFile(SqlGenerator $config, SluggerInterface $slugger)
+    {
+        if ($config->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $datas = [];
+
+        try{
+            $datas = $this->requestGenerator->getDatas($config);
+        } catch(\Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('app_utils_sql_generator_update', ['id' => $config->getId()]);
+        }
+
+        $response = new StreamedResponse(function () use ($datas) {
+            $handle = fopen('php://output', 'w+');
+
+            // BOM UTF-8 : nécessaire pour qu'Excel (Windows) affiche correctement
+            // les accents à l'ouverture du fichier.
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            if (!empty($datas)) {
+                // En-têtes déduits des clés de la première ligne
+                fputcsv($handle, array_keys($datas[0]), ';');
+
+                foreach ($datas as $row) {
+                    fputcsv($handle, $row, ';');
+                }
+            }
+
+            fclose($handle);
+        });
+
+        $filename = sprintf(
+            '%s_%s.csv',
+            $slugger->slug($config->getName())->lower(),
+            (new \DateTimeImmutable())->format('Y-m-d_His')
+        );
+
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $filename
+        ));
+
+        return $response;
     }
 }

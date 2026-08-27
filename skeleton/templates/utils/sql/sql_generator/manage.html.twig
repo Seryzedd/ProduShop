@@ -91,7 +91,7 @@
         {% set titles = datas|first|keys %}
 
         <p class="text-end">
-            <a href="" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ path('app_utils_sql_export_file', {config: form.vars.data.id}) }}" class="btn btn-outline-secondary btn-sm">
                 {{ ux_icon('line-md:file-download-twotone', {width: '14px', height: '14px'}) }}
             </a>
         </p>
