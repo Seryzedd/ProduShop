@@ -1,6 +1,6 @@
 {{ form_label(collection) }}
 
-<ul class="{{ collection.vars.name }}-collection list-group list-group"
+<ul class="{{ collection.vars.name }}-collection list-group list-group{% if sortable is defined and sortable is true %} sortable-list{% endif %}"
     {% if collection.vars.prototype is defined %}
         data-prototype="{{ form_widget(collection.vars.prototype)|e('html_attr') }}"
     {% endif %}
@@ -12,10 +12,17 @@
 >
     {% for item in collection %}
         {% if item.vars.name != '_token' %}
-            <li class="list-group-item">
-                {% if collection.vars.prototype is defined %}
-                    <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash position-absolute top-0 end-0 p-2 rounded-start-0"></button>
-                {% endif %}
+            <li class="list-group-item{% if sortable is defined and sortable is true %} sortable-item{% endif %}">
+                <p class="text-end top-0 end-0 position-absolute">
+                    {% if sortable is defined and sortable is true %}
+                        <button type="button" class="drag-handle btn btn-ouline-dark">
+                            {{ ux_icon('ic:twotone-drag-handle')}}
+                        </button>
+                    {% endif %}
+                    {% if collection.vars.prototype is defined %}
+                        <button type="button" class="btn btn-ouline-danger remove_collection_item_btn btn-trash"></button>
+                    {% endif %}
+                </p>
                 
                 {{ form_row(item) }}
             </li>

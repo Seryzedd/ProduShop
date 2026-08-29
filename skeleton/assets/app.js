@@ -279,3 +279,28 @@ document.querySelectorAll('.number-float-animation').forEach(el => {
     };
     requestAnimationFrame(step);
 });
+
+function refreshPositions(container) {
+    container.querySelectorAll('.sortable-item').forEach((el, index) => {
+        const input = el.querySelector('.input-position');
+        if (input) {
+            input.value = index;
+        }
+    });
+}
+
+function initSortableLists() {
+    document.querySelectorAll('.sortable-list').forEach((container) => {
+        refreshPositions(container);
+
+        Sortable.create(container, {
+            animation: 150,
+            handle: '.drag-handle',
+            onEnd: () => refreshPositions(container),
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initSortableLists);
+
+export { initSortableLists };

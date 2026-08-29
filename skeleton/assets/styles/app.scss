@@ -5,7 +5,7 @@ $success: #4ef700;
 $info: #16d4f1;
 $warning: #ffb74b;
 $danger: #ff4053;
-$light: #f8f9fa;
+$light: #929292;
 $dark: #343a40;
 
 $theme-colors: (
@@ -430,5 +430,24 @@ input[type='checkbox']:checked + label.btn-more-less::after {
   animation-delay: var(--delay, 0s);
 }
 
+[data-bs-toggle="collapse"]:not(.accordion-button)::after {
+    border-color: inherit;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    margin-left: 15px;
+    padding: 2.5px;
+    content: '';
+    transition: 0.5s;
+}
 
+[data-bs-toggle="collapse"][aria-expanded="false"]:not(.accordion-button)::after {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+[data-bs-toggle="collapse"][aria-expanded="true"]:not(.accordion-button)::after {
+    transform: rotate(-90deg);
+    -webkit-transform: rotate(-90deg);
+}
 

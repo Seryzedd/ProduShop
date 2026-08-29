@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ block('main_title') }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if form.vars.data.id %}
+        {% set breadcrum_label = {
+                label: 'Edit Helper "%name%"',
+                route: 'app_admin_helper_create',
+                parameters: {id: form.vars.data.category.id},
+                translationKey: {'%name%': form.vars.data.name}
+            }
+        %}
+    {% else %}
+        {% set breadcrum_label = {
+                label: 'Create new Helper',
+                route: 'app_admin_helper_create',
+                parameters: {id: form.vars.data.category.id},
+                translationKey: {'%name%': form.vars.data.name}
+            }
+        %}
+    {% endif %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Helper manager',
+            route: 'app_admin_helper_index'
+        },
+        breadcrum_label
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1 class="text-primary">{{ block('main_title') }}</h1>
+        {{ form_start(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.category) }}
+            {{ form_row(form.active) }}
+
+            {% include 'form/collectionType.html.twig' with {collection: form.steps, sortable: true} %}
+
+            <p class="text-end">
+                <button class="btn btn-secondary" type="submit">
+                    {% trans %}Save{% endtrans %}
+                </button>
+            </p>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}
+
+{% block main_title %}
+    {% if form.vars.data.name|length > 0 %}
+        {% trans with {'%name%': form.vars.data.name} %}Documentation "%name%"{% endtrans %}
+    {% else %}
+        {% trans %}New documentation{% endtrans %}
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
+{% endblock %}

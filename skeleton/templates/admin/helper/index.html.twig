@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Helper manager{% endtrans %}{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Helper manager',
+            route: 'app_admin_helper_index'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <div class="d-flex justify-content-between">
+            <h1 class="text-secondary">{% trans %}Helper manager{% endtrans %}</h1>
+            {{ form_start(form) }}
+            {{ form_end(form) }}
+        </div>
+
+        {% if categories|length == 0 %}
+            <h3 class="text-center text-light mt-4">
+                {% trans %}No documentation registered.{% endtrans %}
+            </h3>
+        {% else %}
+            {{ block('accordion') }}
+        {% endif %}
+    </main>
+{% endblock %}
+
+{% block accordion %}
+    <div class="accordion" id="helperAccordion">
+        {% for category in categories %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_category_{{ category.name }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse_category_{{ category.name }}">
+                        {{ category.name }}
+                    </button>
+                </h2>
+                <div id="collapse_category_{{ category.name }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#helperAccordion">
+                    <div class="accordion-body">
+                        {{ block('vertical_menu') }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block vertical_menu %}
+    {% if category.documentations|length > 0 %}
+        <ul class="nav flex-column">
+            <li class="nav-item text-end">
+                <a class="btn btn-secondary" href="{{ path('app_admin_helper_create', {id: category.id}) }}" title="{% trans %}New documentation{% endtrans %}">{{ ux_icon('ic:sharp-plus') }}</a>
+            </li>
+            {% for doc in category.documentations %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ path('app_admin_helper_update', {documentation: doc.id}) }}">{{ doc.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
