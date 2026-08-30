@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\Helper\HelperType;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 #[Route('admin/helper')]
 final class HelperController extends AbstractController
@@ -69,6 +70,11 @@ final class HelperController extends AbstractController
     public function updateHelper(Request $request, Helper\Documentation $documentation)
     {
         $form = $this->getForm($documentation, $request);
+
+        if($form instanceof RedirectResponse) {
+            return $form;
+        }
+
         return $this->render('admin/helper/HelperManagement.html.twig', [
             'form' => $form
         ]);
@@ -82,6 +88,10 @@ final class HelperController extends AbstractController
         $documentation->setCategory($id);
         
         $form = $this->getForm($documentation, $request);
+
+        if($form instanceof RedirectResponse) {
+            return $form;
+        }
 
         return $this->render('admin/helper/HelperManagement.html.twig', [
             'form' => $form
@@ -104,6 +114,7 @@ final class HelperController extends AbstractController
 
             return $this->redirectToRoute('app_admin_helper_update', [
                 'documentation' => $documentation->getId(),
+                'request' => $request
             ]);
         }
 

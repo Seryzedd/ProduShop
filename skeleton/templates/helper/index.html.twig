@@ -20,20 +20,20 @@
 {% block body %}
     <main class="container">
         <h1 class="text-primary">{{ documentation.name }}</h1>
-        <div class="row flex-row-interverted align-items-center">
-            {% for step in documentation.steps %}
-                <h3 class="text-secondary col-12">{{ step.position }} - <small>{{ step.title }}</small></h3>
-                
-                    <div class="col-12{% if step.image.src|length > 0 %} col-md-6{% endif %}">
-                        <p class="p-2">{{ step.text }}</p>
-                    </div>
+        
+        {% for step in documentation.steps %}
+            <div class="row flex-row-interverted align-items-center">
+                <div class="col-12{% if step.image.src|length > 0 %} col-md-6{% endif %}">
+                    <h3 class="text-secondary">{{ step.position + 1 }} - <small>{{ step.title }}</small></h3>
+                    <p class="p-2">{{ step.text }}</p>
+                </div>
 
-                    {% if step.image.src|length > 0 %}
-                        <div class="col-12 col-md-6">
-                            <img class="img-fluid" src="{{ step.image.src }}" alt="{{ step.image.name }}">
-                        </div>
-                    {% endif %}
-            {% endfor %}
-        </div>
+                {% if step.image.src|length > 0 %}
+                    <div class="col-12 col-md-6">
+                        <img class="img-fluid" src="{{ step.image.src }}" alt="{{ step.image.name }}">
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
     </main>
 {% endblock %}
