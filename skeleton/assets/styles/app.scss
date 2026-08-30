@@ -451,3 +451,6 @@ input[type='checkbox']:checked + label.btn-more-less::after {
     -webkit-transform: rotate(-90deg);
 }
 
+.flex-row-interverted:nth-child(odd) {
+    flex-direction: row-reverse;
+}

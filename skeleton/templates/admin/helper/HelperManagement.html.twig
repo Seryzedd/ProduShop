@@ -57,7 +57,7 @@
 {% endblock %}
 
 {% block main_title %}
-    {% if form.vars.data.name|length > 0 %}
+    {% if form.vars is defined and form.vars.data.name|length > 0 %}
         {% trans with {'%name%': form.vars.data.name} %}Documentation "%name%"{% endtrans %}
     {% else %}
         {% trans %}New documentation{% endtrans %}

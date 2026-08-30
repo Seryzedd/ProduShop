@@ -4,12 +4,17 @@
 
 <nav class="navbar w-100 bg-body-tertiary">
   <div class="container">
-    <div class="row w-100">
+    <div class="row w-100 align-items-center">
+      <div class="col-2">
+        <a class="navbar-brand logo p-2" href="{{ path('app_home_index') }}">
+          <img src="{{ asset('icons/logo.png') }}" alt="Logo" class="img-fluid" style="width: 145px;">
+        </a>
+      </div>
       <div class="col-4">
         {{ renderView('components/helper_menu.html.twig')|raw }}
       </div>
     </div>
-    <p class="text-center text-muted col-12">&#169;Copyright {{ 'now'|date('Y') }} Lancana</p>
+    <p class="text-center text-muted col-12 mt-4">&#169;Copyright {{ 'now'|date('Y') }} Lancana</p>
   </div>
 </nav>
 

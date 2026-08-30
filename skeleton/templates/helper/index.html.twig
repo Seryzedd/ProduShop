@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ documentation.name }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Documentation "%name%"',
+            route: 'app_helper',
+            parameters: {documentation: documentation.id},
+            translationKey: {'%name%': documentation.name}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1 class="text-primary">{{ documentation.name }}</h1>
+        <div class="row flex-row-interverted align-items-center">
+            {% for step in documentation.steps %}
+                <h3 class="text-secondary col-12">{{ step.position }} - <small>{{ step.title }}</small></h3>
+                
+                    <div class="col-12{% if step.image.src|length > 0 %} col-md-6{% endif %}">
+                        <p class="p-2">{{ step.text }}</p>
+                    </div>
+
+                    {% if step.image.src|length > 0 %}
+                        <div class="col-12 col-md-6">
+                            <img class="img-fluid" src="{{ step.image.src }}" alt="{{ step.image.name }}">
+                        </div>
+                    {% endif %}
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}
