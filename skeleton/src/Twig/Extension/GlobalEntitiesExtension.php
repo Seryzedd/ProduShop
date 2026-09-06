@@ -12,7 +12,12 @@ use App\Repository;
 
 class GlobalEntitiesExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private Repository\Product\ShelfRepository $shelfRepo, private CartService $cartService, private Repository\Helper\CategoryRepository $categoryRepository) {}
+    public function __construct(
+        private Repository\Product\ShelfRepository $shelfRepo,
+        private CartService $cartService,
+        private Repository\Helper\CategoryRepository $categoryRepository,
+        private Repository\Documentation\FileEntityRepository $documentation
+        ) {}
 
     public function getFilters(): array
     {
@@ -36,7 +41,8 @@ class GlobalEntitiesExtension extends AbstractExtension implements GlobalsInterf
         return [
             'shelvesEntities' => $this->shelfRepo->findAll(),
             'cart' => $this->cartService,
-            'categories' => $this->categoryRepository->findAll()
+            'categories' => $this->categoryRepository->findAll(),
+            'documentations' => $this->documentation->findAllLatest()
         ];
     }
 }

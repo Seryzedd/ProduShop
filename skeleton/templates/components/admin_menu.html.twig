@@ -88,6 +88,13 @@
                             <span>{% trans %}Helper manager{% endtrans %}</span>
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a title="{% trans %}Documentation manager{% endtrans %}" class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_documentations' %} active disabled{% endif %}" href="{{ path('app_admin_documentations') }}">
+                            {{ ux_icon('ic:twotone-article') }}
+                            <span>{% trans %}Documentation manager{% endtrans %}</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

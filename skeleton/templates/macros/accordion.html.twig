@@ -1,0 +1,44 @@
+{% macro level(items, depth, parent_id, linkRoute = '', linkParameter = {}, btnClass = '', containerClass = '', accordionItemClass = "") %}
+    {% import _self as macros %}
+    <div class="accordion accordion-flush" id="accordion_{{ parent_id }}">
+        {% for key, value in items %}
+            {% set item_id = parent_id ~ '_' ~ key %}
+            <div class="{% if accordionItemClass|length > 0 %}{{accordionItemClass}}{% else %}accordion-item{% endif %}">
+                <h2 class="accordion-header">
+                    <button
+                        class="{% if btnClass|length > 0 %}{{btnClass}}{% else %}accordion-button collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse_{{ item_id }}"
+                        aria-expanded="false"
+                        aria-controls="collapse_{{ item_id }}"
+                    >
+                        {{ key }}
+                    </button>
+                </h2>
+                <div id="collapse_{{ item_id }}" class="accordion-collapse collapse" data-bs-parent="#accordion_{{ parent_id }}">
+                    <div class="accordion-body {% if containerClass|length > 0 %}{{ containerClass }}{% else %}py-1{% endif %}">
+                        
+                        {% if depth < 3 %}
+                            {{ macros.level(value, depth + 1, item_id, linkRoute, linkParameter, btnClass, containerClass, accordionItemClass) }}
+                        {% elseif value is iterable %}
+                            <ul class="nav flex-column">
+                                {% for entity in value %}
+                                    <li class="my-1">
+                                        <a class="link-secondary" aria-current="page" href="{{ path(linkRoute, entity|generateParameters(linkParameter)) }}">{{ entity.name }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="btn btn-link" aria-current="page" href="#">{{ value.name }}</a>
+                                </li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}

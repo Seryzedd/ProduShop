@@ -13,6 +13,10 @@
       <div class="col-4">
         {{ renderView('components/helper_menu.html.twig')|raw }}
       </div>
+
+      <div class="col-4">
+        {{ renderView('components/documentations.html.twig', {'files': documentations})|raw }}
+      </div>
     </div>
     <p class="text-center text-muted col-12 mt-4">&#169;Copyright {{ 'now'|date('Y') }} Lancana</p>
   </div>

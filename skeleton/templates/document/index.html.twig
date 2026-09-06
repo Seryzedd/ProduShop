@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans with {'%documentName%': document.type} %}Read %documentName%{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: '"%name%" documentation',
+            route: 'app_document',
+            parameters: {entity: document.id},
+            translationKey: {'%name%': document.type}
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <h1 class="text-primary">{% trans with {'%documentName%': document.type} %}Read %documentName%{% endtrans %}</h1>
+        
+        <iframe src="{{ asset(document.source) }}" width="100%" style="border: none; height: 297mm;" loading="lazy" title="{% trans %}Document reader{% endtrans %}">
+            
+        </iframe>
+    </main>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% macro level(items, labelProperty, route, linkParameters = {}, btnClass = '', liClass = '') %}
+    {% import _self as macros %}
+    <ul class="nav flex-column">
+        {% for item in items %}
+            {% set parameters = {} %}
+            {% for key, param in linkParameters %}
+                {% set parameters = parameters|merge({(key): attribute(item, param)}) %}
+            {% endfor %}
+
+            <li class="{% if liClass|length == 0 %}nav-item{% else %}{{ liClass }}{% endif %}">
+                <a class="{% if btnClass %}{{ btnClass }}{% else %}nav-link{% endif %}" href="{{ path(route, parameters) }}">{{ attribute(item, labelProperty) }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}

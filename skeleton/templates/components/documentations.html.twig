@@ -1,0 +1,4 @@
+{% import 'macros/vertical_menu.html.twig' as verical_menu %}
+
+<p class="mb-0"><small>{% trans %}Documentations{% endtrans %}</small></p>
+{{ verical_menu.level(files, 'type', 'app_document', {'entity': 'id'}, 'link-dark link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover px-2 py-1', 'py-0') }}

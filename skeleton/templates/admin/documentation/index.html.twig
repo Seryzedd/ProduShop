@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}Documentations{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% set breadcrumb = [
+        {
+            label: 'Admin Dashboard',
+            route: 'app_admin_index'
+        },
+        {
+            label: 'Documentations',
+            route: 'app_admin_documentations'
+        }
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% import 'macros/accordion.html.twig' as accordion %}
+
+{% block body %}
+    <main class="container mb-3">
+        <h1 class="text-primary">{% trans %}Documentations{% endtrans %}</h1>
+        {{ form_start(form) }}
+            {{ form_row(form.type) }}
+            {{ form_row(form.file) }}
+
+            <button type="submit" class="btn btn-secondary" title="{% trans %}Upload{% endtrans %}">
+                {{ ux_icon('line-md:briefcase-check') }}
+            </button>
+        {{ form_end(form) }}
+        
+        {{ block('accordion_folder') }}
+    </main>
+{% endblock %}
+
+{% block accordion_folder %}
+    {{ accordion.level(files, 1, 'file_type', 'app_document', {'entity': 'id'}, '') }}
+{% endblock %}
