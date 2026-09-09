@@ -38,5 +38,13 @@ services:
         tags:
             - { name: doctrine.event_listener, event: loadClassMetadata }
 
+    App\DTO\SEO\Rule\:
+        resource: '../src/DTO/SEO/Rule/*'
+        tags: ['app.seo_rule']
+
+    App\Service\Seo\Analyzer:
+        arguments:
+            $rules: !tagged_iterator app.seo_rule
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

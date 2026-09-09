@@ -1,0 +1,41 @@
+
+
+<div class="row">
+    <div class="col-6">
+        <section class="fst-italic">
+            {% trans %}Analyze structure of webpage to get an idea of Search Engine Optimization (SEO).{% endtrans %}
+        </section>
+    </div>
+    
+    <div class="col-6">
+        <div class="d-flex align-items-baseline justify-content-end">
+            <p class="text-end mb-0 me-2">
+                {% trans %}My score{% endtrans %}
+            </p>
+
+            <h3 class="number-float-animation mb-0 text-secondary" data-end="{{ report.score }}">
+                <span>0</span>
+                <small>%</small>
+            </h3>
+        </div>
+    </div>
+    <div class="col-md-6">
+        {% for result in report.results %}
+            <h3 class="text-secondary font-weight-bold">
+                {{ result.name|trans }}
+
+                {% if result.passed == true %}
+                    <span class="text-primary">{{ ux_icon('ic:outline-mood', {height: '20px', width: '20px'}) }}</span>
+                {% else %}
+                    <span class="text-danger">{{ ux_icon('ic:round-mood-bad', {height: '20px', width: '20px'}) }}</span>
+                {% endif %}
+            </h3>
+
+            <p>{{ result.message|trans }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-6">
+        <iframe class="w-100 h-100 border" srcdoc="{{ html }}"></iframe>
+    </div>
+</div>

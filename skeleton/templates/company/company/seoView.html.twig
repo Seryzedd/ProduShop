@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {% trans %}My Professional Seo analyze{% endtrans %}
+{% endblock %}
+
+{% block breadcrumb %}
+
+    {% set breadcrumb = [
+        {
+            label: 'SEO company analyze',
+            route: 'app_company_seo',
+        },
+    ] %}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <main class="container pb-4">
+        <h1 class="text-primary">{% trans %}My company SEO Analyze{% endtrans %}</h1>
+        
+        {{ report|viewAnalyze(html)|raw }}
+    </main>
+{% endblock %}

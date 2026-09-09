@@ -10,6 +10,7 @@ use App\Repository\User\ProfessionalRepository;
 use App\Repository\Product\ProductRepository;
 use App\Entity\User\Professional;
 use App\Entity\User\Client;
+use App\Service\Seo\Analyzer;
 
 #[Route('/company')]
 final class CompanyController extends AbstractController
@@ -61,6 +62,25 @@ final class CompanyController extends AbstractController
             'products' => $professional->getProducts(),
             'professional' => $professional,
             'radius' => $request->query->get('radius') ?? 20
+        ]);
+    }
+
+    #[Route('/seo/analyze', name: 'app_company_seo')]
+    public function seoProfessionalView(Analyzer $seoAnalyzer, Request $request): Response
+    {
+        $user = $this->getUser();
+
+        if(!$user) {
+            return $this->redirectToRoute('app_home_index');
+        }
+
+        $html = $this->view($this->getUser(), $request)->getContent();
+
+        $report = $seoAnalyzer->analyze($html);
+
+        return $this->render('company/company/seoView.html.twig', [
+            'html' => $html,
+            'report' => $report
         ]);
     }
 }
