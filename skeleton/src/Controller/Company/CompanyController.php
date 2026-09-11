@@ -11,6 +11,9 @@ use App\Repository\Product\ProductRepository;
 use App\Entity\User\Professional;
 use App\Entity\User\Client;
 use App\Service\Seo\Analyzer;
+use App\Form\Seo\SeoKeywordType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/company')]
 final class CompanyController extends AbstractController
@@ -66,7 +69,7 @@ final class CompanyController extends AbstractController
     }
 
     #[Route('/seo/analyze', name: 'app_company_seo')]
-    public function seoProfessionalView(Analyzer $seoAnalyzer, Request $request): Response
+    public function seoProfessionalView(Analyzer $seoAnalyzer, Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
 
@@ -74,13 +77,38 @@ final class CompanyController extends AbstractController
             return $this->redirectToRoute('app_home_index');
         }
 
+        $keyWords = $user->getSeoKeywords();
+
+        $form = $this->createForm(CollectionType::class, $keyWords, [
+            'entry_type' => SeoKeywordType::class,
+            'allow_add' => true,
+            'allow_delete' => true,
+            'label' => 'keywords'
+        ]);
+
+        $form->handleRequest($request);
+
         $html = $this->view($this->getUser(), $request)->getContent();
 
-        $report = $seoAnalyzer->analyze($html);
+        if($form->isSubmitted() && $form->isValid()) {
+            
+            foreach($form->getData() as $keyword) {
+                $keyword->setUser($user);
+
+                $entityManager->persist($keyword);
+            }
+            
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Your account is updated.');
+        }
+
+        $report = $seoAnalyzer->analyze($html)->analyzeKeywords($keyWords, $html);
 
         return $this->render('company/company/seoView.html.twig', [
             'html' => $html,
-            'report' => $report
+            'report' => $report,
+            'form' => $form->createView()
         ]);
     }
 }

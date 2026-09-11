@@ -3,7 +3,7 @@
 namespace App\Twig\Runtime\Seo;
 
 use Twig\Extension\RuntimeExtensionInterface;
-use App\DTO\SEO\SeoRuleReport;
+use App\Service\Seo\Analyzer;
 use Twig\Environment;
 
 class ViewAnalyzeExtensionRuntime implements RuntimeExtensionInterface
@@ -13,11 +13,12 @@ class ViewAnalyzeExtensionRuntime implements RuntimeExtensionInterface
         // Inject dependencies if needed
     }
 
-    public function viewAnalyze(SeoRuleReport $report, string $html)
+    public function viewAnalyze(Analyzer $analyzer)
     {
         return $this->twig->render('components/seo/analyze_report.html.twig', [
-            'report' => $report,
-            'html' => $html
+            'report' => $analyzer->getHtmlReport(),
+            'html' => $analyzer->html,
+            'keywords' => $analyzer->getkeywordsReport()
         ]);
     }
 }

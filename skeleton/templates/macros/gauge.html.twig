@@ -1,0 +1,57 @@
+{% macro densityGauge(density, minGood, maxGood, scaleMax) %}
+    {% set scaleMax = scaleMax|default(5) %}
+    {% set minGood = minGood|default(0.5) %}
+    {% set maxGood = maxGood|default(2.5) %}
+
+    {# La jauge est un demi-cercle de 180° (de 180° à 0°) #}
+    {% set clampedDensity = density > scaleMax ? scaleMax : density %}
+    {% set needleAngle = 180 - (clampedDensity / scaleMax * 180) %}
+    {% set needleRad = needleAngle * pi() / 180 %}
+
+    {# Centre du cercle (150, 150), rayon 120 #}
+    {% set cx = 150 %}
+    {% set cy = 150 %}
+    {% set r = 120 %}
+    {% set needleX = cx + r * 0.85 * cos(needleRad) %}
+    {% set needleY = cy - r * 0.85 * sin(needleRad) %}
+
+    {# Angles des zones converties en positions sur le cercle #}
+    {% set lowEndAngle = 180 - (minGood / scaleMax * 180) %}
+    {% set goodEndAngle = 180 - (maxGood / scaleMax * 180) %}
+
+    <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" class="seo-gauge">
+        {# Zone basse (trop faible) : orange #}
+        <path d="{{ _self.arcPath(cx, cy, r, 180, lowEndAngle) }}"
+              fill="none" stroke="#f59e0b" stroke-width="24" stroke-linecap="round" />
+
+        {# Zone bonne : vert #}
+        <path d="{{ _self.arcPath(cx, cy, r, lowEndAngle, goodEndAngle) }}"
+              fill="none" stroke="#22c55e" stroke-width="24" stroke-linecap="round" />
+
+        {# Zone haute (sur-optimisation) : rouge #}
+        <path d="{{ _self.arcPath(cx, cy, r, goodEndAngle, 0) }}"
+              fill="none" stroke="#ef4444" stroke-width="24" stroke-linecap="round" />
+
+        {# Aiguille #}
+        <line x1="{{ cx }}" y1="{{ cy }}" x2="{{ needleX }}" y2="{{ needleY }}"
+              stroke="#1f2937" stroke-width="4" stroke-linecap="round" />
+        <circle cx="{{ cx }}" cy="{{ cy }}" r="8" fill="#1f2937" />
+
+        {# Valeur affichée #}
+        {#
+        <text x="{{ cx }}" y="{{ cy + 40 }}" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">
+            {{ density }}%
+        </text>
+        #}
+    </svg>
+{% endmacro %}
+
+{% macro arcPath(cx, cy, r, startAngle, endAngle) %}
+    {% set startRad = startAngle * pi() / 180 %}
+    {% set endRad = endAngle * pi() / 180 %}
+    {% set x1 = cx + r * cos(startRad) %}
+    {% set y1 = cy - r * sin(startRad) %}
+    {% set x2 = cx + r * cos(endRad) %}
+    {% set y2 = cy - r * sin(endRad) %}
+    {{- "M #{x1} #{y1} A #{r} #{r} 0 0 1 #{x2} #{y2}" -}}
+{% endmacro %}

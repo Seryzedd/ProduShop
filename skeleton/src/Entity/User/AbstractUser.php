@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\User\Seo\SeoKeyword;
 use App\Entity\Utils\SqlGenerator;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -62,10 +63,17 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     #[ORM\OneToMany(targetEntity: SqlGenerator::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $sqlGenerators;
 
+    /**
+     * @var Collection<int, SeoKeyword>
+     */
+    #[ORM\OneToMany(targetEntity: SeoKeyword::class, mappedBy: 'user')]
+    private Collection $seoKeywords;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->sqlGenerators = new ArrayCollection();
+        $this->seoKeywords = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -237,6 +245,36 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
             // set the owning side to null (unless already changed)
             if ($sqlGenerator->getUser() === $this) {
                 $sqlGenerator->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SeoKeyword>
+     */
+    public function getSeoKeywords(): Collection
+    {
+        return $this->seoKeywords;
+    }
+
+    public function addSeoKeyword(SeoKeyword $seoKeyword): static
+    {
+        if (!$this->seoKeywords->contains($seoKeyword)) {
+            $this->seoKeywords->add($seoKeyword);
+            $seoKeyword->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSeoKeyword(SeoKeyword $seoKeyword): static
+    {
+        if ($this->seoKeywords->removeElement($seoKeyword)) {
+            // set the owning side to null (unless already changed)
+            if ($seoKeyword->getUser() === $this) {
+                $seoKeyword->setUser(null);
             }
         }
 

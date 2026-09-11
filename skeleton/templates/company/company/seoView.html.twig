@@ -18,8 +18,31 @@
 
 {% block body %}
     <main class="container pb-4">
-        <h1 class="text-primary">{% trans %}My company SEO Analyze{% endtrans %}</h1>
+        <div class="d-flex justify-content-between align-items-baseline">
+            <h1 class="text-primary">{% trans %}My company SEO Analyze{% endtrans %}</h1>
         
-        {{ report|viewAnalyze(html)|raw }}
+            <button class="btn btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapsekeywordForm" aria-expanded="false" aria-controls="collapsekeywordForm">
+                {% trans %}Manage keywords{% endtrans %}
+            </button>
+        </div>
+        
+
+        <div class="collapse" id="collapsekeywordForm">
+            {{ form_start(form) }}
+                {% include 'form/collectionType.html.twig' with {collection: form} %}
+                <p class="text-end">
+                    <button type="submit" class="btn btn-secondary">
+                        {% trans %}Save{% endtrans %}
+                    </button>
+                </p>
+            {{ form_end(form) }}
+        </div>
+
+        {{ report|viewAnalyze|raw }}
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('collection-form') }}
 {% endblock %}

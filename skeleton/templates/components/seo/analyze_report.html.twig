@@ -1,6 +1,6 @@
+{% import 'macros/gauge.html.twig' as gauge %}
 
-
-<div class="row">
+<div class="row mt-3">
     <div class="col-6">
         <section class="fst-italic">
             {% trans %}Analyze structure of webpage to get an idea of Search Engine Optimization (SEO).{% endtrans %}
@@ -20,8 +20,11 @@
         </div>
     </div>
     <div class="col-md-6">
+        <h4 class="text-secondary lined">
+            {% trans %}Webpage analyze{% endtrans %}
+        </h4>
         {% for result in report.results %}
-            <h3 class="text-secondary font-weight-bold">
+            <h5 class="font-weight-bold">
                 {{ result.name|trans }}
 
                 {% if result.passed == true %}
@@ -29,10 +32,65 @@
                 {% else %}
                     <span class="text-danger">{{ ux_icon('ic:round-mood-bad', {height: '20px', width: '20px'}) }}</span>
                 {% endif %}
-            </h3>
+            </h5>
 
             <p>{{ result.message|trans }}</p>
         {% endfor %}
+
+        <div class="row align-items-center">
+            <h4 class="text-secondary lined">
+                {% trans %}Keywords{% endtrans %}
+            </h4>
+            {% for keyword in keywords %}
+                <h5 class="col-10" data-end="{{ report.score }}">
+                    {{ keyword.keyword }}
+
+                    {% if keyword.checks > 0 %}
+                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseKeywordChecks" aria-expanded="false" aria-controls="collapseKeywordChecks">
+                            {% trans %}More details{% endtrans %}
+                        </button>
+                    {% endif %}
+                </h5>
+
+                <p class="text-light number-float-animation col-2 text-center" data-end="{{ keyword.density }}">
+                    {{ gauge.densityGauge(keyword.density) }}
+                    <span>0</span>
+                </p>
+
+                {% if keyword.checks > 0 %}
+                    <div class="col-12">
+                        <div class="collapse" id="collapseKeywordChecks">
+                            <table class="table table-striped">
+                                {% for check in keyword.checks %}
+                                    <tr>
+                                        <th>
+                                            <p class="mb-0">
+                                                <span class="fw-bold">{{ check.label }}</span><br>
+                                                <small class="text-light">{{ check.detail }}</small>
+                                            </p>
+                                        </th>
+
+                                        <td class="text-end mb-0">
+                                            {% if check.found %}
+                                                <p class="text-success mb-0">
+                                                    <small>{% trans %}Found{% endtrans %}</small>
+                                                </p>
+                                            {% else %}
+                                                <p class="text-danger mb-0">
+                                                    <small>{% trans %}Not found{% endtrans %}</small>
+                                                </p>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
     </div>
 
     <div class="col-md-6">
