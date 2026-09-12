@@ -11,9 +11,9 @@ use App\Repository\Product\ProductRepository;
 use App\Entity\User\Professional;
 use App\Entity\User\Client;
 use App\Service\Seo\Analyzer;
-use App\Form\Seo\SeoKeywordType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Form\Seo\SeoProfessionalType;
+use App\Entity\User\Seo\SeoProfessionalInformations;
 
 #[Route('/company')]
 final class CompanyController extends AbstractController
@@ -57,7 +57,7 @@ final class CompanyController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_company')]
+    #[Route('/{name}', name: 'app_company')]
     public function view(Professional $professional, Request $request): Response
     {
         
@@ -79,25 +79,21 @@ final class CompanyController extends AbstractController
 
         $keyWords = $user->getSeoKeywords();
 
-        $form = $this->createForm(CollectionType::class, $keyWords, [
-            'entry_type' => SeoKeywordType::class,
-            'allow_add' => true,
-            'allow_delete' => true,
-            'label' => 'keywords'
-        ]);
+        if(!$user->getSeoInformations()) {
+            
+            $user->setSeoInformations(new SeoProfessionalInformations($user));
+        }
+
+        $form = $this
+            ->createForm(SeoProfessionalType::class, $user)
+        ;
 
         $form->handleRequest($request);
 
         $html = $this->view($this->getUser(), $request)->getContent();
 
         if($form->isSubmitted() && $form->isValid()) {
-            
-            foreach($form->getData() as $keyword) {
-                $keyword->setUser($user);
-
-                $entityManager->persist($keyword);
-            }
-            
+            $entityManager->persist($user);
             $entityManager->flush();
 
             $this->addFlash('success', 'Your account is updated.');

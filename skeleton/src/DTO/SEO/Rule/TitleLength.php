@@ -33,6 +33,6 @@ final class TitleLength implements SeoRuleInterface
             );
         }
 
-        return new SeoResult('title_length', true, sprintf('Correct title (%d characters)', $length), 2);
+        return new SeoResult('title_length', sprintf('Correct title (%d characters)', true, $length), 2);
     }
 }

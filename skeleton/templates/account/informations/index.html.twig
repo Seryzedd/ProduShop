@@ -53,6 +53,7 @@
                     </div>
                     {{ block('products') }}
                     {{ block('orders') }}
+                    {{ block('search_box') }}
                 {% else %}
                     {{ block('payments') }}
                     {{ block('payment_methods') }}
@@ -171,9 +172,23 @@
                 {% trans %}No postal adress{% endtrans %}
             </p>
         {% endif %}
-
-        <p><a href="{{ path('app_company_seo') }}" class="link-primary">{% trans %}Professional view analyze{% endtrans %}</a></p>
     </div>
+{% endblock %}
+
+{% block search_box %}
+    <h3 class="lined text-nowrap flex-row-reverse">
+        {% trans %}Products{% endtrans %}
+    </h3>
+    <p class="text-end">
+        <a href="{{ path('app_company_seo') }}" class="btn btn-outline-primary btn-sm">{% trans %}Manage Seo configuration{% endtrans %}</a>
+    </p>
+    {% if app.user.seoInformations %}
+        {% include 'components/seo/search_block.html.twig' with {
+            serpUrl: url('app_company', {name: app.user.companyName}),
+            serpTitle: app.user.seoInformations.title,
+            serpDescription: app.user.seoInformations.meta
+        } only %}
+    {% endif %}
 {% endblock %}
 
 {% block products %}

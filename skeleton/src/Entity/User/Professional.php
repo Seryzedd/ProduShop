@@ -6,6 +6,7 @@ use App\Entity\Picture;
 use App\Entity\Product\Product;
 use App\Entity\User\Payment\StripeMerchant;
 use App\Entity\User\PostalAdress\Adress;
+use App\Entity\User\Seo\SeoProfessionalInformations;
 use App\Repository\User\ProfessionalRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -27,7 +28,7 @@ class Professional extends AbstractUser implements TranslatableInterface
     #[ORM\Column(length: 255)]
     private ?string $siret = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $companyName = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
@@ -57,6 +58,9 @@ class Professional extends AbstractUser implements TranslatableInterface
      */
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'merchant')]
     private Collection $orders;
+
+    #[ORM\OneToOne(mappedBy: 'professional', cascade: ['persist', 'remove'])]
+    private ?SeoProfessionalInformations $seoInformations = null;
 
     public function __construct()
     {
@@ -284,6 +288,23 @@ class Professional extends AbstractUser implements TranslatableInterface
                 $order->setMerchant(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSeoInformations(): ?SeoProfessionalInformations
+    {
+        return $this->seoInformations;
+    }
+
+    public function setSeoInformations(SeoProfessionalInformations $seoInformations): static
+    {
+        // set the owning side of the relation if necessary
+        if ($seoInformations->getProfessional() !== $this) {
+            $seoInformations->setProfessional($this);
+        }
+
+        $this->seoInformations = $seoInformations;
 
         return $this;
     }

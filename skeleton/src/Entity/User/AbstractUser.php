@@ -66,7 +66,7 @@ abstract class AbstractUser implements UserInterface, PasswordAuthenticatedUserI
     /**
      * @var Collection<int, SeoKeyword>
      */
-    #[ORM\OneToMany(targetEntity: SeoKeyword::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: SeoKeyword::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $seoKeywords;
 
     public function __construct()

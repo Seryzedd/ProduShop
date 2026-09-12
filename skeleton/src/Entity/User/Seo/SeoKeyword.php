@@ -17,7 +17,7 @@ class SeoKeyword
     #[ORM\Column(length: 100)]
     private ?string $label = null;
 
-    #[ORM\ManyToOne(inversedBy: 'seoKeywords')]
+    #[ORM\ManyToOne(inversedBy: 'seoKeywords', cascade: ['persist', 'remove'])]
     private ?AbstractUser $user = null;
 
     public function getId(): ?int

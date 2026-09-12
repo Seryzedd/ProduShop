@@ -236,7 +236,7 @@
                 {% if addr and addr.hasCoordinates() %}
                     {
                         company: {{ (company.companyName ?? '')|json_encode|raw }},
-                        companyLink: {{ path('app_company', { id: company.id })|json_encode|raw }},
+                        companyLink: {{ path('app_company', { name: company.companyName })|json_encode|raw }},
                         lat:     {{ addr.latitude }},
                         lng:     {{ addr.longitude }},
                         phone: {{ company.phone|json_encode|raw }},

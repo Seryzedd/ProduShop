@@ -20,37 +20,37 @@
         </div>
     </div>
     <div class="col-md-6">
-        <h4 class="text-secondary lined">
+        <h5 class="text-light lined">
             {% trans %}Webpage analyze{% endtrans %}
-        </h4>
+        </h5>
         {% for result in report.results %}
-            <h5 class="font-weight-bold">
+            <p class="fw-bold mb-0">
                 {{ result.name|trans }}
-
+                
                 {% if result.passed == true %}
                     <span class="text-primary">{{ ux_icon('ic:outline-mood', {height: '20px', width: '20px'}) }}</span>
                 {% else %}
                     <span class="text-danger">{{ ux_icon('ic:round-mood-bad', {height: '20px', width: '20px'}) }}</span>
                 {% endif %}
-            </h5>
+            </p>
 
-            <p>{{ result.message|trans }}</p>
+            <p class="fst-italic">{{ result.message|trans }}</p>
         {% endfor %}
 
         <div class="row align-items-center">
-            <h4 class="text-secondary lined">
+            <h5 class="text-light lined">
                 {% trans %}Keywords{% endtrans %}
-            </h4>
+            </h5>
             {% for keyword in keywords %}
-                <h5 class="col-10" data-end="{{ report.score }}">
-                    {{ keyword.keyword }}
+                <p class="col-10" data-end="{{ report.score }}">
+                    <span class="fw-bold">{{ keyword.keyword }}</span>
 
                     {% if keyword.checks > 0 %}
                         <button type="button" class="btn btn-link btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseKeywordChecks" aria-expanded="false" aria-controls="collapseKeywordChecks">
                             {% trans %}More details{% endtrans %}
                         </button>
                     {% endif %}
-                </h5>
+                </p>
 
                 <p class="text-light number-float-animation col-2 text-center" data-end="{{ keyword.density }}">
                     {{ gauge.densityGauge(keyword.density) }}

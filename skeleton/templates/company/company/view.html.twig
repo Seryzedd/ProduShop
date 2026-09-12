@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {% trans with {'%professional%': professional.companyName} %}Merchant %professional%{% endtrans %}
+    {% trans with {'%professional%': professional.seoInformations ? professional.seoInformations.title : professional.companyName} %}Lancana | %professional%{% endtrans %}
 {% endblock %}
 
 {% block meta_description %}
-    {{ professional.description }}
+    {{ professional.seoInformations ? professional.seoInformations.title : professional.companyName }}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -18,7 +18,7 @@
         {
             label: 'Merchant %name%'|trans({'%name%': professional.companyName}),
             route: 'app_company',
-            parameters: {id: professional.id}
+            parameters: {name: professional.companyName}
         },
     ] %}
 

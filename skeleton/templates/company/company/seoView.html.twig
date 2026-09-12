@@ -5,8 +5,12 @@
 {% endblock %}
 
 {% block breadcrumb %}
-
     {% set breadcrumb = [
+        {
+            label: 'My account',
+            route: 'app_account_informations',
+            parameters: []
+        },
         {
             label: 'SEO company analyze',
             route: 'app_company_seo',
@@ -21,15 +25,29 @@
         <div class="d-flex justify-content-between align-items-baseline">
             <h1 class="text-primary">{% trans %}My company SEO Analyze{% endtrans %}</h1>
         
-            <button class="btn btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapsekeywordForm" aria-expanded="false" aria-controls="collapsekeywordForm">
-                {% trans %}Manage keywords{% endtrans %}
+            <button class="btn btn-outline-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsekeywordForm" aria-expanded="false" aria-controls="collapsekeywordForm">
+                {% trans %}Manage company informations{% endtrans %}
             </button>
         </div>
         
 
         <div class="collapse" id="collapsekeywordForm">
             {{ form_start(form) }}
-                {% include 'form/collectionType.html.twig' with {collection: form} %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.seoInformations.title) }}
+                        {{ form_row(form.seoInformations.logoTag) }}
+                    </div>
+                    <div class="col-md-6">
+                        <div id="description-preview" class="my-2 d-none">
+                            <p class="mb-0 text-dark">{% trans %}Short preview{% endtrans %} : </p>
+                            <p class="content text-muted"></p>
+                        </div>
+                        {{ form_row(form.seoInformations.meta) }}
+                    </div>
+                </div>
+
+                {% include 'form/collectionType.html.twig' with {collection: form.seoKeywords} %}
                 <p class="text-end">
                     <button type="submit" class="btn btn-secondary">
                         {% trans %}Save{% endtrans %}
@@ -38,6 +56,23 @@
             {{ form_end(form) }}
         </div>
 
+        <h3 class="text-secondary lined flex-row-reverse">{% trans %}Render search engine result{% endtrans %}</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p class="fst-italic">{% trans %}Render appearance that should have company's search result in search engine{% endtrans %}.</p>
+            </div>
+            <div class="col-md-6">
+                {% if app.user.seoInformations %}
+                    {% include 'components/seo/search_block.html.twig' with {
+                        serpUrl: url('app_company', {name: app.user.companyName}),
+                        serpTitle: app.user.seoInformations.title,
+                        serpDescription: app.user.seoInformations.meta
+                    } only %}
+                {% endif %}
+            </div>
+        </div>
+
+        <h3 class="text-secondary lined flex-row-reverse">{% trans %}Webpage analyze results{% endtrans %}</h3>
         {{ report|viewAnalyze|raw }}
     </main>
 {% endblock %}
@@ -45,4 +80,5 @@
 {% block javascripts %}
     {{ parent() }}
     {{ importmap('collection-form') }}
+    <script src="{{ asset('script/textPreviewInput.js') }}"></script>
 {% endblock %}

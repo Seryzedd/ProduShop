@@ -4,9 +4,12 @@ document.querySelectorAll('.text-preview').forEach(input => {
 
     input.addEventListener('input', function () {
         const value = this.value;
-        const counter = document.querySelector('#professional_description_help #count');
-        counter.textContent = value.length;
+        const counter = this.closest('div').querySelector('.help-text span');
 
+        if(counter) {
+            counter.textContent = value.length;
+        }
+        
         if(value.length === 0) {
             previewContainer.classList.add('d-none');
         } 
