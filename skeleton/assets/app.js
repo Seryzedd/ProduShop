@@ -20,26 +20,96 @@ import './script/async-search.js';
 
 // Validation du Siret
 
+async function searchEntreprise(query, options = {}) {
+  const params = new URLSearchParams({
+    q: query,
+    page: options.page || 1,
+    per_page: options.perPage || 10,
+    ...options.filters, // ex: { code_postal: '75001', code_naf: '56.10A' }
+  });
+
+  const response = await fetch(`https://recherche-entreprises.api.gouv.fr/search?${params}`);
+
+  if (!response.ok) {
+    throw new Error(`Erreur API : ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.results; // tableau d'entreprises
+}
+
 $('.siret').on('input', function () {
-    var valid = LuhnCheck($(this).val());
-
-    let spanClass = '';
-    if($(this).val() !== "") {
-        if(valid === false) {
-            spanClass = ['error', 'text-danger'];
-        } else {
-            spanClass = ['valid', 'text-success'];
-        }
-    } else {
-        spanClass = ['pending', 'text-muted'];
-    }
-    
-
-    $(this).next("span").removeClass(['pending', 'valid', 'error', 'text-muted', 'text-danger', 'text-success']).addClass(spanClass);
+  
+  updateSpan($(this));
 })
 
-$(document).ready(function() {
-    $('.siret').after('<span class="input-group-text pending text-muted"></span>');
+function updateSpan(siret)
+{
+  let txt = siret.val().replaceAll(' ', '');
+  
+  if (txt.length === 0) {
+    applySpanClass(siret, 'pending');
+  } else if (txt.length === 14) {
+    var valid = LuhnCheck(txt);
+
+    if (valid) {
+      searchEntreprise(txt).then(datas => {
+        if (datas.length === 0) {
+          applySpanClass(siret, 'error');
+        } else {
+          let company = datas[0];
+          updateCompanyName(company.nom_complet);
+          applySpanClass(siret, 'valid');
+        }
+      });
+    } else {
+      applySpanClass(siret, 'error');
+    }
+  } else if (txt.length < 14) {
+    applySpanClass(siret, 'typing');
+  } else {
+    applySpanClass(siret, 'error');
+  }
+}
+
+function applySpanClass(siret, status)
+{
+  if (siret.next("span").length === 0) {
+    let span = document.createElement("span");
+    siret.closest('div').append(span);
+  }
+
+  siret.next("span")
+    .removeClass(['pending', 'typing', 'valid', 'error', 'text-muted', 'text-danger', 'text-success', 'text-secondary', 'input-group-text'])
+    .addClass(spanInputClass(status));
+}
+
+function updateCompanyName(value)
+{
+  $('#professional_companyName').val(value);
+}
+
+function spanInputClass(status)
+{
+  console.log(status === 'valid');
+
+  if(status === 'valid') {
+    return ['valid', 'text-success', 'input-group-text'];
+  } else if(status === 'error') {
+    return ['error', 'text-danger', 'input-group-text'];
+  } else if(status === 'typing') {
+    return ['typing', 'text-secondary', 'input-group-text'];
+  }
+
+  return ['pending', 'text-muted', 'input-group-text'];
+}
+
+$(window).ready(function() {
+  var siret = $('.siret');
+
+  if(siret) {
+    updateSpan(siret);
+  }
 })
 
 // adress autocomplete

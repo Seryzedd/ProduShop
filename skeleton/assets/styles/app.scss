@@ -102,7 +102,7 @@ input + span.error::before {
 }
 
 input + span.pending::before {
-    content: 'more_horiz';
+    content: 'hourglass_empty';
     font-family: 'Material Icons';
     font-size: 20px;
     margin-right: 5px;
@@ -490,4 +490,22 @@ input[type='checkbox']:checked + label.btn-more-less::after {
     color: #4d5156;
     font-size: 14px;
     line-height: 1.4;
+}
+
+input + span.typing {
+    width: 50px;
+}
+
+input + span.typing::before {
+    content: "hourglass_bottom";
+    font-family: 'Material Icons';
+    animation: spin 0.6s ease-in infinite;
+    vertical-align: middle;
+    font-size: 20px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

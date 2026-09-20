@@ -7,7 +7,7 @@ use Symfony\Component\HttpClient\Response\TraceableResponse;
 
 abstract class AbstractApi
 {
-    private HttpClientInterface $client;
+    protected HttpClientInterface $client;
 
     public function __construct(HttpClientInterface $client)
     {

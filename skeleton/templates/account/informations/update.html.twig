@@ -31,15 +31,17 @@
                 {{ form_start(form) }}
                     {% if form.vars.data|instanceOf('App\\Entity\\User\\Professional') %}
                         {{ form_row(form.logo) }}
-                        {{ form_row(form.companyName) }}
-                        {{ form_row(form.email) }}
-                        {{ form_row(form.phone) }}
 
                         {{ form_label(form.siret) }}
                         <div class="input-group">
                             {{ form_widget(form.siret) }}
                         </div>
                         {{ form_help(form.siret) }}
+
+                        {{ form_row(form.companyName) }}
+                        {{ form_row(form.email) }}
+                        {{ form_row(form.phone) }}
+                        
 
                         <div id="description-preview" class="my-2 d-none">
                             <p class="mb-0 text-dark">{% trans %}Short preview{% endtrans %} : </p>

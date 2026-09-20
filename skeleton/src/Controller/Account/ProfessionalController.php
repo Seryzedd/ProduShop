@@ -8,6 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Service\Api\SiretService;
+use Symfony\Component\HttpFoundation\StreamedJsonResponse;
 
 #[Route('/account/professional')]
 final class ProfessionalController extends AbstractController
@@ -15,6 +17,7 @@ final class ProfessionalController extends AbstractController
     public function __construct(
         private readonly StripeMerchantService $stripeMerchantService,
         private readonly StripeService $stripeService,
+        private SiretService $siretService
     ) {}
 
     /**
@@ -91,5 +94,13 @@ final class ProfessionalController extends AbstractController
         );
 
         return $this->redirect($link['url']);
+    }
+
+    #[Route('/official/datas/{siret}', name: 'app_professional_datas')]
+    public function getCompanyDatas(string $siret): StreamedJsonResponse
+    {
+        $datas = $this->siretService->findBySiret($siret);
+
+        return new StreamedJsonResponse($datas);
     }
 }

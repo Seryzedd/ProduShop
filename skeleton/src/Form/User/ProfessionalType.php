@@ -39,13 +39,18 @@ class ProfessionalType extends AbstractType
                     'class' => 'siret',
                     'placeholder' => 'xxx xxx xxx xxxxx'
                 ],
-                'help' => 'Siret of company are numbers only',
+                'help_attr' => [
+                    'class' => 'mb-3'
+                ],
+                'help' => 'Siret of company are numbers only (14 characters).',
                 'empty_data' => ''
             ])
             ->add('companyName', TextType::class, [
                 'empty_data' => '',
+                'help' => 'Company name is automatially updated on completing siret.',
                 'attr' => [
-                    'placeholder' => 'My company name'
+                    'placeholder' => 'My company name', 
+                    'readonly' => true
                 ]
             ])
             ->add('description', TextareaType::class, [

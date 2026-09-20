@@ -23,7 +23,10 @@ use Symfony\Component\Translation\TranslatableMessage;
 #[Route('/account')]
 final class InformationsController extends AbstractController
 {
-    public function __construct(private StripeService $stripeService, private EntityManagerInterface $entityManager) {}
+    public function __construct(
+        private StripeService $stripeService,
+        private EntityManagerInterface $entityManager
+    ) {}
     
     #[Route('/', name: 'app_account_informations')]
     public function index(OrderRepository $orderRepository): Response

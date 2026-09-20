@@ -1,7 +1,5 @@
 var inputs = document.querySelectorAll('.filter-input');
 
-console.log(inputs)
-
 inputs.forEach(input => {
     input.addEventListener('input', function() {
         var container = document.querySelector(this.getAttribute("data-container"));
