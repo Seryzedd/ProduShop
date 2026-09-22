@@ -30,6 +30,10 @@ body {
     grid-template-rows: auto 1fr auto;
 }
 
+main {
+    margin-bottom: 100px;
+}
+
 .container {
     max-width: 1250px;
 }
@@ -508,4 +512,9 @@ input + span.typing::before {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+div.position-relative:has(a.stretched-link):hover {
+    background-color: lighten($light, 20%);
+    transition: 0.5s;
 }

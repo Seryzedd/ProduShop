@@ -138,4 +138,13 @@ class TranslationFileReader
     {
         $this->getFilesByLocale($locale);
     }
+
+    public function readTranslationFileSafe(string $fileName): array
+    {
+        try {
+            return $this->readTranslationFile($fileName);
+        } catch (\InvalidArgumentException) {
+            return [];
+        }
+    }
 }

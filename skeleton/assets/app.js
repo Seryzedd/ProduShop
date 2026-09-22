@@ -45,31 +45,36 @@ $('.siret').on('input', function () {
 
 function updateSpan(siret)
 {
-  let txt = siret.val().replaceAll(' ', '');
   
-  if (txt.length === 0) {
-    applySpanClass(siret, 'pending');
-  } else if (txt.length === 14) {
-    var valid = LuhnCheck(txt);
+  if(siret.length > 0)
+  {
+    let txt = siret.val().replaceAll(' ', '');
+  
+    if (txt.length === 0) {
+      applySpanClass(siret, 'pending');
+    } else if (txt.length === 14) {
+      var valid = LuhnCheck(txt);
 
-    if (valid) {
-      searchEntreprise(txt).then(datas => {
-        if (datas.length === 0) {
-          applySpanClass(siret, 'error');
-        } else {
-          let company = datas[0];
-          updateCompanyName(company.nom_complet);
-          applySpanClass(siret, 'valid');
-        }
-      });
+      if (valid) {
+        searchEntreprise(txt).then(datas => {
+          if (datas.length === 0) {
+            applySpanClass(siret, 'error');
+          } else {
+            let company = datas[0];
+            updateCompanyName(company.nom_complet);
+            applySpanClass(siret, 'valid');
+          }
+        });
+      } else {
+        applySpanClass(siret, 'error');
+      }
+    } else if (txt.length < 14) {
+      applySpanClass(siret, 'typing');
     } else {
       applySpanClass(siret, 'error');
     }
-  } else if (txt.length < 14) {
-    applySpanClass(siret, 'typing');
-  } else {
-    applySpanClass(siret, 'error');
   }
+  
 }
 
 function applySpanClass(siret, status)
@@ -91,7 +96,6 @@ function updateCompanyName(value)
 
 function spanInputClass(status)
 {
-  console.log(status === 'valid');
 
   if(status === 'valid') {
     return ['valid', 'text-success', 'input-group-text'];
@@ -127,6 +131,8 @@ async function autocompleteStreet(query) {
     );
     
     const data = await response.json();
+
+    console.log(data);
 
     return data.features.map(feature => ({
       label: feature.properties.label,

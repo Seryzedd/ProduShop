@@ -18,21 +18,34 @@
 
 {% block body %}
     <main class="container">
-        <h1>{% trans %}Admin dashboard{% endtrans %}</h1>
-        <div class="row justify-content-around align-items-center">
-            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
+        <h1 class="text-primary">{% trans %}Admin dashboard{% endtrans %}</h1>
+        
+        <div class="row align-items-center">
+            <div class="col-md-6 offset-md-3 px-4 position-relative text-center">
                 {{ block('users_block') }}
             </div>
 
-            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
+            {% if regionClientPercent|length > 0 %}
+                <div class="col-md-6 col-lg-4 offset-lg-2 px-4 py-4 position-relative text-center">
+                    {{ block('region_client_block') }}
+                </div>
+            {% endif %}
+
+            {% if regionProPercent|length > 0 %}
+                <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
+                    {{ block('region_pro_block') }}
+                </div>
+            {% endif %}
+
+            <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
                 {{ block('payments_block') }}
             </div>
 
-            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
                 {{ block('products_block') }}
             </div>
 
-            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
                 {{ block('translations_block') }}
             </div>
         </div>
@@ -47,9 +60,13 @@
         {% set total = total + payment.total %}
         {% set count = count + payment.count %}
     {% endfor %}
-
-    <h2 class="text-secondary number-float-animation"  data-end="{{ total / 100 }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
-    <a href='{{ path('app_admin_payments') }}' class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans with {'%count%': count} %}{1}%count% payment|]1,Inf]%count% payments{% endtrans %}</a>
+    <div class="d-flex align-items-baseline justify-content-center">
+        <h2 class="text-secondary number-float-animation"  data-end="{{ total / 100 }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
+        <p class="mb-0 text-muted fst-italic">
+            /{% trans %}Payment{% endtrans %}
+        </p>
+    </div>
+    <a href='{{ path('app_admin_payments') }}' class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': count} %}{1}%count% payment|]1,Inf]%count% payments{% endtrans %}</a>
 
     {% for payment in paymentStats %}
         {% set pct = payment.total|percentage(total) %}
@@ -60,7 +77,7 @@
 
 {% block users_block %}
     <h2 class="text-secondary number-animation" style="--end:{{ usersStats.total }}"></h2>
-    <a href="{{ path('app_admin_users') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans %}Users{% endtrans %}</a>
+    <a href="{{ path('app_admin_users') }}" class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans %}Users{% endtrans %}</a>
 
     {% for role, count in usersStats.by_role %}
         {% set pct = count|percentage(usersStats.total) %}
@@ -73,11 +90,11 @@
     <div class="d-flex justify-content-center align-items-end">
         <h2 class="text-secondary number-float-animation mb-0" data-end="{{ productsStats.avg_price }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
         <p class="mb-0 text-muted fst-italic">
-            {% trans %}Average{% endtrans %}
+            /{% trans %}Product{% endtrans %}
         </p>
     </div>
     
-    <a href="{{ path('app_admin_product_shelf') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">{% trans with {'%count%': productsStats.total} %}{1}%count% product|]1,Inf]%count% products{% endtrans %}</a>
+    <a href="{{ path('app_admin_product_shelf') }}" class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': productsStats.total} %}{1}%count% product|]1,Inf]%count% products{% endtrans %}</a>
 
     {% for shelf in productsStats.by_shelf %}
         {% set pct = shelf.total|percentage(productsStats.total) %}
@@ -92,7 +109,7 @@
         {% set fileTotal = fileTotal + file|length %}
     {% endfor %}
     <h2 class="text-secondary number-animation mb-0" style="--end:{{ translations|length }}"></h2>
-    <a href="{{ path('app_admin_translations_manager') }}" class="stretched-link link-underline-light link-opacity-50-hover fs-4">
+    <a href="{{ path('app_admin_translations_manager') }}" class="stretched-link link-underline-primary link-underline-opacity-0 link-opacity-50-hover fs-4">
         {% trans with {'%count%': translations|length} %}{1}language|]1,Inf]languages{% endtrans %}
     </a>
 
@@ -100,5 +117,35 @@
         {% set pct = file|length|percentage(fileTotal) %}
         <p class="text-end mb-0"><small class="me-1">{{ local|name }}</small><span class="fst-italic">{% trans with {'%count%': file|length} %}{1}%count% file|]1,Inf]%count% files{% endtrans %}</span></p>
         <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+    {% endfor %}
+{% endblock %}
+
+{% block region_client_block %}
+    <h2 class="text-secondary number-animation mb-0" style="--end:{{ regionClientPercent|first.percentage|number_format(2, '.', ' ')|round }}"><span></span><small>{{ ux_icon('ic:sharp-percent', {width: '12px', height: '12px'}) }}</small></h2>
+
+    <h5 class="text-light">
+        {% trans with {'%name%': regionClientPercent|first.code|department.name|trans([],'regions')} %}Clients in %name%{% endtrans %}
+    </h5>
+
+    {% for department in regionClientPercent %}
+        {% if not loop.first %}
+            <p class="text-end mb-0"><span class="fst-italic fw-bold me-2">{{ department.percentage|number_format(2, '.', ' ') }}%</span><small class="me-1">{{ department.code|department.name|trans([],'regions') }}</small></p>
+            <p class="progress-percent-bar text-muted" style="--pct:{{ department.percentage }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
+{% block region_pro_block %}
+    <h2 class="text-secondary number-animation mb-0" style="--end:{{ regionProPercent|first.percentage|number_format(2, '.', ' ')|round }}"><span></span><small>{{ ux_icon('ic:sharp-percent', {width: '12px', height: '12px'}) }}</small></h2>
+
+    <h5 class="text-light">
+        {% trans with {'%name%': regionProPercent|first.code|department.name|trans([],'regions')} %}Professionals in %name%{% endtrans %}
+    </h5>
+
+    {% for department in regionProPercent %}
+        {% if not loop.first %}
+            <p class="text-end mb-0"><span class="fst-italic fw-bold me-2">{{ department.percentage|number_format(2, '.', ' ') }}%</span><small class="me-1">{{ department.code|department.name|trans([],'regions') }}</small></p>
+            <p class="progress-percent-bar text-muted" style="--pct:{{ department.percentage }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+        {% endif %}
     {% endfor %}
 {% endblock %}

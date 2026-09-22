@@ -8,6 +8,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.file_entity_directory: '%kernel.project_dir%/public/uploads/files/Documentations'
+    app.department_csv_dir: '%kernel.project_dir%/var/data/departments'
 
 services:
     # default configuration for services in *this* file

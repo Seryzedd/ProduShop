@@ -24,7 +24,9 @@ final class AdminController extends AbstractController
             'usersStats' => $usersRespository->getStats(),
             'paymentStats' => $paymentRepository->getPaymentStats(),
             'productsStats' => $productRepository->getStats(),
-            'translations' => $translationFileService->readAllTranslationFiles()
+            'translations' => $translationFileService->readAllTranslationFiles(),
+            'regionClientPercent' => $usersRespository->getClientPercentageByDepartment(),
+            'regionProPercent' => $usersRespository->getProPercentageByDepartment()
         ]);
     }
 }

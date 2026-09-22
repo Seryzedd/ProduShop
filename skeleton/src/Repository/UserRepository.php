@@ -50,6 +50,69 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->getResult();
     }
 
+    public function getTopDepartmentForClients(): ?array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select(
+                'SUBSTRING(a.zipCode, 1, 2) AS codeDepartement',
+                'COUNT(a.id) AS total',
+                'MIN(a.id) AS firstAdressId'
+            )
+            ->from(userContainer\Client::class, 'c')
+            ->join('c.shippingAdresses', 'a')
+            ->groupBy('codeDepartement')
+            ->orderBy('total', 'DESC')
+            ->addOrderBy('firstAdressId', 'ASC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getClientPercentageByDepartment(): array
+    {
+        $rows = $this->getTopDepartmentForClients();
+
+        $counts = array_column($rows, 'total', 'codeDepartement');
+
+        return $this->withPercentages($counts);
+    }
+
+    public function getProPercentageByDepartment(): array
+    {
+        $rows = $this->getTopDepartmentForProfessionals();
+
+        $counts = array_column($rows, 'total', 'codeDepartement');
+
+        return $this->withPercentages($counts);
+    }
+
+    private function withPercentages(array $counts): array
+    {
+        $total = array_sum($counts);
+        $result = [];
+
+        foreach ($counts as $code => $count) {
+            $result[] = [
+                'code' => $code,
+                'total' => (int) $count,
+                'percentage' => $total > 0 ? round($count / $total * 100, 2) : 0.0,
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getTopDepartmentForProfessionals(): ?array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('SUBSTRING(a.zipCode, 1, 2) AS codeDepartement', 'COUNT(a.id) AS total')
+            ->from(userContainer\Professional::class, 'p')
+            ->join('p.adress', 'a')
+            ->groupBy('codeDepartement')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getStats(): array
     {
         $rows = $this->createQueryBuilder('u')
