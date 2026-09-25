@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use App\Repository\User\Payment\PaymentRepository;
 use App\Repository\Product\ProductRepository;
 use App\Service\Translation\TranslationFileReader;
+use App\Service\Sales\SalesStatsService;
 
 #[Route('/admin')]
 final class AdminController extends AbstractController
@@ -18,7 +19,8 @@ final class AdminController extends AbstractController
         UserRepository $usersRespository,
         PaymentRepository $paymentRepository,
         ProductRepository $productRepository,
-        TranslationFileReader $translationFileService
+        TranslationFileReader $translationFileService,
+        SalesStatsService $salesStatsService
     ): Response {
         return $this->render('admin/admin/index.html.twig', [
             'usersStats' => $usersRespository->getStats(),
@@ -26,7 +28,8 @@ final class AdminController extends AbstractController
             'productsStats' => $productRepository->getStats(),
             'translations' => $translationFileService->readAllTranslationFiles(),
             'regionClientPercent' => $usersRespository->getClientPercentageByDepartment(),
-            'regionProPercent' => $usersRespository->getProPercentageByDepartment()
+            'regionProPercent' => $usersRespository->getProPercentageByDepartment(),
+            'salesStats' => $salesStatsService->getMonthlySalesStats()
         ]);
     }
 }

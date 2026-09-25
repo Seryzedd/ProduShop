@@ -21,12 +21,12 @@
         <h1 class="text-primary">{% trans %}Admin dashboard{% endtrans %}</h1>
         
         <div class="row align-items-center">
-            <div class="col-md-6 offset-md-3 px-4 position-relative text-center">
+            <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
                 {{ block('users_block') }}
             </div>
 
             {% if regionClientPercent|length > 0 %}
-                <div class="col-md-6 col-lg-4 offset-lg-2 px-4 py-4 position-relative text-center">
+                <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
                     {{ block('region_client_block') }}
                 </div>
             {% endif %}
@@ -38,6 +38,10 @@
             {% endif %}
 
             <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
+                {{ block('translations_block') }}
+            </div>
+
+            <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
                 {{ block('payments_block') }}
             </div>
 
@@ -45,13 +49,12 @@
                 {{ block('products_block') }}
             </div>
 
-            <div class="col-md-6 col-lg-4 px-4 py-4 position-relative text-center">
-                {{ block('translations_block') }}
+            <div class="col-12">
+                {{ block('sales_charts') }}
             </div>
         </div>
     <main>
 {% endblock %}
-
 
 {% block payments_block %}
     {% set total = 0 %}
@@ -148,4 +151,8 @@
             <p class="progress-percent-bar text-muted" style="--pct:{{ department.percentage }}%; --delay:{{ loop.index * 0.15 }}s"></p>
         {% endif %}
     {% endfor %}
+{% endblock %}
+
+{% block sales_charts %}
+    {% include 'components/charts/sales_charts.html.twig' with {stats: salesStats} %}
 {% endblock %}

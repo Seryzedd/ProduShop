@@ -1,0 +1,40 @@
+
+{% if stats is defined %}
+    
+    <h4 class="text-light">{% trans with {'%length%': stats.labels|length} %}Sales for %length% months{% endtrans %}</h4>
+
+    <canvas id="salesChart" height="100px"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script>
+        new Chart(document.getElementById('salesChart'), {
+            data: {
+                labels: {{ stats.labels|json_encode|raw }},
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'CA mensuel (€)',
+                        data: {{ stats.totals|json_encode|raw }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        yAxisID: 'y',
+                    },
+                    {
+                        type: 'line',
+                        label: 'Évolution',
+                        data: {{ stats.totals|json_encode|raw }},
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.3,
+                        fill: false,
+                        yAxisID: 'y',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: '€' } }
+                }
+            }
+        });
+    </script>
+{% endif %}

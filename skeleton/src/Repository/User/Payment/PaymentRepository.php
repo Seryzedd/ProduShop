@@ -42,6 +42,18 @@ class PaymentRepository extends ServiceEntityRepository
             ;
     }
 
+    public function findLastMonthsPayments(int $monthsCount = 12): array
+    {
+        $since = new \DateTimeImmutable('first day of -11 months midnight');
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->orderBy('p.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Payment[] Returns an array of Payment objects
     //     */

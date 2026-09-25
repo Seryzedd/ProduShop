@@ -19,6 +19,8 @@ $theme-colors: (
   "dark":       $dark
 );
 
+$enable-rounded : false;
+
 // Importer le reste des variables par défaut
 @import '../../node_modules/bootstrap/scss/bootstrap';
 @import 'stripe.scss';
