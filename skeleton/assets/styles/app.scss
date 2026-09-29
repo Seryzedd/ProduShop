@@ -80,6 +80,10 @@ input[type="radio"], input[type="checkbox"] {
     display:none;
 }
 
+.secret-type {
+    letter-spacing: 1.4px;
+}
+
 .nav-item:hover {
     background-color: $gray-200;
     transition: 0.3s;

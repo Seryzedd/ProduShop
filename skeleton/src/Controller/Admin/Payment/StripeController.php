@@ -35,6 +35,8 @@ final class StripeController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Stripe configuration updated.');
+
+            return $this->redirectToRoute('app_admin_config_stripe'); //
         }
 
         $error = null;

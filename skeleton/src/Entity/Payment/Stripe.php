@@ -14,14 +14,14 @@ class Stripe
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $authenticationKey = '';
+    #[ORM\Column(type: 'encrypted')]
+    private ?string $webhookSecret = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $publicKey = '';
+    private ?string $publicKey = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    private string $secretKey = '';
+    #[ORM\Column(type: 'encrypted')]
+    private ?string $secretKey = null;
 
     #[ORM\Column]
     private bool $active = false;
@@ -34,14 +34,14 @@ class Stripe
         return $this->id;
     }
 
-    public function getAuthenticationKey(): ?string
+    public function getWebhookSecret(): ?string
     {
-        return $this->authenticationKey;
+        return $this->webhookSecret;
     }
 
-    public function setAuthenticationKey(string $authenticationKey): static
+    public function setWebhookSecret(string $webhookSecret): static
     {
-        $this->authenticationKey = $authenticationKey;
+        $this->webhookSecret = $webhookSecret;
 
         return $this;
     }
