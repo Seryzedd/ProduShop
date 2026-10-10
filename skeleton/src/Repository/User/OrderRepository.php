@@ -60,4 +60,17 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+
+    public function getTotalAmountBetween(\DateTimeInterface $from, \DateTimeInterface $to): int
+    {
+        return (int) $this->createQueryBuilder('o')
+            ->select('COALESCE(SUM(o.amount), 0)')
+            ->where('o.createdAt BETWEEN :from AND :to')
+            ->andWhere('o.status = :status')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->setParameter('status', 'paid')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Trait;
 
 use App\Interface\TranslationInterface;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 trait TranslatableTrait
 {

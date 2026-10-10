@@ -20,7 +20,7 @@
     <main class="container">
         <h1 class="text-primary">{% trans %}Admin dashboard{% endtrans %}</h1>
         
-        <div class="row align-items-center">
+        <div class="row align-items-center justify-content-center">
             <div class="col-md-6 col-lg-4 px-4 position-relative text-center">
                 {{ block('users_block') }}
             </div>
@@ -58,23 +58,18 @@
 
 {% block payments_block %}
     {% set total = 0 %}
-    {% set count = 0 %}
-    {% for payment in paymentStats %}
-        {% set total = total + payment.total %}
-        {% set count = count + payment.count %}
+    {% for stat in paymentStats %}
+        {% set total = total + stat.count %}
     {% endfor %}
+
     <div class="d-flex align-items-baseline justify-content-center">
-        <h2 class="text-secondary number-float-animation"  data-end="{{ total / 100 }}"><span>0</span><small>{{ ux_icon('ic:round-euro', {width: '14px', height: '14px'}) }}</small></h2>
-        <p class="mb-0 text-muted fst-italic">
-            /{% trans %}Payment{% endtrans %}
-        </p>
+        <h2 class="text-secondary number-animation"  style="--end:{{ total }};"></h2>
     </div>
-    <a href='{{ path('app_admin_payments') }}' class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': count} %}{1}%count% payment|]1,Inf]%count% payments{% endtrans %}</a>
+    <a href='{{ path('app_admin_payments') }}' class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': paymentStats|first.count} %}{0} no payment|{1}payment|]1,Inf]payments{% endtrans %}</a>
 
     {% for payment in paymentStats %}
-        {% set pct = payment.total|percentage(total) %}
-        <p class="text-end mb-0"><small>{{ payment.status|replace({'ROLE_': ''})|lower|capitalize|trans }} : {{ pct|number_format(2, ',', ' ') }}%</small></p>
-        <p class="progress-percent-bar text-muted" style="--pct:{{ pct }}%; --delay:{{ loop.index * 0.15 }}s"></p>
+        <p class="text-end mb-0"><small>{{ payment.status|lower|capitalize|trans }} : x{{ payment.count|number_format(0, ',', ' ') }}</small></p>
+        <p class="progress-percent-bar text-muted" style="--pct:{{ payment.count|percentage(total) }}%; --delay:{{ loop.index * 0.15 }}s"></p>
     {% endfor %}
 {% endblock %}
 
@@ -97,7 +92,7 @@
         </p>
     </div>
     
-    <a href="{{ path('app_admin_product_shelf') }}" class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': productsStats.total} %}{1}%count% product|]1,Inf]%count% products{% endtrans %}</a>
+    <a href="{{ path('app_admin_product_shelf') }}" class="stretched-link fs-4 link-underline-primary link-underline-opacity-0 link-opacity-50-hover">{% trans with {'%count%': productsStats.total} %}{0} no product|{1}%count% product|]1,Inf]%count% products{% endtrans %}</a>
 
     {% for shelf in productsStats.by_shelf %}
         {% set pct = shelf.total|percentage(productsStats.total) %}
@@ -113,7 +108,7 @@
     {% endfor %}
     <h2 class="text-secondary number-animation mb-0" style="--end:{{ translations|length }}"></h2>
     <a href="{{ path('app_admin_translations_manager') }}" class="stretched-link link-underline-primary link-underline-opacity-0 link-opacity-50-hover fs-4">
-        {% trans with {'%count%': translations|length} %}{1}language|]1,Inf]languages{% endtrans %}
+        {% trans with {'%count%': translations|length} %}{0} no language|{1}language|]1,Inf]languages{% endtrans %}
     </a>
 
     {% for local, file in translations %}

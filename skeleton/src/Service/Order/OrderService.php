@@ -38,8 +38,10 @@ class OrderService
         // Order for the buyer
         $buyerOrder = $this->buildOrder($seller, $intent, $paidAt);
         $this->addItems($buyerOrder, $items, $seller);
+
+        $buyerOrder->setPlatformFeesAmount($intent['application_fee_amount'] ?? 0);
+
         $payment->addOrder($buyerOrder);
-        $payment->setAmount($buyerOrder->getAmount() + $payment->getAmount());
 
         $this->em->persist($payment);
         $this->em->persist($buyerOrder);

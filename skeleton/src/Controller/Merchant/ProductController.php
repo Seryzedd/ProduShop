@@ -103,7 +103,7 @@ final class ProductController extends AbstractController
         $this->entityManager->persist($product);
         $this->entityManager->flush();
 
-        $this->addFlash('success', new TranslatableMessage('Product translation %lang% added on product "%name%" removed successfully.', ['%name%' => $product->getName(), '%lang%' => $language], 'messages'));
+        $this->addFlash('success', new TranslatableMessage('Product translation %lang% added.', ['%name%' => $product->getName(), '%lang%' => $language], 'messages'));
 
         return $this->redirectToRoute('app_merchant_product_edit', ['product' => $product->getId()]);
     }

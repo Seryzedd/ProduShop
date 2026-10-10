@@ -28,9 +28,6 @@ class Payment
     #[ORM\Column(length: 50)]
     private ?string $status = 'Pending';
 
-    #[ORM\Column]
-    private int $amount = 0;
-
     /**
      * @var Collection<int, Order>
      */
@@ -85,16 +82,12 @@ class Payment
         return $this;
     }
 
-    public function getAmount(): ?int
+    public function getAmount(): int
     {
-        return $this->amount;
-    }
-
-    public function setAmount(int $amount): static
-    {
-        $this->amount = $amount;
-
-        return $this;
+        return array_sum(array_map(
+            fn(Order $o) => $o->getAmount(),
+            $this->orders->toArray()
+        ));
     }
 
     /**
@@ -125,5 +118,15 @@ class Payment
         }
 
         return $this;
+    }
+
+    public function getTotalStripeFeesAmount(): int
+    {
+        return array_sum(array_map(fn(Order $o) => $o->getStripeFeesAmount(), $this->orders->toArray()));
+    }
+
+    public function getTotalPlatformFeesAmount(): int
+    {
+        return array_sum(array_map(fn(Order $o) => $o->getPlatformFeesAmount(), $this->orders->toArray()));
     }
 }

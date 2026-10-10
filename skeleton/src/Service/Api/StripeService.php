@@ -10,6 +10,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use App\Service\TokenGenerator;
 use App\Entity\User\Payment\Transfer;
 use App\Repository\User\Payment\TransferRepository;
+use Symfony\Component\HttpClient\Response\TraceableResponse;
+use \Exception;
+use Symfony\Component\Uid\Uuid;
 
 class StripeService extends AbstractApi
 {
@@ -47,6 +50,39 @@ class StripeService extends AbstractApi
                 'Content-Type'  => 'application/x-www-form-urlencoded',
             ],
         ]);
+    }
+
+    protected function sendRequest(
+        string $url,
+        string $method = 'GET',
+        array $body = [],
+        array $auth = [],
+        array $headers = []
+    ): TraceableResponse {
+        $this->assertConfigurationUsable();
+
+        return parent::sendRequest($url, $method, $body, $auth, $headers);
+    }
+
+    private function assertConfigurationUsable(): void
+    {
+        if (null === $this->stripeConfig) {
+            throw new Exception(
+                'La configuration Stripe est introuvable. Renseignez-la dans l\'administration.'
+            );
+        }
+
+        if (!$this->stripeConfig->isActive()) {
+            throw new Exception(
+                'Stripe est désactivé : activez la configuration Stripe pour effectuer des paiements.'
+            );
+        }
+
+        if (empty($this->stripeConfig->getSecretKey())) {
+            throw new Exception(
+                'La clé secrète Stripe n\'est pas renseignée dans la configuration.'
+            );
+        }
     }
 
     public function getPublicKey()
@@ -294,6 +330,9 @@ class StripeService extends AbstractApi
             ));
         }
 
+        $orderRef     = Uuid::v4()->toRfc4122();
+        $webhookToken = $this->tokenGenerator->generate($orderRef);
+
         $params = [
             'amount'             => $total,
             'currency'           => $currency,
@@ -306,8 +345,8 @@ class StripeService extends AbstractApi
 
         $params['application_fee_amount']     = (int) round($total * $this->amountFees / 100);
         $params['transfer_data[destination]'] = $merchantAccountId;
-
-        
+        $params['metadata[order_ref]']       = $orderRef; // Local token generated
+        $params['metadata[webhook_token]']   = $webhookToken;
 
         $params['payment_method'] = $paymentMethodId;
 

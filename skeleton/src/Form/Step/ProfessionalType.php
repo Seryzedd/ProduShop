@@ -18,7 +18,9 @@ class ProfessionalType extends AbstractType
             ->add('name', TextType::class, [
                 'empty_data' => '',
                 'attr' => [
-                    'placeholder' => 'My company name'
+                    'placeholder' => 'My company name',
+                    'class' => 'professional_companyName',
+                    'readonly' => true
                 ]
             ])
             ->add('siret', TextType::class, [

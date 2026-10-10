@@ -34,6 +34,7 @@ class Shelf implements TranslatableInterface
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->initTranslations();
     }
 
     public function getId(): ?int

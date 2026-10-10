@@ -33,7 +33,7 @@ services:
     
     App\Service\TokenGenerator:
         arguments:
-            $webhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'
+            $paymentSecret: '%env(PAYMENT_TOKEN_SECRET)%'
     
     App\EventListener\Doctrine\TranslatableListener:
         tags:

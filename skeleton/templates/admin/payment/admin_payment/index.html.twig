@@ -22,36 +22,73 @@
 {% block body %}
     <main class="container">
 
-        <h1>{% trans %}Payment list{% endtrans %}</h1>
+        <h1 class="text-primary">{% trans %}Payments{% endtrans %}</h1>
 
-        <div class="list-group">
-            {% for payment in payments %}
-                <a href="{{ path('app_admin_payment', {id: payment.id}) }}" class="list-group-item list-group-item-action" aria-current="true">
-                    <div class="row">
-                        <div class="col-4">
-                            {{ payment.customer.email }}
-                        </div>
+        <div class="">
+            
+            <p class="number-float-animation text-muted text-end mb-0" data-end="{{ lastYearFees.platformFees }}">
+                {% trans %}Last 12 months Platform fees{% endtrans %} : 
+                <span class="text-secondary fs-5">0</span>
+                <small class="text-secondary">€</small>
+            </p>
 
-                        <div class="col-4">
-                            {{ payment.createdAt|date('d/m/Y H:i') }}
-                        </div>
+            <p class="number-float-animation text-muted text-end mb-0" data-end="{{ lastYearFees.stripeFees }}">
+                {% trans %}Last 12 months Platform fees{% endtrans %} : 
+                <span class="text-secondary fs-5">0</span>
+                <small class="text-secondary">€</small>
+            </p>
 
-                        <div class="col-2">
-                            {% if payment.status == "Pending" %}
-                                <p class="link-info mb-0">{{ payment.status|trans }}</p>
-                            {% elseif payment.status == "Treated" %}
-                                <p class="link-success mb-0">{{ payment.status|trans }}</p>
-                            {% else %}
-                                <p class="link-warning mb-0">{{ payment.status|trans }}</p>
-                            {% endif %}
-                        </div>
+            {% set diff = lastYearFees.platformFees - lastYearFees.stripeFees %}
 
-                        <div class="col-2 text-end">
-                            <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
-                        </div>
-                    </div>
-                </a>
-            {% endfor %}
+            <p class="number-float-animation text-muted text-end mb-0" data-end="{{ diff }}">
+                {% trans %}Revenue{% endtrans %} : 
+                {% if diff > 0 %}
+                    <span class="text-success fs-4 fw-bold">0</span>
+                    <small class="text-success">€</small>
+                {% else %}
+                    <span class="text-danger fs-4">0</span>
+                    <small class="text-danger">€</small>
+                {% endif %}
+                
+            </p>
         </div>
+
+        <h4 class="text-secondary lined flex-row-reverse text-nowrap">{% trans %}Payment list{% endtrans %}</h4>
+        
+        {% if payments is not empty %}
+            <div class="list-group">
+                {% for payment in payments %}
+                    <a href="{{ path('app_admin_payment', {id: payment.id}) }}" class="list-group-item list-group-item-action" aria-current="true">
+                        <div class="row">
+                            <div class="col-4">
+                                {{ payment.customer.email }}
+                            </div>
+
+                            <div class="col-4">
+                                {{ payment.createdAt|date('d/m/Y H:i') }}
+                            </div>
+
+                            <div class="col-2">
+                                {% if payment.status == "Pending" %}
+                                    <p class="link-info mb-0">{{ payment.status|trans }}</p>
+                                {% elseif payment.status == "Treated" %}
+                                    <p class="link-success mb-0">{{ payment.status|trans }}</p>
+                                {% else %}
+                                    <p class="link-warning mb-0">{{ payment.status|trans }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-2 text-end">
+                                <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h5 class="text-muted text-center py-4">
+                {% trans %}No payment registered{% endtrans %}.
+            </h5>
+        {% endif %}
     </main>
 {% endblock %}

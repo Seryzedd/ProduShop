@@ -49,7 +49,8 @@ class ProfessionalType extends AbstractType
                 'empty_data' => '',
                 'help' => 'Company name is automatially updated on completing siret.',
                 'attr' => [
-                    'placeholder' => 'My company name', 
+                    'placeholder' => 'My company name',
+                    'class' => 'professional_companyName',
                     'readonly' => true
                 ]
             ])

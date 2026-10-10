@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\Api\StripeService;
+use App\Service\Payment\Webhook\StripeWebhookService;
+use App\Service\Payment\Webhook\Exception\InvalidWebhookPayloadException;
+use App\Service\Payment\Webhook\Exception\InvalidWebhookTokenException;
 use App\Service\Order\OrderService;
 use Psr\Log\LoggerInterface;
 
@@ -17,35 +20,23 @@ final class WebhookController extends AbstractController
     ) {}
 
     #[Route('/payment/Stripe/webhook', name: 'app_payment_webhook')]
-    public function index(Request $request, StripeService $stripeService, OrderService $orderService): Response
+    public function index(Request $request, StripeWebhookService $webhookService): Response
     {
-        $payload = json_decode($request->getContent(), true);
- 
-        if (!isset($payload['type'], $payload['data']['object'])) {
+        try {
+            $webhookService->handle(
+                $request->getContent(),
+                $request->headers->get('Stripe-Signature') ?? ''
+            );
+        } catch (InvalidWebhookPayloadException $e) {
+            $this->logger->warning('Stripe webhook rejected: invalid payload or signature.', [
+                'reason' => $e->getMessage(),
+            ]);
             return new Response('Bad payload', 400);
-        }
-
-        $pi    = $payload['data']['object'];
-        $piId  = $pi['id'];
-
-        switch($payload['type']) {
-            case 'payment_intent.succeeded':
-                $webhookToken = $pi['metadata']['webhook_token'] ?? null;
- 
-                if (!$webhookToken) {
-                    throw new \RuntimeException('Missing webhook token.');
-                }
-
-                $order = $orderService->getOrderByIntentId($piId);
-
-                $orderService->orderPay($order);
-                break;
-            case 'payment_intent.payment_failed':
-                $orderService->updateStatusByIntentId($piId, 'failed');
-                break;
-            case 'payment_intent.canceled':
-                $orderService->updateStatusByIntentId($piId, 'canceled');
-                break;
+        } catch (InvalidWebhookTokenException $e) {
+            $this->logger->warning('Stripe webhook rejected: invalid token.', [
+                'reason' => $e->getMessage(),
+            ]);
+            return new Response('Invalid token', 400);
         }
 
         return new Response('Order updated', 200);

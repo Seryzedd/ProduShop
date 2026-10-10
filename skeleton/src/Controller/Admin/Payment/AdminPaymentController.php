@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\User\Payment\PaymentRepository;
 use App\Entity\User\Payment\Payment;
+use \DateTime;
 
 #[Route('/admin/user/payment')]
 final class AdminPaymentController extends AbstractController
@@ -16,8 +17,13 @@ final class AdminPaymentController extends AbstractController
     {
         $payments = $paymentRepository->findByOrdered();
 
+        $date = new DateTime();
+
+        $lastYearFees = $paymentRepository->getPlatformFeesTotalBetween($date, $date->modify('+12 months'));
+
         return $this->render('admin/payment/admin_payment/index.html.twig', [
-            'payments' => $payments
+            'payments' => $payments,
+            'lastYearFees' => $lastYearFees
         ]);
     }
 

@@ -55,7 +55,7 @@ class Product implements TranslatableInterface
     {
         $this->setCompany($company);
         $this->packages = new ArrayCollection();
-        $this->initializeTranslations();
+        $this->initTranslations();
     }
 
     public function getId(): ?int

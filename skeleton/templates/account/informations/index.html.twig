@@ -136,15 +136,18 @@
 {% endblock %}
 
 {% block professional_details %}
-    <h3>
+    <div class="d-flex align-items-center mb-3">
         {% if user.logo and user.logo.src|length %}
-            <img src="{{ user.logo.src }}" class="img-fluid" style="max-width: 100px;">
+            <img src="{{ user.logo.src }}" class="img-fluid" style="max-width: 40px;">
         {% else %}
             {{ ux_icon('ic:twotone-account-circle', {height: '48px', width: '48px'}) }}
         {% endif %}
 
-        {{ user.companyName}}
-    </h3>
+        <h5 class="mb-0 ms-3 text-muted">
+            {{ user.companyName}}
+        </h5>
+    </div>
+    
 
     <p><strong>{% trans %}Email{% endtrans %}</strong> : <small>{{ user.email }}</small></p>
 
@@ -177,14 +180,14 @@
 
 {% block search_box %}
     <h3 class="lined text-nowrap flex-row-reverse">
-        {% trans %}Products{% endtrans %}
+        {% trans %}Search Engine Optimization{% endtrans %}
     </h3>
     <p class="text-end">
         <a href="{{ path('app_company_seo') }}" class="btn btn-outline-primary btn-sm">{% trans %}Manage Seo configuration{% endtrans %}</a>
     </p>
     {% if app.user.seoInformations %}
         {% include 'components/seo/search_block.html.twig' with {
-            serpUrl: url('app_company', {name: app.user.companyName}),
+            serpUrl: url('app_company', {professional: app.user.companyName}),
             serpTitle: app.user.seoInformations.title,
             serpDescription: app.user.seoInformations.meta
         } only %}
@@ -269,21 +272,24 @@
     {% set limit = 0 %}
 
     <ul class="list-group list-group-flush">
+        {% set limit = 5 %}
         {% for payment in user.paymentsByDate %}
-            <a href="{{ path('app_account_payment', {payment: payment.id}) }}" class="list-group-item list-group-item-action">
-                <div class="row">
-                    <div class="col-md-4">
-                        {{ payment.createdAt|date('d/m/Y H:i') }}
-                    </div>
+            {% if limit > loop.index  %}
+                <a href="{{ path('app_account_payment', {payment: payment.id}) }}" class="list-group-item list-group-item-action">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ payment.createdAt|date('d/m/Y H:i') }}
+                        </div>
 
-                    <div class="col-md-4{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Treated' %} text-success{% endif %}">
-                        {{ payment.status|trans }}
+                        <div class="col-md-4{% if payment.status == 'Pending' %} text-info{% elseif payment.status == 'Treated' %} text-success{% endif %}">
+                            {{ payment.status|trans }}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
+                        </div>
                     </div>
-                    <div class="col-md-4 text-end">
-                        <strong>{{ (payment.amount / 100)|number_format(2, ',', ' ') }}</strong><small>EUR</small>
-                    </div>
-                </div>
-            </a>
+                </a>
+            {% endif %}
         {% endfor %}
     </ul>
 {% endblock %}

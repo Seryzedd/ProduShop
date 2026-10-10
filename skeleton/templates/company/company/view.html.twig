@@ -18,7 +18,7 @@
         {
             label: 'Merchant %name%'|trans({'%name%': professional.companyName}),
             route: 'app_company',
-            parameters: {name: professional.companyName}
+            parameters: {professional: professional.companyName}
         },
     ] %}
 
@@ -38,7 +38,7 @@
         <p class="text-muted">{{ professional|translated('description') }}</p>
         
         <div class="row mb-4">
-            <p class="col-lg-4">
+            <p class="col-lg-4 offset-lg-2">
                 <strong class="text-primary">{{ ux_icon('line-md:phone') }}</strong>
                 <strong>{% trans %}Phone{% endtrans %} :</strong><br>
                 {{ professional.phone ?: 'Not registered'|trans }}
@@ -98,7 +98,7 @@
                 {% endif %}
             </div>
             
-            <div class="col-lg-4">
+            <div class="col-lg-10 offset-lg-2">
                 <p class="">
                     <strong class="text-primary">{{ ux_icon('line-md:my-location') }}</strong>
                     <strong>{% trans %}Adress{% endtrans %} :</strong><br>

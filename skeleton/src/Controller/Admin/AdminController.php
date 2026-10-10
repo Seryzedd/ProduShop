@@ -10,6 +10,7 @@ use App\Repository\User\Payment\PaymentRepository;
 use App\Repository\Product\ProductRepository;
 use App\Service\Translation\TranslationFileReader;
 use App\Service\Sales\SalesStatsService;
+use App\Repository\User\OrderRepository;
 
 #[Route('/admin')]
 final class AdminController extends AbstractController

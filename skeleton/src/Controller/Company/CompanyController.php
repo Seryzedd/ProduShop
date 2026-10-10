@@ -14,6 +14,7 @@ use App\Service\Seo\Analyzer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\Seo\SeoProfessionalType;
 use App\Entity\User\Seo\SeoProfessionalInformations;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 #[Route('/company')]
 final class CompanyController extends AbstractController
@@ -57,8 +58,8 @@ final class CompanyController extends AbstractController
         ]);
     }
 
-    #[Route('/{name}', name: 'app_company')]
-    public function view(Professional $professional, Request $request): Response
+    #[Route('/{professional}', name: 'app_company')]
+    public function view(#[MapEntity(mapping: ['professional' => 'companyName'])] Professional $professional, Request $request): Response
     {
         
         return $this->render('company/company/view.html.twig', [

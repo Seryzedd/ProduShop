@@ -1,6 +1,6 @@
 {{ form_label(collection) }}
 
-<ul class="{{ collection.vars.name }}-collection list-group list-group{% if sortable is defined and sortable is true %} sortable-list{% endif %}"
+<ul class="{{ collection.vars.id }}-collection list-group list-group{% if sortable is defined and sortable is true %} sortable-list{% endif %}"
     {% if collection.vars.prototype is defined %}
         data-prototype="{{ form_widget(collection.vars.prototype)|e('html_attr') }}"
     {% endif %}
@@ -32,7 +32,7 @@
 
 {% if collection.vars.allow_add %}
     <p class="text-end">
-        <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ collection.vars.name }}-collection">
+        <button type="button" class="add_collection_item_btn btn btn-outline-secondary btn-sm" data-collection-holder-class="{{ collection.vars.id }}-collection">
             {% if buttonText is defined %}
                 {% if buttonText != false %}
                     {{ buttonText }}

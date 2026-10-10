@@ -49,6 +49,12 @@ class Order
     #[ORM\ManyToOne(inversedBy: 'orders')]
     private ?Professional $merchant = null;
 
+    #[ORM\Column]
+    private int $stripeFeesAmount = 0;
+
+    #[ORM\Column]
+    private int $platformFeesAmount = 0;
+
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
@@ -183,6 +189,28 @@ class Order
     {
         $this->merchant = $merchant;
 
+        return $this;
+    }
+
+    public function getStripeFeesAmount(): int
+    {
+        return $this->stripeFeesAmount;
+    }
+
+    public function setStripeFeesAmount(int $amount): static
+    { 
+        $this->stripeFeesAmount = $amount;
+        return $this; 
+    }
+
+    public function getPlatformFeesAmount(): int
+    {
+        return $this->platformFeesAmount;
+    }
+
+    public function setPlatformFeesAmount(int $amount): static
+    {
+        $this->platformFeesAmount = $amount;
         return $this;
     }
 }

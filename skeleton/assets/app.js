@@ -91,7 +91,7 @@ function applySpanClass(siret, status)
 
 function updateCompanyName(value)
 {
-  $('#professional_companyName').val(value);
+  $('.professional_companyName').val(value);
 }
 
 function spanInputClass(status)

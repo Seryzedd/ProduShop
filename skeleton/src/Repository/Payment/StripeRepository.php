@@ -19,6 +19,7 @@ class StripeRepository extends ServiceEntityRepository
     public function findStripe(): Stripe
     {
         $stripe = $this->createQueryBuilder('stripe')
+            ->where('stripe.active = true')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult()

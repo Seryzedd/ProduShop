@@ -177,7 +177,7 @@ class Client extends AbstractUser
                 return 0;
             }
 
-            return (float) $first->getCreatedAt()->format("U.u") < (float) $second->getCreatedAt()->format("U.u") ? -1 : 1;
+            return (float) $first->getCreatedAt()->format("U.u") < (float) $second->getCreatedAt()->format("U.u") ? 1 : -1;
         });
 
         return $iterator;

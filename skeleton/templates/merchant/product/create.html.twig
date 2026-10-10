@@ -25,6 +25,10 @@
 
     {% set breadcrumb = [
         {
+            label: 'My account',
+            route: 'app_account_informations'
+        },
+        {
             label: 'My products',
             route: 'app_merchant_products',
         },
@@ -49,19 +53,19 @@
         <div class="row align-items-start">
             
             <div class="col-lg-8">
-                <h4 class="mb-3 text-muted">{% trans %}General informations{% endtrans %}</h4>
+                <h4 class="mb-3 text-muted lined text-nowrap flex-row-reverse">{% trans %}General informations{% endtrans %}</h4>
                 
                 {{ block('main_informations') }}
 
-                <h4 class="mb-3 text-muted">{% trans %}Packages{% endtrans %}</h4>
+                <h4 class="mb-3 text-muted lined text-nowrap flex-row-reverse">{% trans %}Packages{% endtrans %}</h4>
                 {% include 'form/collectionType.html.twig' with {collection: form.packages} %}
             </div>
 
             <div class="col-lg-4">
-                <h4 class="mb-3 text-muted">{% trans %}Shelf{% endtrans %}</h4>
+                <h4 class="mb-3 text-muted lined text-nowrap flex-row-reverse">{% trans %}Shelf{% endtrans %}</h4>
                 {{ form_row(form.shelf) }}
 
-                <h4 class="mb-3 text-muted">{% trans %}Pictures{% endtrans %}</h4>
+                <h4 class="mb-3 text-muted lined text-nowrap flex-row-reverse">{% trans %}Pictures{% endtrans %}</h4>
                 <div class="text-center position-relative">
                     {% if product.image == null %}
                         <label class="text-end mx-auto px-2 text-muted" for="{{ form.image.file.vars.id }}">
@@ -121,30 +125,34 @@
                 {% trans %}Default{% endtrans %}
             </button>
         </li>
-        {% for item in form.translations %}
+        {% if form.translations|length > 0 %}
+            {% for item in form.translations %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ item.vars.data.locale }}-tab" data-bs-toggle="tab" data-bs-target="#{{ item.vars.data.locale }}-tab-pane" type="button" role="tab" aria-controls="{{ item.vars.data.locale }}-tab-pane" aria-selected="false">
+                        {{ item.vars.data.locale }}
+                    </button>
+                </li>
+            {% endfor %}
+            
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="{{ item.vars.data.locale }}-tab" data-bs-toggle="tab" data-bs-target="#{{ item.vars.data.locale }}-tab-pane" type="button" role="tab" aria-controls="{{ item.vars.data.locale }}-tab-pane" aria-selected="false">
-                    {{ item.vars.data.locale }}
-                </button>
+                <div class="dropdown">
+                    <button class="nav-link text-secondary dropdown-toggle" type="button" title="{% trans %}Add new Translation{% endtrans %}" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ ux_icon('line-md:plus') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% if form.vars.data.id != null %}
+                            {% for enabledLanguage in app.enabled_locales %}
+                                <li>
+                                    <a class="dropdown-item{% if form.vars.data.hasTranslation(enabledLanguage) %} disabled{% endif %}" {% if form.vars.data.hasTranslation(enabledLanguage) %}disabled{% endif %} href="{{ path('app_merchant_product_translation_add', {product: form.vars.data.id, language: enabledLanguage}) }}">
+                                        {{ enabledLanguage|name }} {{ enabledLanguage|region}}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
             </li>
-        {% endfor %}
-        
-        <li class="nav-item" role="presentation">
-            <div class="dropdown">
-                <button class="nav-link text-secondary dropdown-toggle" type="button" title="{% trans %}Add new Translation{% endtrans %}" data-bs-toggle="dropdown" aria-expanded="false">
-                    {{ ux_icon('line-md:plus') }}
-                </button>
-                <ul class="dropdown-menu">
-                    {% for enabledLanguage in app.enabled_locales %}
-                        <li>
-                            <a class="dropdown-item{% if form.vars.data.hasTranslation(enabledLanguage) %} disabled{% endif %}" {% if form.vars.data.hasTranslation(enabledLanguage) %}disabled{% endif %} href="{{ path('app_merchant_product_translation_add', {product: form.vars.data.id, language: enabledLanguage}) }}">
-                                {{ enabledLanguage|name }} {{ enabledLanguage|region}}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </li>
+        {% endif %}
     </ul>
     <div class="tab-content px-3 border-start border-end border-bottom mb-2 rounded-bottom">
         <div class="tab-pane fade show active" id="default-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
