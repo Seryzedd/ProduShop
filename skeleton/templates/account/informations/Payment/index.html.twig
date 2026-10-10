@@ -43,9 +43,8 @@
         </div>
 
         <div class="card p-4">
-            <div class="row">
+            <div class="row align-items-center">
                 {% for order in payment.orders %}
-                    
                     <div class="col-4">
                         <a href="">{{ order.merchant.companyName }}</a>
                     </div>
@@ -54,7 +53,7 @@
                     </div>
 
                     <div class="col-2 text-end text-muted">
-                        {{ order.status }}
+                        {{ order.status|trans }}
                     </div>
 
                     <div class="col-2 text-end text-muted">
@@ -75,7 +74,7 @@
                                         </div>
 
                                         <div class="col-md-4 text-end">
-                                            {{ item.unitPrice|number_format(2, ',', ' ') }}<small>EUR</small>
+                                            {{ item.unitPrice|number_format(2, ',', ' ') }}<small class="text-muted">EUR/{% trans %}Unit price{% endtrans %}</small>
                                         </div>
                                     </div>
                                 </li>
